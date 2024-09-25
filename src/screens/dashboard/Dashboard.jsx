@@ -6,9 +6,11 @@ import { BsCashCoin } from "react-icons/bs";
 import { MdDashboard, MdOutlineCategory } from "react-icons/md";
 import { NavLink } from "react-router-dom";
 import { HiOutlineUsers } from "react-icons/hi2";
+import { useUser } from "../../context/UserContext";
 
 export const Dashboard = () => {
-  const role = "admin";
+  const { user } = useUser();
+  const role = user.role;
   return (
     <>
       <section>
@@ -22,7 +24,7 @@ export const Dashboard = () => {
             <div className="shadow-s3 border border-green bg-green_100 p-8 flex items-center text-center justify-center gap-5 flex-col rounded-xl">
               <BsCashCoin size={80} className="text-green" />
               <div>
-                <Title level={1}>500 </Title>
+                <Title level={1}>500</Title>
                 <Title>Balance</Title>
               </div>
             </div>

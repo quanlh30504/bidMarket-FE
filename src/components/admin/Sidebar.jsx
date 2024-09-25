@@ -1,4 +1,5 @@
 import { Caption, CustomNavLink, Title } from "../common/Design";
+import { useUser } from "../../router";
 import { CiGrid41 } from "react-icons/ci";
 import { IoSettingsOutline } from "react-icons/io5";
 import { MdOutlineCategory } from "react-icons/md";
@@ -15,7 +16,8 @@ import { useLocation } from "react-router-dom";
 export const Sidebar = () => {
   const location = useLocation();
 
-  const role = "admin";
+  const { user } = useUser();
+  const role = user.role;
   const className = "flex items-center gap-3 mb-2 p-4 rounded-full";
 
   return (
@@ -34,7 +36,7 @@ export const Sidebar = () => {
             <span>
               <CiGrid41 size={22} />
             </span>
-            <span>Dashbaord</span>
+            <span>Dashboard</span>
           </CustomNavLink>
 
           {(role === "seller" || role === "admin") && (

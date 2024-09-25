@@ -3,6 +3,8 @@ export { ScrollToTop } from "../utils/ScrollToTop";
 export { NotFound } from "../components/common/NotFound";
 export { WinningBidList } from "../screens/product/WinningBidList";
 export { UserList } from "../admin/UserList";
+export { UserProvider } from "../context/UserContext";
+export { useUser } from "../context/UserContext";
 
 // Home Section
 export { CategoryCard } from "../components/cards/CategoryCard";
