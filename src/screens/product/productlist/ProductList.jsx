@@ -11,7 +11,7 @@ export const ProductList = () => {
           <Title level={5} className=" font-normal">
             Product Lists
           </Title>
-          <NavLink to="/create-product">
+          <NavLink to="/add">
             <PrimaryButton className="flex items-center gap-3 px-5 py-2 text-sm rounded-md transition-transform hover:scale-105">
               <AiOutlinePlus size={20} />
               <span>Create Product</span>
