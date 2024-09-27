@@ -1,8 +1,15 @@
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { Caption, Container, CustomNavLink, PrimaryButton, Title } from "../../router";
 import { commonClassNameOfInput } from "../../components/common/Design";
+import { useState } from "react";
 
 export const Register = () => {
+  const [isSeller, setIsSeller] = useState(false);
+
+  const handleBecomeSellerClick = () => {
+    setIsSeller(!isSeller);
+  };
+
   return (
     <>
       <section className="regsiter pt-16 relative">
@@ -35,8 +42,8 @@ export const Register = () => {
             </p>
           </div>
           <div className="py-5">
-            <Caption className="mb-2">Username *</Caption>
-            <input type="text" name="name" className={commonClassNameOfInput} placeholder="First Name" required />
+            <Caption className="mb-2">Fullname *</Caption>
+            <input type="text" name="name" className={commonClassNameOfInput} placeholder="Full Name" required />
           </div>
           <div className="py-5">
             <Caption className="mb-2">Enter Your Email *</Caption>
@@ -50,6 +57,34 @@ export const Register = () => {
             <Caption className="mb-2">Confirm Password *</Caption>
             <input type="password" name="confirmPassword" className={commonClassNameOfInput} placeholder="Confirm password" />
           </div>
+          <div  className="flex items-center gap-2 py-4">
+            <input onClick={handleBecomeSellerClick} type="checkbox" />
+            <Caption>Become a Seller</Caption>
+          </div>
+          {isSeller && (
+            <div>
+               <div className="py-5">
+            <Caption className="mb-2">ID card number *</Caption>
+            <input type="text" name="id_card" className={commonClassNameOfInput} placeholder="ID card number" required />
+          </div>
+          <div className="py-5">
+            <Caption className="mb-2">Front ID card image *</Caption>
+            <input type="file" name="image" className={commonClassNameOfInput} required />
+          </div>
+          <div className="py-5">
+            <Caption className="mb-2">Back ID card image *</Caption>
+            <input type="file" name="image" className={commonClassNameOfInput} required />
+          </div>
+          <div className="py-5">
+            <Caption className="mb-2">Issued date *</Caption>
+            <input type="date" name="id_card" className={commonClassNameOfInput} placeholder="ID card number" required />
+          </div>
+          <div className="py-5">
+            <Caption className="mb-2">Expiration date *</Caption>
+            <input type="date" name="id_card" className={commonClassNameOfInput} placeholder="ID card number" required />
+          </div>
+            </div>
+          )}
           <div className="flex items-center gap-2 py-4">
             <input type="checkbox" />
             <Caption>I agree to the Terms & Policy</Caption>
