@@ -24,6 +24,7 @@ import {
   ScrollToTop,
   PrivateRoute,
   UserProvider,
+  SearchList,
 } from "./router/index.js";
 
 function App() {
@@ -41,6 +42,14 @@ function App() {
                 </Layout>
               }
             />
+            <Route 
+            path="/search"
+            element={
+              <Layout>
+                <SearchList />
+              </Layout>
+            }
+          />
             <Route
               path="/login"
               element={

@@ -1,4 +1,4 @@
-import { Body, Caption, Container, PrimaryButton, ProfileCard, Title } from "../../router";
+import { Body, Caption, Container, PrimaryButton, ProfileCard, Title, CustomNavLink } from "../../router";
 import { IoIosSearch } from "react-icons/io";
 import { AiOutlinePropertySafety } from "react-icons/ai";
 import PropTypes from "prop-types";
@@ -93,7 +93,9 @@ const SearchBox = () => {
             <IoIosSearch color="black" size={25} />
           </div>
           <input type="search" id="default-search" className="block shadow-md w-full p-6 ps-16 text-sm text-gray-800 rounded-full bg-gray-50 outline-none" placeholder="Search product..." />
+          <CustomNavLink href="/search">
           <PrimaryButton className="absolute end-2.5 bottom-2">Search</PrimaryButton>
+            </CustomNavLink>
         </div>
       </form>
     </>
