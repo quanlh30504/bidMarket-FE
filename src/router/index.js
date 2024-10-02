@@ -4,7 +4,6 @@ export { NotFound } from "../components/common/NotFound";
 export { WinningBidList } from "../screens/product/WinningBidList";
 export { UserList } from "../admin/UserList";
 export { UserProvider } from "../context/UserContext";
-export { useUser } from "../context/UserContext";
 
 // Home Section
 export { CategoryCard } from "../components/cards/CategoryCard";
@@ -47,6 +46,8 @@ export { DashboardLayout } from "../components/common/layout/DashboardLayout";
 export { Layout } from "../components/common/layout/Layout";
 
 // Hook Routes
+export { useUser } from "../context/UserContext";
+export { useSignup } from "../hooks/useSignup";
 
 // Auth Routes
 export { Register } from "../screens/auth/Register";

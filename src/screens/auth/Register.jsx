@@ -1,13 +1,22 @@
 import { FaFacebook, FaGoogle } from "react-icons/fa";
-import { Caption, Container, CustomNavLink, PrimaryButton, Title } from "../../router";
+import { Caption, Container, CustomNavLink, PrimaryButton, Title, useSignup } from "../../router";
 import { commonClassNameOfInput } from "../../components/common/Design";
 import { useState } from "react";
 
 export const Register = () => {
+  const {
+    formData,
+    handleChange,
+    handleSubmit,
+    response,
+    error,
+    successMessage,
+  } = useSignup();
   const [isSeller, setIsSeller] = useState(false);
-
   const handleBecomeSellerClick = () => {
+    formData.isSeller = !isSeller;
     setIsSeller(!isSeller);
+    console.log(formData.isSeller);
   };
 
   return (
@@ -34,28 +43,41 @@ export const Register = () => {
             </div>
           </Container>
         </div>
-        <form className="bg-white shadow-s3 w-1/3 m-auto my-16 p-8 rounded-xl">
+
+        <form className="bg-white shadow-s3 w-1/3 m-auto my-16 p-8 rounded-xl" onSubmit={handleSubmit}>
           <div className="text-center">
             <Title level={5}>Sign Up</Title>
             <p className="mt-2 text-lg">
               Do you already have an account? <CustomNavLink href="/login">Log In Here</CustomNavLink>
             </p>
           </div>
+          <div className="text-center">
+            {error && (
+              <div className="text-red-500 mt-4">
+                {error}
+              </div>
+            )}
+            {successMessage && (
+              <div className="text-green mt-4">
+                {successMessage}
+              </div>
+            )}
+          </div>
           <div className="py-5">
             <Caption className="mb-2">Fullname *</Caption>
-            <input type="text" name="name" className={commonClassNameOfInput} placeholder="Full Name" required />
+            <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className={commonClassNameOfInput} placeholder="Full Name" required />
           </div>
           <div className="py-5">
             <Caption className="mb-2">Enter Your Email *</Caption>
-            <input type="email" name="email" className={commonClassNameOfInput} placeholder="Enter Your Email" required />
+            <input type="email" name="email" value={formData.email} onChange={handleChange} className={commonClassNameOfInput} placeholder="Enter Your Email" required />
           </div>
           <div>
             <Caption className="mb-2">Password *</Caption>
-            <input type="password" name="password" className={commonClassNameOfInput} placeholder="Enter Your Password" required />
+            <input type="password" name="password" value={formData.password} onChange={handleChange} className={commonClassNameOfInput} placeholder="Enter Your Password" required />
           </div>
           <div>
             <Caption className="mb-2">Confirm Password *</Caption>
-            <input type="password" name="confirmPassword" className={commonClassNameOfInput} placeholder="Confirm password" />
+            <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={commonClassNameOfInput} placeholder="Confirm password" />
           </div>
           <div  className="flex items-center gap-2 py-4">
             <input onClick={handleBecomeSellerClick} type="checkbox" />
@@ -65,28 +87,28 @@ export const Register = () => {
             <div>
                <div className="py-5">
             <Caption className="mb-2">ID card number *</Caption>
-            <input type="text" name="id_card" className={commonClassNameOfInput} placeholder="ID card number" required />
+            <input type="text" name="idCard" value={formData.idCard} onChange={handleChange} className={commonClassNameOfInput} placeholder="ID card number" required />
           </div>
           <div className="py-5">
             <Caption className="mb-2">Front ID card image *</Caption>
-            <input type="file" name="image" className={commonClassNameOfInput} required />
+            <input type="file" name="frontImageURL" value={formData.frontImageURL} onChange={handleChange} className={commonClassNameOfInput} required />
           </div>
           <div className="py-5">
             <Caption className="mb-2">Back ID card image *</Caption>
-            <input type="file" name="image" className={commonClassNameOfInput} required />
+            <input type="file" name="backImageURL" value={formData.backImageURL} onChange={handleChange} className={commonClassNameOfInput} required />
           </div>
           <div className="py-5">
             <Caption className="mb-2">Issued date *</Caption>
-            <input type="date" name="id_card" className={commonClassNameOfInput} placeholder="ID card number" required />
+            <input type="date" name="issuedDate" value={formData.issuedDate} onChange={handleChange} className={commonClassNameOfInput} required />
           </div>
           <div className="py-5">
             <Caption className="mb-2">Expiration date *</Caption>
-            <input type="date" name="id_card" className={commonClassNameOfInput} placeholder="ID card number" required />
+            <input type="date" name="expirationDate" value={formData.expirationDate} onChange={handleChange} className={commonClassNameOfInput} required />
           </div>
             </div>
           )}
           <div className="flex items-center gap-2 py-4">
-            <input type="checkbox" />
+            <input type="checkbox" required/>
             <Caption>I agree to the Terms & Policy</Caption>
           </div>
           <PrimaryButton className="w-full rounded-none my-5">CREATE ACCOUNT</PrimaryButton>
@@ -95,16 +117,16 @@ export const Register = () => {
             <div className="flex items-center justify-center gap-5 mt-5">
               <button className="flex items-center gap-2 bg-red-500 text-white p-3 px-5 rounded-sm">
                 <FaGoogle />
-                <p className="text-sm">SIGNUP WHIT GOOGLE</p>
+                <p className="text-sm">SIGNUP WITH GOOGLE</p>
               </button>
               <button className="flex items-center gap-2 bg-indigo-500 text-white p-3 px-5 rounded-sm">
                 <FaFacebook />
-                <p className="text-sm">SIGNUP WHIT FACEBOOK</p>
+                <p className="text-sm">SIGNUP WITH FACEBOOK</p>
               </button>
             </div>
           </div>
           <p className="text-center mt-5">
-            By clicking the signup button, you create a Cobiro account, and you agree to Cobiros <span className="text-green underline">Terms & Conditions</span> &
+            By clicking the signup button, you create a BidMarket account, and you agree to BidMarket <span className="text-green underline">Terms & Conditions</span> &
             <span className="text-green underline"> Privacy Policy </span> .
           </p>
         </form>
