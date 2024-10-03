@@ -42,6 +42,8 @@ export const useSignup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setSuccessMessage('');
 
     if (formData.password !== formData.confirmPassword) {
       setError('Confirm password does not match');

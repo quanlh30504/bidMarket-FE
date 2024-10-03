@@ -52,16 +52,8 @@ export const Register = () => {
             </p>
           </div>
           <div className="text-center">
-            {error && (
-              <div className="text-red-500 mt-4">
-                {error}
-              </div>
-            )}
-            {successMessage && (
-              <div className="text-green mt-4">
-                {successMessage}
-              </div>
-            )}
+            {error && (<div className="text-red-500 mt-4">{error}</div>)}
+            {successMessage && (<div className="text-green mt-4">{successMessage}</div>)}
           </div>
           <div className="py-5">
             <Caption className="mb-2">Fullname *</Caption>
