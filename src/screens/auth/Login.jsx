@@ -3,7 +3,7 @@ import { Caption, Container, CustomNavLink, PrimaryButton, Title, useSignin } fr
 import { commonClassNameOfInput } from "../../components/common/Design";
 
 export const Login = () => {
-  const { email, password, handleChange, handleSubmit, error, successMessage } = useSignin();
+  const { setEmail, setPassword, handleSubmit, error } = useSignin();
 
   return (
     <>
@@ -38,15 +38,14 @@ export const Login = () => {
           </div>
           <div className="text-center">
             {error && (<div className="text-red-500 mt-4">{error}</div>)}
-            {successMessage && (<div className="text-green mt-4">{successMessage}</div>)}  {/* // maybe can remove this line */}
           </div>
           <div className="py-5 mt-8">
             <Caption className="mb-2">Enter Your Email *</Caption>
-            <input type="email" name="email" value={email} onChange={handleChange} className={commonClassNameOfInput} placeholder="Enter Your Email" required />
+            <input type="email" name="email" onChange={(e) => (setEmail(e.target.value))} className={commonClassNameOfInput} placeholder="Enter Your Email" required />
           </div>
           <div>
             <Caption className="mb-2">Password *</Caption>
-            <input type="password" name="password" value={password} onChange={handleChange} className={commonClassNameOfInput} placeholder="Enter Your Password" required />
+            <input type="password" name="password" onChange={(e) => (setPassword(e.target.value))} className={commonClassNameOfInput} placeholder="Enter Your Password" required />
           </div>
           <div className="flex items-center gap-2 py-4">
             <input type="checkbox" required/>

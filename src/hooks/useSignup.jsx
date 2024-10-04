@@ -20,7 +20,7 @@ export const useSignup = () => {
     expirationDate: ''
   });
 
-  const [response, setResponse] = useState(null);
+  // const [response, setResponse] = useState(null);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -70,7 +70,8 @@ export const useSignup = () => {
     if (formData.profileImageUrl) formDataToSend.append('profileImageUrl', formData.profileImageUrl);  // required = false
 
     try {
-      setResponse(await signup(formDataToSend));
+      // setResponse(await signup(formDataToSend));
+      await signup(formDataToSend);
       setSuccessMessage('Đăng ký thành công!');
       setError('');
     } catch (error) {
@@ -83,7 +84,7 @@ export const useSignup = () => {
     formData,
     handleChange,
     handleSubmit,
-    response,
+    // response,
     error,
     successMessage,
   };
