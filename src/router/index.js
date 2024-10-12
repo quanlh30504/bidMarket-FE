@@ -56,3 +56,8 @@ export { UserProfile } from "../screens/auth/UserProfile";
 
 // SearchList
 export {SearchList} from "../screens/search/Search";
+
+
+// Seller Hub Routes
+export { SellerHub } from "../screens/seller-hub/SellerHub";
+export { Overview } from "../screens/seller-hub/sub-pages/Overview";

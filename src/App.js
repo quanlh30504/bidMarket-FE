@@ -25,6 +25,8 @@ import {
   PrivateRoute,
   UserProvider,
   SearchList,
+  SellerHub,
+  Overview,
 } from "./router/index.js";
 
 function App() {
@@ -236,6 +238,30 @@ function App() {
                     <DashboardLayout>
                       <UpdateCategory />
                     </DashboardLayout>
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/seller-hub"
+              element={
+                <PrivateRoute allowedRoles={["seller"]}>
+                  <Layout>
+                    <SellerHub>
+                      <Overview />
+                    </SellerHub>
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/seller-hub/overview"
+              element={
+                <PrivateRoute allowedRoles={["seller"]}>
+                  <Layout>
+                    <SellerHub>
+                      <Overview />
+                    </SellerHub>
                   </Layout>
                 </PrivateRoute>
               }
