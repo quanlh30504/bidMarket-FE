@@ -25,6 +25,8 @@ import {
   PrivateRoute,
   UserProvider,
   SearchList,
+  ChatLayout,
+  Chat,
 } from "./router/index.js";
 
 function App() {
@@ -74,6 +76,16 @@ function App() {
                 <Layout>
                   <Register />
                 </Layout>
+              }
+            />
+            <Route
+              path="/chat"
+              element={
+                <PrivateRoute allowedRoles={["bidder", "seller", "admin"]}>
+                    <ChatLayout>
+                      <Chat />
+                    </ChatLayout>
+                </PrivateRoute>
               }
             />
             <Route
