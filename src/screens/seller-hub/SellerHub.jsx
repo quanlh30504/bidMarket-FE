@@ -1,4 +1,5 @@
 import React from "react";
+import { Outlet } from "react-router-dom";
 import { Container, Title, CustomNavLinkList } from "../../components/common/Design";
 
 export const SellerHub = ({ children }) => {
@@ -34,7 +35,9 @@ export const SellerHub = ({ children }) => {
           Reports
         </CustomNavLinkList>
       </nav>
-      <Container>{children}</Container>
+      
+      <Outlet /> {/* nested routes */}
+
     </Container>
   );
 };
