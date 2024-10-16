@@ -7,42 +7,42 @@ import { Sidebar } from '../components/Sidebar';
 const auctionData = [ 
   {
     auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    quantity: 1,
-    price: 'US $7.99',
-    winner: 'tonystack@gmail.com',
-    carrier: 'ABC',
+    Start: 'August 1, 2024',
+    End: 'August 15, 2024',
+    "start price": '$100',
+    "current price": '$200',
     status: 'Open'
   },
   {
     auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    quantity: 1,
-    price: 'US $7.99',
-    winner: 'tonystack@gmail.com',
-    carrier: 'ABC',
+    Start: 'August 1, 2024',
+    End: 'August 15, 2024',
+    "start price": '$100',
+    "current price": '$200',
     status: 'Pending'
   },
   {
     auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    quantity: 1,
-    price: 'US $7.99',
-    winner: 'tonystack@gmail.com',
-    carrier: 'ABC',
+    Start: 'August 1, 2024',
+    End: 'August 15, 2024',
+    "start price": '$100',
+    "current price": '$200',
     status: 'Canceled'
   },
   {
     auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    quantity: 1,
-    price: 'US $7.99',
-    winner: 'tonystack@gmail.com',
-    carrier: 'ABC',
+    Start: 'August 1, 2024',
+    End: 'August 15, 2024',
+    "start price": '$100',
+    "current price": '$200',
     status: 'Closed'
   },
   {
     auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    quantity: 1,
-    price: 'US $7.99',
-    winner: 'tonystack@gmail.com',
-    carrier: 'ABC',
+    Start: 'August 1, 2024',
+    End: 'August 15, 2024',
+    "start price": '$100',
+    "current price": '$200',
     status: 'Completed'
   },
 ];
