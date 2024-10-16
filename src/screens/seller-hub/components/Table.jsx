@@ -8,12 +8,7 @@ export const Table = ({ items, sortOptions, sortFuntion }) => {
   const fields = Object.keys(items[0]).map(
     (field) => field.charAt(0).toUpperCase() + field.slice(1)
   );
-
-  // const handleSortChange = (event) => {
-  //   const selectedValue = event.target.value;
-  //   sortFuntion(selectedValue);
-  // };
-
+  
   return (
     <div className="p-5 border rounded-xl relative">
       {sortOptions && sortOptions.length > 0 && (
@@ -34,7 +29,7 @@ export const Table = ({ items, sortOptions, sortFuntion }) => {
           </select>
         </div>
       )}
-      <table className="w-full text-left border-collapse mt-10">
+      <table className="w-full text-center border-collapse mt-10">
         <thead>
           <tr className="border-b">
             {fields.map((field, index) => (
@@ -44,7 +39,7 @@ export const Table = ({ items, sortOptions, sortFuntion }) => {
         </thead>
         <tbody>
           {items.map((item, index) => (
-            <TableItem key={index} item={item} />
+            <TableItem key={index} item={item}/>
           ))}
         </tbody>
       </table>

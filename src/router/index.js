@@ -72,3 +72,6 @@ export { Research } from "../screens/seller-hub/sub-pages/Research";
 export { Store } from "../screens/seller-hub/sub-pages/Store";
 
 
+// Enum Routes
+export { AuctionStatus, ProductStatus, OrderStatus } from "../screens/seller-hub/Enum/StatusType";
+
