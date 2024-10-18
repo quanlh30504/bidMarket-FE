@@ -70,7 +70,7 @@ export const Header = () => {
             <div className="flex items-center gap-8 icons">
               <div className="hidden lg:flex lg:items-center lg:gap-8">
                 <IoSearchOutline size={23} className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`} />
-                {role === "bidder" && (
+                {role === "BIDDER" && (
                   <CustomNavLink href="/seller/login" className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
                     Become a Seller
                   </CustomNavLink>

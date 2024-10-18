@@ -8,7 +8,6 @@ export const Register = () => {
     formData,
     handleChange,
     handleSubmit,
-    response,
     error,
     successMessage,
   } = useSignup();

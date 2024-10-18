@@ -5,7 +5,7 @@ const getRefreshToken = () => localStorage.getItem('refreshToken');
 
 // Axios instance
 const myAxios = axios.create({
-  baseURL: '(Url)',  // url fill later
+  baseURL: `${process.env.REACT_APP_BACKEND_URL}`
 });
 
 myAxios.interceptors.request.use((config) => {
@@ -29,7 +29,7 @@ myAxios.interceptors.response.use((response) => {
     originalRequest._retry = true; // mark as retry
     try {
       const refreshToken = getRefreshToken();
-      const response = await axios.post('(url)/api/users/refresh-token', {  // url fill later
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/users/refresh-token`, {
         refreshToken: refreshToken,
       });
 

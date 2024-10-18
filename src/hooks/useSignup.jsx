@@ -8,8 +8,8 @@ export const useSignup = () => {
     confirmPassword: '',
     fullName: '',
     phoneNumber: '',
-    role: 'bidder',  // default role
-    profileImageUrl: null,
+    role: 'BIDDER',  // default role
+    // profileImageUrl: null,
 
     // FOR SELLER
     isSeller: false,  // default is false
@@ -52,13 +52,11 @@ export const useSignup = () => {
     }
 
     const formDataToSend = new FormData();
-    formDataToSend.append('registerRequest', JSON.stringify({
-      email: formData.email,
-      password: formData.password,
-      role: formData.role,
-      fullName: formData.fullName,
-      phoneNumber: formData.phoneNumber,
-    }));
+    formDataToSend.append('email', formData.email);
+    formDataToSend.append('password', formData.password);
+    formDataToSend.append('role', formData.role);
+    formDataToSend.append('fullName', formData.fullName);
+    formDataToSend.append('phoneNumber', formData.phoneNumber);
     
     if (formData.isSeller) {
       formDataToSend.append('idCard', formData.idCard);
@@ -67,7 +65,7 @@ export const useSignup = () => {
       formDataToSend.append('frontImageURL', formData.frontImageURL);
       formDataToSend.append('backImageURL', formData.backImageURL);
     }
-    if (formData.profileImageUrl) formDataToSend.append('profileImageUrl', formData.profileImageUrl);  // required = false
+    // if (formData.profileImageUrl) formDataToSend.append('profileImageUrl', formData.profileImageUrl);  // required = false
 
     try {
       // setResponse(await signup(formDataToSend));
@@ -84,7 +82,6 @@ export const useSignup = () => {
     formData,
     handleChange,
     handleSubmit,
-    // response,
     error,
     successMessage,
   };
