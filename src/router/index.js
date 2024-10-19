@@ -70,6 +70,8 @@ export {Performance} from "../screens/seller-hub/sub-pages/Performance";
 export { Reports } from "../screens/seller-hub/sub-pages/Reports";
 export { Research } from "../screens/seller-hub/sub-pages/Research";
 export { Store } from "../screens/seller-hub/sub-pages/Store";
+export { Shipping } from "../screens/seller-hub/sub-pages/Shipping";
+export { CreateProduct } from "../screens/seller-hub/sub-pages/CreateProduct";
 
 
 // Enum Routes

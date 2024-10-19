@@ -10,6 +10,8 @@ import {
   Reports,
   Research,
   Store,
+  Shipping,
+  CreateProduct,
 } from "../../router/index.js";
 
 export const SellerHubRoute = () => {
@@ -21,10 +23,12 @@ export const SellerHubRoute = () => {
         <Route path="listings" element={<Listings />} />
         <Route path="marketing" element={<Marketing />} />
         <Route path="store" element={<Store />} />
+        <Route path="shipping" element={<Shipping />} />
         <Route path="performance" element={<Performance />} />
         <Route path="payments" element={<Payments />} />
         <Route path="reports" element={<Reports />} />
         <Route path="research" element={<Research />} />
+        <Route path="create-product" element={<CreateProduct />} />
       </Route>
     </Routes>
   );
