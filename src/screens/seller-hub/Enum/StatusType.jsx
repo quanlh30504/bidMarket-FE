@@ -1,20 +1,23 @@
 export const AuctionStatus = {
-    OPEN: 'Open',
     PENDING: 'Pending',
-    CANCELED: 'Canceled',
+    OPEN: 'Open',
     CLOSED: 'Closed',
-    COMPLETED: 'Completed'
+    CANCELED: 'Canceled',
+    COMPLETED: 'Completed',
+    EXTENDED: 'Extended'
 }
 
 export const ProductStatus = {
     ACTIVE: 'Active',
     INACTIVE: 'Inactive',
-    SOLD: 'Sold'
+    SOLD: 'Sold',
+    REMOVED: 'Removed'
 }
 
 export const OrderStatus = {
-    UNPAID: 'Unpaid',
+    PENDING: 'Unpaid',
     PAID: 'Paid',
-    SHIPPED: 'Shipped',
-    DELIVERED: 'Delivered'
+    SHIPPING: 'Shipping',
+    COMPLETED: 'Completed',
+    CANCELED: 'Canceled'
 }
