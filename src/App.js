@@ -27,6 +27,12 @@ import {
   SearchList,
   ChatLayout,
   Chat,
+  Account,
+  Tab,
+  Watchlist,
+  Order,
+  Shipping,
+  Payment
 } from "./router/index.js";
 
 function App() {
@@ -267,6 +273,76 @@ function App() {
                   <NotFound />
                 </Layout>
               } 
+            />
+            <Route
+              path="/profiletest"
+              element={
+                <PrivateRoute allowedRoles={["bidder"]}>
+                  <Layout>
+                    <Account/>
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/account"
+              element={
+                <PrivateRoute allowedRoles={["bidder"]}>
+                  <Layout>
+                    <Tab>
+                    <Account/>
+                    </Tab>              
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/watchlist"
+              element={
+                <PrivateRoute allowedRoles={["bidder"]}>
+                  <Layout>
+                    <Tab>
+                    <Watchlist/>
+                    </Tab>              
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/order"
+              element={
+                <PrivateRoute allowedRoles={["bidder"]}>
+                  <Layout>
+                    <Tab>
+                    <Order/>
+                    </Tab>              
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/payment-history"
+              element={
+                <PrivateRoute allowedRoles={["bidder"]}>
+                  <Layout>
+                    <Tab>
+                    <Payment/>
+                    </Tab>              
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/shipping"
+              element={
+                <PrivateRoute allowedRoles={["bidder"]}>
+                  <Layout>
+                    <Tab>
+                    <Shipping/>
+                    </Tab>              
+                  </Layout>
+                </PrivateRoute>
+              }
             />
           </Routes>
         </BrowserRouter>
