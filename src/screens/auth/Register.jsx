@@ -1,22 +1,16 @@
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { Caption, Container, CustomNavLink, PrimaryButton, Title, useSignup } from "../../router";
 import { commonClassNameOfInput } from "../../components/common/Design";
-import { useState } from "react";
 
 export const Register = () => {
   const {
     formData,
     handleChange,
+    handleBecomeSellerClick,
     handleSubmit,
     error,
     successMessage,
   } = useSignup();
-  const [isSeller, setIsSeller] = useState(false);
-  const handleBecomeSellerClick = () => {
-    formData.isSeller = !isSeller;
-    setIsSeller(!isSeller);
-    console.log(formData.isSeller);
-  };
 
   return (
     <>
@@ -50,59 +44,41 @@ export const Register = () => {
               Do you already have an account? <CustomNavLink href="/login">Log In Here</CustomNavLink>
             </p>
           </div>
-          <div className="text-center">
-            {error && (<div className="text-red-500 mt-4">{error}</div>)}
-            {successMessage && (<div className="text-green mt-4">{successMessage}</div>)}
-          </div>
-          <div className="py-5">
-            <Caption className="mb-2">Fullname *</Caption>
-            <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className={commonClassNameOfInput} placeholder="Full Name" required />
-          </div>
-          <div className="py-5">
-            <Caption className="mb-2">Enter Your Email *</Caption>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} className={commonClassNameOfInput} placeholder="Enter Your Email" required />
-          </div>
-          <div>
-            <Caption className="mb-2">Password *</Caption>
-            <input type="password" name="password" value={formData.password} onChange={handleChange} className={commonClassNameOfInput} placeholder="Enter Your Password" required />
-          </div>
-          <div>
-            <Caption className="mb-2">Confirm Password *</Caption>
-            <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className={commonClassNameOfInput} placeholder="Confirm password" />
-          </div>
-          <div  className="flex items-center gap-2 py-4">
+          
+          {error && <div className="text-red-500 mt-4 text-center">{error}</div>}
+          {successMessage && <div className="text-green mt-4 text-center">{successMessage}</div>}
+
+          {formConfig.map(({ name, label, type, placeholder, required, condition }) => {
+            if (condition && !condition(formData)) return null; // if condition is false, return null
+            
+            return (
+              <div key={name} className="py-5">
+                <Caption className="mb-2">{label}</Caption>
+                <input
+                  type={type}
+                  name={name}
+                  value={type === 'file' ? undefined : formData[name]}
+                  onChange={handleChange}
+                  className={commonClassNameOfInput}
+                  placeholder={placeholder}
+                  required={required}
+                />
+              </div>
+            );
+          })}
+
+          <div className="flex items-center gap-2 py-4">
             <input onClick={handleBecomeSellerClick} type="checkbox" />
             <Caption>Become a Seller</Caption>
           </div>
-          {isSeller && (
-            <div>
-               <div className="py-5">
-            <Caption className="mb-2">ID card number *</Caption>
-            <input type="text" name="idCard" value={formData.idCard} onChange={handleChange} className={commonClassNameOfInput} placeholder="ID card number" required />
-          </div>
-          <div className="py-5">
-            <Caption className="mb-2">Front ID card image *</Caption>
-            <input type="file" name="frontImageURL" value={formData.frontImageURL} onChange={handleChange} className={commonClassNameOfInput} required />
-          </div>
-          <div className="py-5">
-            <Caption className="mb-2">Back ID card image *</Caption>
-            <input type="file" name="backImageURL" value={formData.backImageURL} onChange={handleChange} className={commonClassNameOfInput} required />
-          </div>
-          <div className="py-5">
-            <Caption className="mb-2">Issued date *</Caption>
-            <input type="date" name="issuedDate" value={formData.issuedDate} onChange={handleChange} className={commonClassNameOfInput} required />
-          </div>
-          <div className="py-5">
-            <Caption className="mb-2">Expiration date *</Caption>
-            <input type="date" name="expirationDate" value={formData.expirationDate} onChange={handleChange} className={commonClassNameOfInput} required />
-          </div>
-            </div>
-          )}
+
           <div className="flex items-center gap-2 py-4">
-            <input type="checkbox" required/>
+            <input type="checkbox" required />
             <Caption>I agree to the Terms & Policy</Caption>
           </div>
+
           <PrimaryButton className="w-full rounded-none my-5">CREATE ACCOUNT</PrimaryButton>
+
           <div className="text-center border py-4 rounded-lg mt-4">
             <Title>OR SIGNUP WITH</Title>
             <div className="flex items-center justify-center gap-5 mt-5">
@@ -116,9 +92,11 @@ export const Register = () => {
               </button>
             </div>
           </div>
+
           <p className="text-center mt-5">
-            By clicking the signup button, you create a BidMarket account, and you agree to BidMarket <span className="text-green underline">Terms & Conditions</span> &
-            <span className="text-green underline"> Privacy Policy </span> .
+            By clicking the signup button, you create a BidMarket account, and you agree to BidMarket 
+            <span className="text-green underline">Terms & Conditions</span> & 
+            <span className="text-green underline">Privacy Policy</span>.
           </p>
         </form>
         <div className="bg-green w-96 h-96 rounded-full opacity-20 blur-3xl absolute bottom-96 right-0"></div>
@@ -126,3 +104,48 @@ export const Register = () => {
     </>
   );
 };
+
+
+
+const formConfig = [
+  { name: 'fullName', label: 'Fullname *', type: 'text', placeholder: 'Full Name', required: true },
+  { name: 'email', label: 'Enter Your Email *', type: 'email', placeholder: 'Enter Your Email', required: true },
+  { name: 'password', label: 'Password *', type: 'password', placeholder: 'Enter Your Password', required: true },
+  { name: 'confirmPassword', label: 'Confirm Password *', type: 'password', placeholder: 'Confirm password', required: true },
+  {
+    name: 'idCard',
+    label: 'ID card number *',
+    type: 'text',
+    placeholder: 'ID card number',
+    required: true,
+    condition: (formData) => formData.role === 'SELLER'
+  },
+  {
+    name: 'frontImage',
+    label: 'Front ID card image *',
+    type: 'file',
+    required: true,
+    condition: (formData) => formData.role === 'SELLER'
+  },
+  {
+    name: 'backImage',
+    label: 'Back ID card image *',
+    type: 'file',
+    required: true,
+    condition: (formData) => formData.role === 'SELLER'
+  },
+  {
+    name: 'issuedDate',
+    label: 'Issued date *',
+    type: 'date',
+    required: true,
+    condition: (formData) => formData.role === 'SELLER'
+  },
+  {
+    name: 'expirationDate',
+    label: 'Expiration date *',
+    type: 'date',
+    required: true,
+    condition: (formData) => formData.role === 'SELLER'
+  }
+];

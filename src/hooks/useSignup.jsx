@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signup } from '../services/authService';
+import { authService } from '../services/authService';
 
 export const useSignup = () => {
   const [formData, setFormData] = useState({
@@ -8,34 +8,46 @@ export const useSignup = () => {
     confirmPassword: '',
     fullName: '',
     phoneNumber: '',
-    role: 'BIDDER',  // default role
-    // profileImageUrl: null,
+    role: 'BIDDER',
 
-    // FOR SELLER
-    isSeller: false,  // default is false
+    // SELLER
     idCard: '',
-    frontImageURL: null,
-    backImageURL: null,
+    frontImage: null,
+    backImage: null,
     issuedDate: '',
     expirationDate: ''
   });
 
-  // const [response, setResponse] = useState(null);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value, files } = e.target; // get data from input (name, value/files(if it's file input))
 
+    // image
     if (files) {
       setFormData({
-        ...formData,  // keep the other fields
+        ...formData,
         [name]: files[0] // only get the first file
       });
     } else {
       setFormData({
-        ...formData,
+        ...formData,  
         [name]: value
+      });
+    }
+  };
+
+  const handleBecomeSellerClick = () => {
+    if (formData.role === 'BIDDER') {
+      setFormData({
+        ...formData,
+        role: 'SELLER'
+      });
+    } else {
+      setFormData({
+        ...formData,
+        role: 'BIDDER'
       });
     }
   };
@@ -51,29 +63,27 @@ export const useSignup = () => {
       return;
     }
 
-    const formDataToSend = new FormData();
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('password', formData.password);
-    formDataToSend.append('role', formData.role);
-    formDataToSend.append('fullName', formData.fullName);
-    formDataToSend.append('phoneNumber', formData.phoneNumber);
+    // const formDataToSend = new FormData();
+    // formDataToSend.append('email', formData.email);
+    // formDataToSend.append('password', formData.password);
+    // formDataToSend.append('role', formData.role);
+    // formDataToSend.append('fullName', formData.fullName);
+    // formDataToSend.append('phoneNumber', formData.phoneNumber);
     
-    if (formData.isSeller) {
-      formDataToSend.append('idCard', formData.idCard);
-      formDataToSend.append('issuedDate', formData.issuedDate);
-      formDataToSend.append('expirationDate', formData.expirationDate);
-      formDataToSend.append('frontImageURL', formData.frontImageURL);
-      formDataToSend.append('backImageURL', formData.backImageURL);
-    }
-    // if (formData.profileImageUrl) formDataToSend.append('profileImageUrl', formData.profileImageUrl);  // required = false
+    // if (formData.role === 'SELLER') {
+    //   formDataToSend.append('idCard', formData.idCard);
+    //   formDataToSend.append('issuedDate', formData.issuedDate);
+    //   formDataToSend.append('expirationDate', formData.expirationDate);
+    //   formDataToSend.append('frontImage', formData.frontImage);
+    //   formDataToSend.append('backImage', formData.backImage);
+    // }
 
     try {
-      // setResponse(await signup(formDataToSend));
-      await signup(formDataToSend);
+      await authService.signup(formData);
       setSuccessMessage('Đăng ký thành công!');
       setError('');
     } catch (error) {
-      setError(error);
+      setError(error.message || error.toString());
       setSuccessMessage('');
     }
   };
@@ -81,6 +91,7 @@ export const useSignup = () => {
   return {
     formData,
     handleChange,
+    handleBecomeSellerClick,
     handleSubmit,
     error,
     successMessage,

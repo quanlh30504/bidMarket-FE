@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { authService } from './authService';
 
-const getAccessToken = () => localStorage.getItem('accessToken');
-const getRefreshToken = () => localStorage.getItem('refreshToken');
+const getAccessToken = () => localStorage.getItem(authService.tokenKey);
+const getRefreshToken = () => localStorage.getItem(authService.refreshTokenKey);
 
 // Axios instance
 const myAxios = axios.create({
@@ -25,11 +26,11 @@ myAxios.interceptors.response.use((response) => {
   const originalRequest = error.config;
 
   // 401 (Unauthorized) and not retry yet
-  if (error.response.status === 401 && !originalRequest._retry) {
+  if (error.response && error.response.status === 401 && !originalRequest._retry) {
     originalRequest._retry = true; // mark as retry
     try {
       const refreshToken = getRefreshToken();
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/users/refresh-token`, {
+      const response = await myAxios.post(`/api/users/refresh-token`, {
         refreshToken: refreshToken,
       });
 
@@ -40,7 +41,7 @@ myAxios.interceptors.response.use((response) => {
       return myAxios(originalRequest);
     } catch (refreshError) {
       if (refreshError.response === "Invalid refresh token") { // refreshToken invalid = phien dang nhap ket thuc
-        //call logout (implement later)
+        authService.logout();
       }
       return Promise.reject(refreshError);
     }
