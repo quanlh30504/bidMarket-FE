@@ -83,7 +83,7 @@ export const Header = () => {
                 <CustomNavLink href="/register" className={`${(!isHomePage && !isChatPage) || isScrolled ? "bg-green" : "bg-white"} px-8 py-2 rounded-full text-primary shadow-md`}>
                   Join
                 </CustomNavLink>
-                <CustomNavLink href="/dashboard">
+                <CustomNavLink href="/account">
                   <ProfileCard>
                     <img src={User1} alt="" className="w-full h-full object-cover" />
                   </ProfileCard>
