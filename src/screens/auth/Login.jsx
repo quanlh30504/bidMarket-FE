@@ -53,7 +53,7 @@ export const Login = () => {
           </div>
           <PrimaryButton className="w-full rounded-none my-5">LOGIN</PrimaryButton>
           <div className="text-center border py-4 rounded-lg mt-4">
-            <Title>OR SIGNIN WITH</Title>
+            <Title level={5}>OR SIGNIN WITH</Title>
             <div className="flex items-center justify-center gap-5 mt-5">
               <button className="flex items-center gap-2 bg-red-500 text-white p-3 px-5 rounded-sm">
                 <FaGoogle />

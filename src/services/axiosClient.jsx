@@ -2,14 +2,14 @@ import axios from 'axios';
 import { authService } from './authService';
 
 const getAccessToken = () => localStorage.getItem(authService.tokenKey);
-const getRefreshToken = () => localStorage.getItem(authService.refreshTokenKey);
 
 // Axios instance
-const myAxios = axios.create({
-  baseURL: `${process.env.REACT_APP_BACKEND_URL}`
+const axiosClient = axios.create({
+  baseURL: `${process.env.REACT_APP_BACKEND_URL}`,
+  withCredentials: true,
 });
 
-myAxios.interceptors.request.use((config) => {
+axiosClient.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
@@ -20,7 +20,7 @@ myAxios.interceptors.request.use((config) => {
 });
 
 // try get new access token when the old one is expired
-myAxios.interceptors.response.use((response) => {
+axiosClient.interceptors.response.use((response) => {
   return response;
 }, async (error) => {
   const originalRequest = error.config;
@@ -29,19 +29,15 @@ myAxios.interceptors.response.use((response) => {
   if (error.response && error.response.status === 401 && !originalRequest._retry) {
     originalRequest._retry = true; // mark as retry
     try {
-      const refreshToken = getRefreshToken();
-      const response = await myAxios.post(`/api/users/refresh-token`, {
-        refreshToken: refreshToken,
-      });
-
+      const response = await axiosClient.post(`/api/users/refresh-token`);
       const { accessToken } = response.data;
       localStorage.setItem('accessToken', accessToken);
       originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
 
-      return myAxios(originalRequest);
+      return axiosClient(originalRequest);
     } catch (refreshError) {
       if (refreshError.response === "Invalid refresh token") { // refreshToken invalid = phien dang nhap ket thuc
-        authService.logout();
+        // authService.logout();
       }
       return Promise.reject(refreshError);
     }
@@ -49,4 +45,4 @@ myAxios.interceptors.response.use((response) => {
   return Promise.reject(error);
 });
 
-export default myAxios;
+export default axiosClient;

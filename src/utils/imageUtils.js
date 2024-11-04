@@ -1,4 +1,4 @@
-import myAxios from "../services/axiosClient";
+import axiosClient from "../services/axiosClient";
 
 const imageUtils = {    
     validateImage: (file) => {
@@ -20,7 +20,7 @@ const imageUtils = {
             imageUtils.validateImage(file);
 
             // Get presigned URL
-            const presignedResponse = await myAxios.get('/api/images/presigned-url', {
+            const presignedResponse = await axiosClient.get('/api/images/presigned-url', {
                 params: {
                     folder,
                     fileType: file.type

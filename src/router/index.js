@@ -58,3 +58,8 @@ export { UserProfile } from "../screens/auth/UserProfile";
 
 // SearchList
 export {SearchList} from "../screens/search/Search";
+
+
+// Services Routes
+export { authService } from "../services/authService";
+export { default as axiosClient } from "../services/axiosClient";
