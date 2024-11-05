@@ -1,9 +1,15 @@
 import axiosClient from "./axiosClient";
 import imageUtils from "../utils/imageUtils";
+import { redirect } from "react-router-dom";
 
 class AuthService {
   constructor() {
     this.tokenKey = 'accessToken';
+    this.roleHandler = null;
+  }
+
+  setRoleHandler(handler) {
+    this.roleHandler = handler;
   }
 
   async signup(formData) {
@@ -32,11 +38,52 @@ class AuthService {
 
       if (response.data?.accessToken) {
         this.handleAuthSuccess(response.data);
+        if (this.roleHandler) {
+          this.roleHandler.setRole(this.getRoleFromToken(response.data.accessToken));
+        } else {
+          throw new Error('Role handler is not set');
+        }
         return response.data;
       }
       throw new Error('Invalid response from server');
     } catch (error) {
       throw this.handleError(error);
+    }
+  }
+
+  async logout() {
+    try {
+      const response = await axiosClient.post('/api/users/logout');
+      console.log('response:', response);
+      localStorage.removeItem(this.tokenKey);
+      if (this.roleHandler) {
+        this.roleHandler.deleteRole();
+      } else {
+        throw new Error('Role handler is not set');
+      }
+      window.alert(response.data || 'Logout success');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Failed to logout:', error);
+    }
+  }
+
+  async refreshToken() {
+    console.log('try to refresh token...');
+    try {
+      const response = await axiosClient.post('/api/users/refresh-token');
+      const { accessToken } = response.data;
+      localStorage.setItem(this.tokenKey, accessToken);
+      if (this.roleHandler) {
+        this.roleHandler.setRole(this.getRoleFromToken(accessToken));
+      } else {
+        throw new Error('Role handler is not set');
+      }
+      console.log('refresh token success:', accessToken);
+      return accessToken;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      throw error;
     }
   }
 
@@ -71,25 +118,12 @@ class AuthService {
   handleAuthSuccess(data) {
     const { accessToken } = data;
     localStorage.setItem(this.tokenKey, accessToken);
-    axiosClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
   }
 
   handleError(error) {
     const message = error.response?.data?.message || error.message || 'Authentication Failed';
     console.error('Auth error:', error);
     throw new Error(message);
-  }
-
-  logout() {
-    localStorage.removeItem(this.tokenKey);
-    delete axiosClient.defaults.headers.common['Authorization'];
-    window.alert('You have been logged out!');
-    // window.location.reload();
-  }
-
-  getCurrentUser() {
-    const userStr = localStorage.getItem(this.userKey);
-    return userStr ? JSON.parse(userStr) : null;
   }
 
   isTokenExpired(token) {
@@ -112,6 +146,20 @@ class AuthService {
 
     try {
       const payload = this.decodeToken(token);
+      if (Array.isArray(payload.roles) && payload.roles.length > 0) {
+        const role = payload.roles[0];
+        if (role === "ROLE_BIDDER") {
+          payload.roles = "BIDDER";
+        } else if (role === "ROLE_SELLER") {
+          payload.roles = "SELLER";
+        } else if (role === "ROLE_ADMIN") {
+          payload.roles = "ADMIN";
+        } else {
+          payload.roles = null;
+        }
+      } else {
+        payload.roles = null;
+      }
       console.log('roles:', payload.roles);
       return payload.roles;
     } catch (error) {

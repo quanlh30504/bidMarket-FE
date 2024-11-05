@@ -31,7 +31,7 @@ export const Login = () => {
         </div>
         <form className="bg-white shadow-s3 w-1/3 m-auto my-16 p-8 rounded-xl" onSubmit={handleSubmit}>
           <div className="text-center">
-            <Title level={5}>New Member</Title>
+            <Title level={5}>Sign in</Title>
             <p className="mt-2 text-lg">
               Do you already have an account? <CustomNavLink href="/register">Signup Here</CustomNavLink>
             </p>
@@ -46,10 +46,6 @@ export const Login = () => {
           <div>
             <Caption className="mb-2">Password *</Caption>
             <input type="password" name="password" onChange={(e) => (setPassword(e.target.value))} className={commonClassNameOfInput} placeholder="Enter Your Password" required />
-          </div>
-          <div className="flex items-center gap-2 py-4">
-            <input type="checkbox" required/>
-            <Caption>I agree to the Terms & Policy</Caption>
           </div>
           <PrimaryButton className="w-full rounded-none my-5">LOGIN</PrimaryButton>
           <div className="text-center border py-4 rounded-lg mt-4">

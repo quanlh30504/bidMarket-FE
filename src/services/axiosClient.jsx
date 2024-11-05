@@ -29,15 +29,14 @@ axiosClient.interceptors.response.use((response) => {
   if (error.response && error.response.status === 401 && !originalRequest._retry) {
     originalRequest._retry = true; // mark as retry
     try {
-      const response = await axiosClient.post(`/api/users/refresh-token`);
-      const { accessToken } = response.data;
-      localStorage.setItem('accessToken', accessToken);
+      const accessToken = await authService.refreshToken();
       originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
 
       return axiosClient(originalRequest);
     } catch (refreshError) {
-      if (refreshError.response === "Invalid refresh token") { // refreshToken invalid = phien dang nhap ket thuc
-        // authService.logout();
+      console.error('Failed to refresh token:', refreshError);
+      if (refreshError.response === "Invalid refresh token") {
+        this.logout();
       }
       return Promise.reject(refreshError);
     }

@@ -14,6 +14,7 @@ export const useSignin = () => {
 
     try {
       await authService.signin(email, password);
+      window.location.href = '/';
     } catch (err) {
       setError(err.message || "An error occurred");
     }

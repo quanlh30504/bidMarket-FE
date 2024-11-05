@@ -147,7 +147,7 @@ function App() {
             <Route
               path="/product/admin"
               element={
-                <PrivateRoute allowedRoles={["admin"]}>
+                <PrivateRoute allowedRoles={["ADMIN"]}>
                   <Layout>
                     <DashboardLayout>
                       <AdminProductList />
