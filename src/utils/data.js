@@ -11,8 +11,8 @@ export const menulists = [
   },
   {
     id: 3,
-    path: "/blog",
-    link: "Blog",
+    path: "/chat",
+    link: "Chat",
   },
   {
     id: 4,
