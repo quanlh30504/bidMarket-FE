@@ -44,6 +44,7 @@ export { Title, Body, Caption, CustomLink, CustomNavLink, Container, PrimaryButt
 // Layout Routes
 export { DashboardLayout } from "../components/common/layout/DashboardLayout";
 export { Layout } from "../components/common/layout/Layout";
+export { ChatLayout } from "../components/common/layout/ChatLayout"
 
 // Hook Routes
 export { useUser } from "../context/UserContext";
@@ -59,6 +60,16 @@ export { UserProfile } from "../screens/auth/UserProfile";
 // SearchList
 export {SearchList} from "../screens/search/Search";
 
+// Chat
+export { Chat } from "../screens/chat/Chat";
+
+//Profile
+export { Account } from "../screens/profile/Account";
+export { Tab } from "../screens/profile/Tab";
+export { Order } from "../screens/profile/Order";
+export { Payment } from "../screens/profile/Payment";
+export { Shipping } from "../screens/profile/Shipping";
+export { Watchlist} from "../screens/profile/Watchlist";
 
 // Services Routes
 export { authService } from "../services/authService";

@@ -42,16 +42,18 @@ export const Header = () => {
   // Check if it's the home page
   const isHomePage = location.pathname === "/";
 
+  const isChatPage = location.pathname === "/chat";
+
   const { user } = useUser();
   const role = user.role;
   return (
     <>
-      <header className={isHomePage ? `header py-1 bg-primary ${isScrolled ? "scrolled" : ""}` : `header bg-white shadow-s1 ${isScrolled ? "scrolled" : ""}`}>
+      <header className={(isHomePage ? `header py-1 bg-primary ${isScrolled ? "scrolled" : ""}` : (isChatPage ? "header py-1 bg-primary" : `header bg-white shadow-s1 ${isScrolled ? "scrolled" : ""}`))}>
         <Container>
           <nav className="p-4 flex justify-between items-center relative">
             <div className="flex items-center gap-14">
               <div>
-                {isHomePage && !isScrolled ? (
+                {(isHomePage || isChatPage) && !isScrolled ? (
                   <img src="../images/common/header-logo.png" alt="LogoImg" className="h-11" />
                 ) : (
                   <img src="../images/common/header-logo2.png" alt="LogoImg" className="h-11" />
@@ -60,7 +62,7 @@ export const Header = () => {
               <div className="hidden lg:flex items-center justify-between gap-8">
                 {menulists.map((list) => (
                   <li key={list.id} className="capitalize list-none">
-                    <CustomNavLinkList href={list.path} isActive={location.pathname === list.path} className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
+                    <CustomNavLinkList href={list.path} isActive={location.pathname === list.path} className={`${isScrolled || (!isHomePage && !isChatPage) ? "text-black" : "text-white"}`}>
                       {list.link}
                     </CustomNavLinkList>
                   </li>
@@ -97,7 +99,7 @@ export const Header = () => {
                   </div>
                 )}
               </div>
-              <div className={`icon flex items-center justify-center gap-6 ${isScrolled || !isHomePage ? "text-primary" : "text-white"}`}>
+              <div className={`icon flex items-center justify-center gap-6 ${isScrolled || (!isHomePage && !isChatPage) ? "text-primary" : "text-white"}`}>
                 <button onClick={toggleMenu} className="lg:hidden w-10 h-10 flex justify-center items-center bg-black text-white focus:outline-none">
                   {isOpen ? <AiOutlineClose size={24} /> : <AiOutlineMenu size={24} />}
                 </button>
