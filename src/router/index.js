@@ -4,7 +4,6 @@ export { NotFound } from "../components/common/NotFound";
 export { WinningBidList } from "../screens/product/WinningBidList";
 export { UserList } from "../admin/UserList";
 export { UserProvider } from "../context/UserContext";
-export { useUser } from "../context/UserContext";
 
 // Home Section
 export { CategoryCard } from "../components/cards/CategoryCard";
@@ -48,6 +47,9 @@ export { Layout } from "../components/common/layout/Layout";
 export { ChatLayout } from "../components/common/layout/ChatLayout"
 
 // Hook Routes
+export { useUser } from "../context/UserContext";
+export { useSignup } from "../hooks/useSignup";
+export { useSignin } from "../hooks/useSignin";
 
 // Auth Routes
 export { Register } from "../screens/auth/Register";
@@ -68,3 +70,7 @@ export { Order } from "../screens/profile/Order";
 export { Payment } from "../screens/profile/Payment";
 export { Shipping } from "../screens/profile/Shipping";
 export { Watchlist} from "../screens/profile/Watchlist";
+
+// Services Routes
+export { authService } from "../services/authService";
+export { default as axiosClient } from "../services/axiosClient";

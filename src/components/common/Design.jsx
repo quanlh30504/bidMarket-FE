@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { NavLink } from "react-router-dom";
 
-const Title = ({ level, children, className }) => {
+const Title = ({ level = 6, children, className }) => {
   const Heading = `h${level}`;
   const classes = `${
     level === 1

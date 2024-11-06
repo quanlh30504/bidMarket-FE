@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 // design
 import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai";
 import { IoSearchOutline } from "react-icons/io5";
-import { Container, CustomNavLink, CustomNavLinkList, ProfileCard } from "../../router";
+import { authService, Container, CustomNavLink, CustomNavLinkList, ProfileCard } from "../../router";
 import { User1 } from "../hero/Hero";
 import { menulists } from "../../utils/data";
 import { useUser } from "../../router";
@@ -71,23 +71,33 @@ export const Header = () => {
             </div>
             <div className="flex items-center gap-8 icons">
               <div className="hidden lg:flex lg:items-center lg:gap-8">
-                <IoSearchOutline size={23} className={`${isScrolled || (!isHomePage && !isChatPage) ? "text-black" : "text-white"}`} />
-                {role === "bidder" && (
-                  <CustomNavLink href="/seller/login" className={`${isScrolled || (!isHomePage && !isChatPage) ? "text-black" : "text-white"}`}>
+                <IoSearchOutline size={23} className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`} />
+                {role === "BIDDER" && (
+                  <CustomNavLink href="/seller/login" className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
                     Become a Seller
                   </CustomNavLink>
                 )}
-                <CustomNavLink href="/login" className={`${isScrolled || (!isHomePage && !isChatPage) ? "text-black" : "text-white"}`}>
-                  Sign in
-                </CustomNavLink>
-                <CustomNavLink href="/register" className={`${(!isHomePage && !isChatPage) || isScrolled ? "bg-green" : "bg-white"} px-8 py-2 rounded-full text-primary shadow-md`}>
-                  Join
-                </CustomNavLink>
-                <CustomNavLink href="/account">
-                  <ProfileCard>
-                    <img src={User1} alt="" className="w-full h-full object-cover" />
-                  </ProfileCard>
-                </CustomNavLink>
+                {role === null ? (
+                  <div className="flex items-center gap-8">
+                    <CustomNavLink href="/login" className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
+                      Sign in
+                    </CustomNavLink>
+                    <CustomNavLink href="/register" className={`${!isHomePage || isScrolled ? "bg-green" : "bg-white"} px-8 py-2 rounded-full text-primary shadow-md`}>
+                      Join
+                    </CustomNavLink>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-8">
+                    <button onClick={() => authService.logout()} className="border rounded-full p-2 px-4 bg-red-500">
+                      Logout
+                    </button>
+                    <CustomNavLink href="/dashboard">
+                      <ProfileCard>
+                        <img src={User1} alt="" className="w-full h-full object-cover" />
+                      </ProfileCard>
+                    </CustomNavLink>
+                  </div>
+                )}
               </div>
               <div className={`icon flex items-center justify-center gap-6 ${isScrolled || (!isHomePage && !isChatPage) ? "text-primary" : "text-white"}`}>
                 <button onClick={toggleMenu} className="lg:hidden w-10 h-10 flex justify-center items-center bg-black text-white focus:outline-none">
