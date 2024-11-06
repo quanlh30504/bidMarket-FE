@@ -1,6 +1,5 @@
 import axiosClient from "./axiosClient";
 import imageUtils from "../utils/imageUtils";
-import { redirect } from "react-router-dom";
 
 class AuthService {
   constructor() {
@@ -47,7 +46,8 @@ class AuthService {
       }
       throw new Error('Invalid response from server');
     } catch (error) {
-      throw this.handleError(error);
+      // throw this.handleError(error);
+      throw error;
     }
   }
 

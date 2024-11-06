@@ -64,9 +64,10 @@ const Container = ({ children, className }) => {
   return <div className={`${className} w-[85%] m-auto`}>{children}</div>;
 };
 
-const PrimaryButton = ({ children, className }) => {
+const PrimaryButton = ({ children, className, disabled }) => {
   return (
-    <button type="submit" className={`${className} text-white bg-green font-medium rounded-full text-lg px-16 py-3 hover:bg-primary transition ease-in-out`}>
+    <button type="submit" className={`${className} text-white bg-green font-medium rounded-full text-lg px-16 py-3 hover:bg-primary transition ease-in-out`}
+     disabled={disabled}>
       {children}
     </button>
   );

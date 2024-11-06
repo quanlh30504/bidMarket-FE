@@ -50,6 +50,7 @@ export { ChatLayout } from "../components/common/layout/ChatLayout"
 export { useUser } from "../context/UserContext";
 export { useSignup } from "../hooks/useSignup";
 export { useSignin } from "../hooks/useSignin";
+export { useOtpService } from "../hooks/useOtpService";
 
 // Auth Routes
 export { Register } from "../screens/auth/Register";
