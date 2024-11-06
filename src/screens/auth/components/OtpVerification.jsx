@@ -2,15 +2,14 @@ import { Container, Title, PrimaryButton, Caption } from "../../../router";
 import { commonClassNameOfInput } from "../../../components/common/Design";
 import { useState } from "react";
 import { useOtpService } from "../../../router";
-import { useUser } from "../../../router";
 
-export const OTPVerification = ({ email, setEmail }) => { 
-  const [otp, setOtp] = useState("");
+export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) => { 
+  const [otp, setOtp] = useState(""); // OTP input
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [emailSubmitted, setEmailSubmitted] = useState(!!email);
+  const [emailSubmitted, setEmailSubmitted] = useState(!!email); // If props already passes the email value, skip the email import step
   const [verified, setVerified] = useState(false);
-  const { sendOtp, verifyOtp, resendOtp, loading, isCooldownActive, cooldown } = useOtpService();
+  const { sendOtp, verifyOtp, verifyOtpForgotPassword, resendOtp, loading, isCooldownActive, cooldown } = useOtpService();
 
   const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
@@ -36,7 +35,12 @@ export const OTPVerification = ({ email, setEmail }) => {
         setErrorMessage("OTP must be 6 digits.");
         return;
       }
-      await verifyOtp(otp, email);
+      // 2 type of verification: normal and forgot password
+      if (isForgotPassword) {
+        await verifyOtpForgotPassword(otp, email);
+      } else {
+        await verifyOtp(otp, email);
+      }
       setVerified(true);
       setSuccessMessage("OTP has been verified successfully. You can now login.");
     } catch {
@@ -60,6 +64,7 @@ export const OTPVerification = ({ email, setEmail }) => {
     }
   };
 
+  // Handle resending OTP
   const handleResendOtp = async () => {
     try {
       await resendOtp(email);
@@ -69,6 +74,7 @@ export const OTPVerification = ({ email, setEmail }) => {
     }
   };
 
+  // Mask email address (abc***@domain)
   const maskEmail = (email) => {
     if (typeof email !== "string" || !email.includes("@")) {
       throw new Error("Invalid email address");
