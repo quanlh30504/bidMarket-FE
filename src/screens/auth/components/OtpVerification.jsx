@@ -42,7 +42,11 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
         await verifyOtp(otp, email);
       }
       setVerified(true);
-      setSuccessMessage("OTP has been verified successfully. You can now login.");
+      if (isForgotPassword) {
+        setSuccessMessage("OTP has been verified successfully. A new password has been sent to your email.");
+      } else {
+        setSuccessMessage("OTP has been verified successfully. You can now login.");
+      }
     } catch {
       setErrorMessage("Failed to verify OTP. Please try again.");
     }
@@ -98,7 +102,8 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
           <Title level={5}>OTP Verification</Title>
           {emailSubmitted ? (
             <p className="mt-2 text-lg">
-              We have sent an OTP to {maskEmail(email)}. <br /> Please enter the OTP to verify your account.
+              We have sent an OTP to {maskEmail(email)}. <br />
+              { isForgotPassword ? "Please enter the OTP to reset your password." : "Please enter the OTP to verify your email." }
             </p>
           ) : (
             <p className="mt-2 text-lg">Please enter your email to receive an OTP.</p>

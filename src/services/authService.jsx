@@ -27,10 +27,6 @@ class AuthService {
   }
 
   async signin(email, password) {
-    console.log('email:', email);
-    console.log('password:', password);
-    console.log(`${process.env.REACT_APP_BACKEND_URL}`);
-
     try {
       const response = await axiosClient.post('/api/users/signin', { email, password});
       console.log('response:', response);
@@ -67,6 +63,21 @@ class AuthService {
       console.error('Failed to logout:', error);
     }
   }
+  
+  async changePassword(email, currentPassword, newPassword) {
+    try {
+      const response = await axiosClient.post(`/api/users/changePassword/${email}`, null, {
+        params: { currentPassword, newPassword },
+      });
+      console.log('response:', response);
+      if (response.data) {
+        return response.data.message || response.data || 'Change password success';
+      }
+    } catch (error) {
+      console.error('Failed to change password:', error);
+      throw error;
+    }
+  }  
 
   async refreshToken() {
     console.log('try to refresh token...');

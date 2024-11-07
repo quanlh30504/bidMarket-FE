@@ -67,7 +67,7 @@ export const Register = () => {
             <div className="text-center">
               <Title level={5}>Sign Up</Title>
               <p className="mt-2 text-lg">
-                Do you already have an account? <CustomNavLink href="/login">Log In Here</CustomNavLink>
+                Do you already have an account? <CustomNavLink href="/auth/login">Log In Here</CustomNavLink>
               </p>
             </div>
             {formConfig.map(({ name, label, type, placeholder, required, condition }) => {

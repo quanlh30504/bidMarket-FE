@@ -46,7 +46,7 @@ export const Login = () => {
               <div className="text-center">
                 <Title level={5}>Sign in</Title>
                 <p className="mt-2 text-lg">
-                  Don't have an account? <CustomNavLink href="/register">Signup Here</CustomNavLink>
+                  Don't have an account? <CustomNavLink href="/auth/register">Signup Here</CustomNavLink>
                 </p>
               </div>
               {error && (
@@ -76,7 +76,7 @@ export const Login = () => {
                   required
                 />
                 <div className="text-right mt-2">
-                  <CustomNavLink href="/forgot-password" className="text-sm text-blue-500">Forgot Password?</CustomNavLink>
+                  <CustomNavLink href="/auth/forgot-password" className="text-sm text-blue-500">Forgot Password?</CustomNavLink>
                 </div>
               </div>
               <PrimaryButton className="w-full rounded-none my-5">LOGIN</PrimaryButton>
