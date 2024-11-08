@@ -3,6 +3,7 @@ import { Container, PrimaryButton, CustomNavLink} from "../../router";
 import { productlists } from "../../utils/data";
 import { ProductCard } from "../../components/cards/ProductCard";
 import { IoIosSearch } from "react-icons/io";
+import { commonClassNameOfInput } from "../../components/common/Design";
 
 
 export const SearchList = () => {
@@ -16,7 +17,27 @@ export const SearchList = () => {
     );
   };
 
-  const filters = ['Filter 1', 'Filter 2', 'Filter 3'];
+  const category = [
+    'All',
+    'Electronics',
+    'Fashion',
+    'Collectibles',
+    'Home appliances',
+    'Sports equipment',
+    'Toys and games',
+    'Vehicles',
+    'Real estate',
+    'Art and crafts',
+    'Jewelry and accessories',
+    'Health and beauty',
+    'Garden and outdoors',
+    'Music instruments',
+    'Pet supplies',
+    'Office supplies'
+];
+
+  const status = ['Pending', 'Open', 'Closed', 'Cancelled'];
+  const sortByTime =['Newly listed', 'Ending soonest'];
   return (
     
     <>
@@ -34,24 +55,40 @@ export const SearchList = () => {
             {/* Cột filter bên trái */}
             <div className="md:col-span-1">
               <div className="p-4 shadow-md bg-white rounded-lg">
-                {/* Nội dung bộ lọc */}
-                <h3 className="text-lg font-semibold mb-4">Filters</h3>
-                <div>
-                {filters.map((filter) => (
-              <div key={filter}>
-              <a
-                onClick={(e) => {
-                  e.preventDefault(); // Ngăn hành động mặc định
-                  toggleFilter(filter);
-                }}
-                className={`text-black text-[17px] font-medium cursor-pointer list-none hover:text-green transition-all ease-in-out ${selectedFilters.includes(filter) ? 'text-green' : ''}`}
-                href="/search"
-              >
-                {filter}
-              </a>
+                {/* Category */}
+                <FilterSection
+                    title="Category"
+                    filters={category}
+                    selectedFilters={selectedFilters}
+                    onFilterToggle={toggleFilter}
+                  />
+
+              {/* Status */}
+              <FilterSection
+                    title="Status"
+                    filters={status}
+                    selectedFilters={selectedFilters}
+                    onFilterToggle={toggleFilter}
+                  />
+
+          <h3 className="text-lg font-semibold mb-4">Price</h3>
+          <div>
+              <div>Min price:</div>
+              <input className={commonClassNameOfInput} type="number" name="" placeholder='VND' />
+              <div>Max price:</div>
+              <input className={commonClassNameOfInput} type="number" name="" placeholder='VND' />
             </div>
-            ))}
-                </div>
+                <div className="h-px bg-gray-200 my-6" />
+
+                {/* Sort by time*/}
+              <FilterSection
+                    title="Sort by time"
+                    filters={sortByTime}
+                    selectedFilters={selectedFilters}
+                    onFilterToggle={toggleFilter}
+                  />
+
+                <PrimaryButton className="ml-3">More filters</PrimaryButton>
               </div>
             </div>
 
@@ -91,6 +128,33 @@ const SearchBox = () => {
             </CustomNavLink>
         </div>
       </form>
+    </>
+  );
+};
+
+const FilterSection = ({ title, filters, selectedFilters, onFilterToggle, className ='' }) => {
+  return (
+    <>
+      <div className={className}>
+      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <div>
+        {filters.map((filter) => (
+          <div key={filter}>
+            <a
+                onClick={(e) => {
+                  e.preventDefault(); // Ngăn hành động mặc định
+                  onFilterToggle(filter);
+                }}
+                className={`text-[15px] font-[500] text-gray_100 cursor-pointer list-none hover:text-green transition-all ease-in-out ${selectedFilters.includes(filter) ? 'text-green' : ''}`}
+                href="/search"
+              >
+                {filter}
+              </a>
+            </div>
+            ))}
+                </div>
+      <div className="h-px bg-gray-200 my-6" />
+      </div>
     </>
   );
 };
