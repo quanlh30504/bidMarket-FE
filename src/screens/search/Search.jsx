@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Container, PrimaryButton, CustomNavLink} from "../../router";
+import { Container, PrimaryButton, CustomNavLink, Pagination} from "../../router";
 import { productlists } from "../../utils/data";
 import { ProductCard } from "../../components/cards/ProductCard";
 import { IoIosSearch } from "react-icons/io";
 import { commonClassNameOfInput } from "../../components/common/Design";
-
 
 export const SearchList = () => {
   const [selectedFilters, setSelectedFilters] = useState([]);
@@ -38,6 +37,21 @@ export const SearchList = () => {
 
   const status = ['Pending', 'Open', 'Closed', 'Cancelled'];
   const sortByTime =['Newly listed', 'Ending soonest'];
+
+  const ITEMS_PER_PAGE = 12; 
+  const PAGES_PER_GROUP = 3; 
+
+  const [currentPage, setCurrentPage] = useState(1);
+  
+    const handlePageChange = (page) => {
+      setCurrentPage(page);
+    };
+  
+    const paginatedProducts = productlists.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
+    );
+
   return (
     
     <>
@@ -98,10 +112,16 @@ export const SearchList = () => {
                {productlists?.length} results
             </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {productlists?.slice(0, 12)?.map((item, index) => (
+                {paginatedProducts?.map((item, index) => (
                   <ProductCard item={item} key={index + 1} />
                 ))}
               </div>
+              <Pagination
+        totalItems={productlists.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+        pagesPerGroup={PAGES_PER_GROUP}
+        onPageChange={handlePageChange}
+      />
             </div>
           </div>
         </Container>

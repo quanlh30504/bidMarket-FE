@@ -1,21 +1,45 @@
+import React, { useState } from 'react';
 import { Title } from "../../router";
 import { IoIosSearch } from "react-icons/io";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { RiAuctionFill } from "react-icons/ri";
+import { watchlist } from "../../utils/data";
+import { Pagination } from "../../router";
+
 
 export const Watchlist = () => {
+  const itemsPerPage = 5;
+  const pagesPerGroup = 3; 
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Pagination logic
+  const totalItems = watchlist.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = watchlist.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex items-center justify-between gap-4 mb-6">
-        <Title level={4} className="">
-          My Watchlist
-        </Title>
+        <Title level={4}>My Watchlist</Title>
         <SearchBox />
       </div>
       
       <div className="h-px bg-gray-200 my-6" />
       
-      <Table />
+      <Table items={currentItems} /> {/* Pass the current page items */}
+      
+      <Pagination
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        pagesPerGroup={pagesPerGroup}
+        onPageChange={handlePageChange}
+      /> {/* Pagination component */}
     </div>
   );
 };
@@ -33,86 +57,54 @@ const SearchBox = () => {
       />
     </div>
   );
-}
+};
 
-const Table = () => {
+const Table = ({ items }) => {
   return (
-    <>
-      <div className="relative overflow-x-auto rounded-lg">
-        <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-100">
-            <tr>
-              <th scope="col" className="px-10 py-5">
-                Image
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Title
-              </th>
-              <th scope="col" className="px-6 py-3 text-center">
-                Current Bid
-              </th>
-              <th scope="col" className="px-6 py-3 text-center">
-                Your Bid
-              </th>
-              <th scope="col" className="px-6 py-3 text-center">
-                Status
-              </th>
-              <th scope="col" className="px-6 py-3 text-center">
-                Time Left
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="bg-white border-b hover:bg-gray-50">
-            <td className="px-6 py-4">
-                <img className="w-20 h-20 rounded-md" src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg" alt="Jeseimage" />
-            </td>
-              <td className="px-6 py-4">Couple Wedding Ring</td>
-              <td className="px-6 py-4 text-center">$500</td>
-              <td className="px-6 py-4 text-center">$500</td>
-              
-              <td className="px-6 py-4  text-center">
-                 <div className="inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-green border-emerald-500 text-center truncate  rounded-full">Winning</div>
+    <div className="relative overflow-x-auto rounded-lg">
+      <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+          <tr>
+            <th scope="col" className="px-10 py-5">Image</th>
+            <th scope="col" className="px-6 py-3">Title</th>
+            <th scope="col" className="px-6 py-3 text-center">Current Bid</th>
+            <th scope="col" className="px-6 py-3 text-center">Your Bid</th>
+            <th scope="col" className="px-6 py-3 text-center">Status</th>
+            <th scope="col" className="px-6 py-3 text-center">Time Left</th>
+            <th scope="col" className="px-6 py-3">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item, index) => (
+            <tr key={index} className="bg-white border-b hover:bg-gray-50">
+              <td className="px-6 py-4">
+                <img className="w-20 h-20 rounded-md" src={item.image} alt="Item" />
               </td>
-              <td className="px-6 py-4 text-center text-red-500">1d 11h 27m</td>
+              <td className="px-6 py-4">{item.title}</td>
+              <td className="px-6 py-4 text-center">{item.currentBid}</td>
+              <td className="px-6 py-4 text-center">{item.yourBid}</td>
+              <td className="px-6 py-4 text-center">
+                <div
+                  className={`inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-center truncate rounded-full ${
+                    item.status === "Winning" ? "text-green border-emerald-500" : "text-red-500 border-red-500"
+                  }`}
+                >
+                  {item.status}
+                </div>
+              </td>
+              <td className="px-6 py-4 text-center text-red-500">{item.timeLeft}</td>
               <td className="px-6 py-4 text-center flex items-center gap-3 mt-5">
-              <button>
-                <RiAuctionFill size={24} className="font-medium text-green" />
-              </button>
+                <button>
+                  <RiAuctionFill size={24} className="font-medium text-green" />
+                </button>
                 <button className="font-medium text-red-500">
                   <MdOutlineDeleteOutline size={27} />
                 </button>
               </td>
             </tr>
-          </tbody>
-          <tbody>
-            <tr className="bg-white border-b hover:bg-gray-50">
-            <td className="px-6 py-4">
-                <img className="w-20 h-20 rounded-md" src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg" alt="Jeseimage" />
-            </td>
-              <td className="px-6 py-4">Couple Wedding Ring</td>
-              <td className="px-6 py-4 text-center">$1000</td>
-              <td className="px-6 py-4 text-center">$500</td>
-              
-              <td className="px-6 py-4  text-center">
-                 <div className="inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-red-500 border-red-500 text-center truncate rounded-full">Out Bid</div>
-              </td>
-              <td className="px-6 py-4 text-center text-red-500">1d 11h 27m</td>
-              <td className="px-6 py-4 text-center flex items-center gap-3 mt-5">
-              <button>
-                <RiAuctionFill size={24} className="font-medium text-green" />
-              </button>
-                <button className="font-medium text-red-500">
-                  <MdOutlineDeleteOutline size={27} />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
