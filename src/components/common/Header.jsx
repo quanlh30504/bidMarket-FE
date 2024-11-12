@@ -59,7 +59,7 @@ export const Header = () => {
               </div>
               <div className="hidden lg:flex items-center justify-between gap-8">
                 {menulists.map((list) => (
-                  (list.id !== 7 || role === "seller") && (
+                  (list.id !== 7 || role === "SELLER") && (
                     <li key={list.id} className="capitalize list-none">
                       <CustomNavLinkList href={list.path} isActive={location.pathname === list.path} className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
                         {list.link}
@@ -72,7 +72,7 @@ export const Header = () => {
             <div className="flex items-center gap-8 icons">
               <div className="hidden lg:flex lg:items-center lg:gap-8">
                 <IoSearchOutline size={23} className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`} />
-                {role === "bidder" && (
+                {role === "BIDDER" && (
                   <CustomNavLink href="/seller/login" className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
                     Become a Seller
                   </CustomNavLink>
@@ -99,7 +99,7 @@ export const Header = () => {
             {/* Responsive Menu if below 768px */}
             <div ref={menuRef} className={`lg:flex lg:items-center lg:w-auto w-full p-5 absolute right-0 top-full menu-container ${isOpen ? "open" : "closed"}`}>
               {menulists.map((list) => (
-                (list.id !== 7 || role === "seller") && (
+                (list.id !== 7 || role === "SELLER") && (
                   <li href={list.path} key={list.id} className="uppercase list-none">
                     <CustomNavLink className="text-white">{list.link}</CustomNavLink>
                   </li>

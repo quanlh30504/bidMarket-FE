@@ -19,6 +19,7 @@ export const SellerHubRoute = () => {
   return (
     <Routes>
       <Route path="/" element={<SellerHub />}>
+        <Route index element={<Overview />} /> {/* default route */}
         <Route path="overview" element={<Overview />} />
         <Route path="orders" element={<Orders />} />
         <Route path="listings" element={<Listings />} />

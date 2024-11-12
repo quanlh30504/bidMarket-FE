@@ -39,7 +39,7 @@ export const Sidebar = () => {
             <span>Dashboard</span>
           </CustomNavLink>
 
-          {(role === "seller" || role === "admin") && (
+          {(role === "SELLER" || role === "ADMIN") && (
             <>
               <CustomNavLink href="/product" isActive={location.pathname === "/product"} className={className}>
                 <span>
@@ -58,7 +58,7 @@ export const Sidebar = () => {
             </>
           )}
 
-          {role === "admin" && (
+          {role === "ADMIN" && (
             <>
               <CustomNavLink href="/userlist" isActive={location.pathname === "/userlist"} className={className}>
                 <span>

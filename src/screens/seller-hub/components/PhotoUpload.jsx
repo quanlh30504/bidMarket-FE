@@ -1,47 +1,222 @@
-import React from 'react';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 
-// Chưa xử lý max number of photos
-export const PhotoUpload = ({ productDetails, setProductDetails }) => {
-  const handlePhotoUpload = (event) => {
-    const uploadedPhotos = Array.from(event.target.files);
+// Component PhotoUpload được memo hóa để tránh re-render không cần thiết
+export const PhotoUpload = memo(({ productDetails, setProductDetails }) => {
+  const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [previewVideo, setPreviewVideo] = useState(null);
+
+  // Sử dụng useMemo để ghi nhớ giá trị của photos và videos
+  const photos = useMemo(() => productDetails.photos || [], [productDetails.photos]);
+  const videos = useMemo(() => productDetails.videos || [], [productDetails.videos]);
+
+  // Photo Upload Handlers
+  const handlePhotoUpload = useCallback(
+    (event) => {
+      const uploadedPhotos = Array.from(event.target.files);
+      setProductDetails((prevDetails) => ({
+        ...prevDetails,
+        photos: [...photos, ...uploadedPhotos],
+      }));
+    },
+    [photos, setProductDetails]
+  );
+
+  // Video Upload Handlers
+  const handleVideoUpload = useCallback(
+    (event) => {
+      const uploadedVideos = Array.from(event.target.files);
+      setProductDetails((prevDetails) => ({
+        ...prevDetails,
+        videos: [...videos, ...uploadedVideos],
+      }));
+    },
+    [videos, setProductDetails]
+  );
+
+  // Delete Handlers
+  const handlePhotoDelete = useCallback(
+    (index) => {
+      const updatedPhotos = photos.filter((_, photoIndex) => photoIndex !== index);
+      setProductDetails({ ...productDetails, photos: updatedPhotos });
+    },
+    [photos, setProductDetails, productDetails]
+  );
+
+  const handleVideoDelete = useCallback(
+    (index) => {
+      const updatedVideos = videos.filter((_, videoIndex) => videoIndex !== index);
+      setProductDetails({ ...productDetails, videos: updatedVideos });
+    },
+    [videos, setProductDetails, productDetails]
+  );
+
+  // Drag Handlers
+  const handlePhotoDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handlePhotoDrop = (event) => {
+    event.preventDefault();
+    const uploadedPhotos = Array.from(event.dataTransfer.files).filter((file) =>
+      file.type.startsWith('image/')
+    );
     setProductDetails((prevDetails) => ({
       ...prevDetails,
-      photos: [...prevDetails.photos, ...uploadedPhotos],
+      photos: [...photos, ...uploadedPhotos],
     }));
   };
 
-  const handlePhotoDelete = (index) => {
-    const updatedPhotos = productDetails.photos.filter((_, photoIndex) => photoIndex !== index);
-    setProductDetails({ ...productDetails, photos: updatedPhotos });
+  const handleVideoDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handleVideoDrop = (event) => {
+    event.preventDefault();
+    const uploadedVideos = Array.from(event.dataTransfer.files).filter((file) =>
+      file.type.startsWith('video/')
+    );
+    setProductDetails((prevDetails) => ({
+      ...prevDetails,
+      videos: [...videos, ...uploadedVideos],
+    }));
   };
 
   return (
     <div className="mb-8">
       <h2 className="text-lg font-semibold mb-2">PHOTO & VIDEO</h2>
-      <p>{productDetails.photos.length} of 24 photos</p>
-      <div className="flex justify-between mt-4">
-        <div className="w-3/5 h-48 border border-dashed rounded-xl flex items-center justify-center">
-          <input type="file" multiple onChange={handlePhotoUpload} className="hidden" id="photo-upload" />
-          <label htmlFor="photo-upload" className="cursor-pointer">Add photos or drag and drop</label>
+      <div className="flex space-x-4">
+        {/* Photo Upload Area */}
+        <div
+          className="w-3/5 h-72 border border-dashed rounded-xl flex items-center justify-center flex-wrap gap-4 p-2"
+          onDragOver={handlePhotoDragOver}
+          onDrop={handlePhotoDrop}
+        >
+          {photos.length === 0 ? (
+            <label htmlFor="photo-upload" className="cursor-pointer text-center">
+              <input
+                type="file"
+                multiple
+                onChange={handlePhotoUpload}
+                className="hidden"
+                id="photo-upload"
+                accept="image/*"
+              />
+              <p className="text-gray-500">Add photos or drag and drop here</p>
+            </label>
+          ) : (
+            <>
+              {photos.map((photo, index) => (
+                <div key={index} className="relative w-20 h-20 border rounded overflow-hidden">
+                  <img
+                    src={URL.createObjectURL(photo)}
+                    alt={`${index + 1}`}
+                    onClick={() => setPreviewPhoto(URL.createObjectURL(photo))}
+                    className="w-full h-full object-cover cursor-pointer"
+                  />
+                  <button
+                    onClick={() => handlePhotoDelete(index)}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+              <label htmlFor="photo-upload" className="cursor-pointer w-20 h-20 border-dashed border flex items-center justify-center">
+                <input
+                  type="file"
+                  multiple
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                  id="photo-upload"
+                  accept="image/*"
+                />
+                <span className="text-3xl text-gray-500">+</span>
+              </label>
+            </>
+          )}
         </div>
-        <div className="w-2/5 h-48 border border-dashed rounded-xl flex items-center justify-center ml-4">
-          <input type="file" accept="video/*" className="hidden" id="video-upload" />
-          <label htmlFor="video-upload" className="cursor-pointer">Add video or drag and drop</label>
+
+        {/* Video Upload Area */}
+        <div
+          className="w-2/5 h-72 border border-dashed rounded-xl flex items-center justify-center flex-wrap gap-4 p-2"
+          onDragOver={handleVideoDragOver}
+          onDrop={handleVideoDrop}
+        >
+          {videos.length === 0 ? (
+            <label htmlFor="video-upload" className="cursor-pointer text-center">
+              <input
+                type="file"
+                multiple
+                onChange={handleVideoUpload}
+                className="hidden"
+                id="video-upload"
+                accept="video/*"
+              />
+              <p className="text-gray-500">Add videos or drag and drop here</p>
+            </label>
+          ) : (
+            <>
+              {videos.map((video, index) => (
+                <div key={index} className="relative w-20 h-20 border rounded overflow-hidden">
+                  <video
+                    onClick={() => setPreviewVideo(URL.createObjectURL(video))}
+                    className="cursor-pointer object-cover w-full h-full"
+                    src={URL.createObjectURL(video)}
+                    controls={false}
+                  />
+                  <button
+                    onClick={() => handleVideoDelete(index)}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+              <label htmlFor="video-upload" className="cursor-pointer w-20 h-20 border-dashed border flex items-center justify-center">
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleVideoUpload}
+                  className="hidden"
+                  id="video-upload"
+                  accept="video/*"
+                />
+                <span className="text-3xl text-gray-500">+</span>
+              </label>
+            </>
+          )}
         </div>
       </div>
-      <div className="mt-4 grid grid-cols-3 gap-4">
-        {productDetails.photos.map((photo, index) => (
-          <div key={index} className="w-full border rounded-lg overflow-hidden relative">
-            <img src={URL.createObjectURL(photo)} alt={`${index + 1}`} className="w-full h-full object-cover" />
+
+      {/* Photo Preview Modal */}
+      {previewPhoto && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="relative bg-white p-0 rounded-lg shadow-lg max-w-4xl">
+            <img src={previewPhoto} alt="Preview" className="max-w-full max-h-[800px] rounded-md" />
             <button
-              className="absolute top-2 right-2"
-              onClick={() => handlePhotoDelete(index)}
+              onClick={() => setPreviewPhoto(null)}
+              className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 text-center"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke='red' xmlns="http://www.w3.org/2000/svg" width='20' height='20'><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M13 4H8.8C7.11984 4 6.27976 4 5.63803 4.32698C5.07354 4.6146 4.6146 5.07354 4.32698 5.63803C4 6.27976 4 7.11984 4 8.8V15.2C4 16.8802 4 17.7202 4.32698 18.362C4.6146 18.9265 5.07354 19.3854 5.63803 19.673C6.27976 20 7.11984 20 8.8 20H15.2C16.8802 20 17.7202 20 18.362 19.673C18.9265 19.3854 19.3854 18.9265 19.673 18.362C20 17.7202 20 16.8802 20 15.2V11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M4 16L8.29289 11.7071C8.68342 11.3166 9.31658 11.3166 9.70711 11.7071L13 15M13 15L15.7929 12.2071C16.1834 11.8166 16.8166 11.8166 17.2071 12.2071L20 15M13 15L15.25 17.25" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M17 3L19 5M21 7L19 5M19 5L21 3M19 5L17 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+              &times;
             </button>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* Video Preview Modal */}
+      {previewVideo && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="relative bg-white p-0 rounded-lg shadow-lg max-w-4xl">
+            <video controls src={previewVideo} className="max-w-full max-h-[800px] rounded-md"></video>
+            <button
+              onClick={() => setPreviewVideo(null)}
+              className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 text-center"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+});
