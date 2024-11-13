@@ -42,7 +42,7 @@ export const Dashboard = () => {
                 <Title>Your Products </Title>
               </div>
             </div>
-            {role === "admin" && (
+            {role === "ADMIN" && (
               <>
                 <div className="shadow-s3 border border-green bg-green_100 p-8 flex items-center text-center justify-center gap-5 flex-col rounded-xl">
                   <MdOutlineCategory size={80} className="text-green" />

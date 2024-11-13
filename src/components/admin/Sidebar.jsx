@@ -58,7 +58,7 @@ export const Sidebar = () => {
             </>
           )}
 
-          {role === "admin" && (
+          {role === "ADMIN" && (
             <>
               <CustomNavLink href="/userlist" isActive={location.pathname === "/userlist"} className={className}>
                 <span>

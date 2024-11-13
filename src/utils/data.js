@@ -29,6 +29,11 @@ export const menulists = [
     path: "/contact",
     link: "Contact",
   },
+  {
+    id: 7,
+    path: "/seller-hub",
+    link: "Seller Hub",
+  }
 ];
 
 export const categorylists = [

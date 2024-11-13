@@ -32,7 +32,8 @@ import {
   Watchlist,
   Order,
   Shipping,
-  Payment
+  Payment,
+  SellerHubRoute,
 } from "./router/index.js";
 
 function App() {
@@ -259,6 +260,16 @@ function App() {
               }
             />
             <Route
+              path="/seller-hub/*"
+              element={
+                <PrivateRoute allowedRoles={["SELLER"]}>
+                  <Layout>
+                    <SellerHubRoute />
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/*"
               element={
                 <Layout>
@@ -277,7 +288,7 @@ function App() {
             <Route
               path="/profiletest"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Account/>
                   </Layout>
@@ -287,7 +298,7 @@ function App() {
             <Route
               path="/account"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
                     <Account/>
@@ -299,7 +310,7 @@ function App() {
             <Route
               path="/watchlist"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
                     <Watchlist/>
@@ -311,7 +322,7 @@ function App() {
             <Route
               path="/order"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
                     <Order/>
@@ -323,7 +334,7 @@ function App() {
             <Route
               path="/payment-history"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
                     <Payment/>
@@ -335,7 +346,7 @@ function App() {
             <Route
               path="/shipping"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
                     <Shipping/>

@@ -61,11 +61,13 @@ export const Header = () => {
               </div>
               <div className="hidden lg:flex items-center justify-between gap-8">
                 {menulists.map((list) => (
-                  <li key={list.id} className="capitalize list-none">
-                    <CustomNavLinkList href={list.path} isActive={location.pathname === list.path} className={`${isScrolled || (!isHomePage && !isChatPage) ? "text-black" : "text-white"}`}>
-                      {list.link}
-                    </CustomNavLinkList>
-                  </li>
+                  (list.id !== 7 || role === "SELLER") && (
+                    <li key={list.id} className="capitalize list-none">
+                      <CustomNavLinkList href={list.path} isActive={location.pathname === list.path} className={`${isScrolled || (!isHomePage && !isChatPage) ? "text-black" : "text-white"}`}>
+                        {list.link}
+                      </CustomNavLinkList>
+                    </li>
+                  )
                 ))}
               </div>
             </div>
@@ -109,9 +111,11 @@ export const Header = () => {
             {/* Responsive Menu if below 768px */}
             <div ref={menuRef} className={`lg:flex lg:items-center lg:w-auto w-full p-5 absolute right-0 top-full menu-container ${isOpen ? "open" : "closed"}`}>
               {menulists.map((list) => (
-                <li href={list.path} key={list.id} className="uppercase list-none">
-                  <CustomNavLink className="text-white">{list.link}</CustomNavLink>
-                </li>
+                (list.id !== 7 || role === "SELLER") && (
+                  <li href={list.path} key={list.id} className="uppercase list-none">
+                    <CustomNavLink className="text-white">{list.link}</CustomNavLink>
+                  </li>
+                )
               ))}
             </div>
           </nav>
