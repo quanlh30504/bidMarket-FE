@@ -81,10 +81,10 @@ export const Header = () => {
                 )}
                 {role === null ? (
                   <div className="flex items-center gap-8">
-                    <CustomNavLink href="/login" className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
+                    <CustomNavLink href="/auth/login" className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
                       Sign in
                     </CustomNavLink>
-                    <CustomNavLink href="/register" className={`${!isHomePage || isScrolled ? "bg-green" : "bg-white"} px-8 py-2 rounded-full text-primary shadow-md`}>
+                    <CustomNavLink href="/auth/register" className={`${!isHomePage || isScrolled ? "bg-green" : "bg-white"} px-8 py-2 rounded-full text-primary shadow-md`}>
                       Join
                     </CustomNavLink>
                   </div>
@@ -93,7 +93,7 @@ export const Header = () => {
                     <button onClick={() => authService.logout()} className="border rounded-full p-2 px-4 bg-red-500">
                       Logout
                     </button>
-                    <CustomNavLink href="/dashboard">
+                    <CustomNavLink href="/account">
                       <ProfileCard>
                         <img src={User1} alt="" className="w-full h-full object-cover" />
                       </ProfileCard>

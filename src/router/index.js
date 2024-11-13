@@ -50,11 +50,9 @@ export { ChatLayout } from "../components/common/layout/ChatLayout"
 export { useUser } from "../context/UserContext";
 export { useSignup } from "../hooks/useSignup";
 export { useSignin } from "../hooks/useSignin";
+export { useOtpService } from "../hooks/useOtpService";
 
 // Auth Routes
-export { Register } from "../screens/auth/Register";
-export { Login } from "../screens/auth/Login";
-export { LoginAsSeller } from "../screens/auth/LoginAsSeller";
 export { UserProfile } from "../screens/auth/UserProfile";
 
 // SearchList
@@ -96,3 +94,6 @@ export { Watchlist} from "../screens/profile/Watchlist";
 // Services Routes
 export { authService } from "../services/authService";
 export { default as axiosClient } from "../services/axiosClient";
+
+// Combine Routes
+export { AuthRoute } from "../screens/auth/AuthRoute";
