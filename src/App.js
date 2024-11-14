@@ -26,6 +26,7 @@ import {
   UserProvider,
   SearchList,
   SellerHubRoute,
+  AdminRoute,
 } from "./router/index.js";
 
 function App() {
@@ -247,6 +248,16 @@ function App() {
                 <PrivateRoute allowedRoles={["SELLER"]}>
                   <Layout>
                     <SellerHubRoute />
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/*"
+              element={
+                <PrivateRoute allowedRoles={["ADMIN"]}>
+                  <Layout>
+                    <AdminRoute />
                   </Layout>
                 </PrivateRoute>
               }

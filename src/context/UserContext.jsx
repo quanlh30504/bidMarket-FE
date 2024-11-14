@@ -4,7 +4,7 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState({
-    role: 'bidder', // default role
+    role: 'ADMIN', // default role
   });
 
   // const [authToken, setAuthToken] = useState(null);
