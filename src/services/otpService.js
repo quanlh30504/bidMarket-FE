@@ -3,7 +3,7 @@ import axiosClient from "./axiosClient";
 class OtpService {
     async sendOtp(email) {
         try {
-            const response = await axiosClient.post(`/emails/sendOtp/${email}`);
+            const response = await axiosClient.post(`/api/emails/sendOtp/${email}`);
             console.log('response:', response);
             
             if (response.data) {
@@ -17,7 +17,7 @@ class OtpService {
 
     async verifyOtp(otp, email) {
         try {
-            const response = await axiosClient.post(`/emails/register/verifyOtp/${otp}/${email}`);
+            const response = await axiosClient.post(`/api/emails/register/verifyOtp/${otp}/${email}`);
             console.log('response:', response);
 
             if (response.data) {
@@ -31,7 +31,7 @@ class OtpService {
 
     async verifyOtpForgotPassword(otp, email) {
         try {
-            const response = await axiosClient.post(`/emails/forgotPassword/verifyOtp/${otp}/${email}`);
+            const response = await axiosClient.post(`/api/emails/forgotPassword/verifyOtp/${otp}/${email}`);
             console.log('response:', response);
 
             if (response.data) {

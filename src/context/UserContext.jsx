@@ -8,6 +8,7 @@ export const UserProvider = ({ children }) => {
     role: null, // null, 'BIDDER', 'SELLER', 'ADMIN'
     // -> role !== null: user is logged in ('BIDDER', 'SELLER', 'ADMIN')
     // -> role === null: user is not
+    UUID: "5eeea7fb-9adc-11ef-a43a-00155df1c39f" // Dummy UUID
   });
 
   const RoleHandler = {
