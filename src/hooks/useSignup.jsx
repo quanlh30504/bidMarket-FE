@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authService } from '../services/authService';
+import {useNotification} from "../notifications/NotificationContext";
 
 export const useSignup = () => {
   const [formData, setFormData] = useState({
@@ -20,6 +21,7 @@ export const useSignup = () => {
 
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const { createNotification } = useNotification();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target; // get data from input (name, value/files(if it's file input))
@@ -80,6 +82,7 @@ export const useSignup = () => {
 
     try {
       await authService.signup(formData);
+      await createNotification(`Welcome back! You've successfully logged in.`);
       setSuccessMessage('Đăng ký thành công!');
       setError('');
     } catch (error) {

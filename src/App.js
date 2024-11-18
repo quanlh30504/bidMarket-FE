@@ -34,14 +34,18 @@ import {
   Shipping,
   Payment
 } from "./router/index.js";
+import {NotificationProvider} from "./notifications/NotificationContext";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <>
+          <BrowserRouter>
       <UserProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
+            <NotificationProvider>
+            <ScrollToTop />
+            <Routes>
             <Route
               path="/"
               element={
@@ -50,7 +54,7 @@ function App() {
                 </Layout>
               }
             />
-            <Route 
+            <Route
             path="/search"
             element={
               <Layout>
@@ -239,7 +243,7 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={["ADMIN"]}>
                   <Layout>
-                    <DashboardLayout> 
+                    <DashboardLayout>
                       <CreateCategory />
                     </DashboardLayout>
                   </Layout>
@@ -272,7 +276,7 @@ function App() {
                 <Layout>
                   <NotFound />
                 </Layout>
-              } 
+              }
             />
             <Route
               path="/profiletest"
@@ -291,7 +295,7 @@ function App() {
                   <Layout>
                     <Tab>
                     <Account/>
-                    </Tab>              
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
@@ -303,7 +307,7 @@ function App() {
                   <Layout>
                     <Tab>
                     <Watchlist/>
-                    </Tab>              
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
@@ -315,7 +319,7 @@ function App() {
                   <Layout>
                     <Tab>
                     <Order/>
-                    </Tab>              
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
@@ -327,7 +331,7 @@ function App() {
                   <Layout>
                     <Tab>
                     <Payment/>
-                    </Tab>              
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
@@ -339,14 +343,28 @@ function App() {
                   <Layout>
                     <Tab>
                     <Shipping/>
-                    </Tab>              
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
             />
           </Routes>
-        </BrowserRouter>
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={true}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                    style={{ zIndex: 9999 }}
+                />
+            </NotificationProvider>
       </UserProvider>
+          </BrowserRouter>
     </>
   );
 }

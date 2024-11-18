@@ -8,6 +8,7 @@ import { authService, Container, CustomNavLink, CustomNavLinkList, ProfileCard }
 import { User1 } from "../hero/Hero";
 import { menulists } from "../../utils/data";
 import { useUser } from "../../router";
+import {NotificationBell} from "../../notifications/NotificationBell";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -87,19 +88,26 @@ export const Header = () => {
                     </CustomNavLink>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-8">
-                    <button onClick={() => authService.logout()} className="border rounded-full p-2 px-4 bg-red-500">
-                      Logout
-                    </button>
-                    <CustomNavLink href="/dashboard">
-                      <ProfileCard>
-                        <img src={User1} alt="" className="w-full h-full object-cover" />
-                      </ProfileCard>
-                    </CustomNavLink>
-                  </div>
+
+                    <div className="flex items-center gap-8">
+                      <div className="flex items-center gap-4">
+                        {/* Show notification bell only if user is logged in */}
+                        {user.role && <NotificationBell/>}
+                        {/* Other header items */}
+                      </div>
+                      <button onClick={() => authService.logout()} className="border rounded-full p-2 px-4 bg-red-500">
+                        Logout
+                      </button>
+                      <CustomNavLink href="/dashboard">
+                        <ProfileCard>
+                          <img src={User1} alt="" className="w-full h-full object-cover"/>
+                        </ProfileCard>
+                      </CustomNavLink>
+                    </div>
                 )}
               </div>
-              <div className={`icon flex items-center justify-center gap-6 ${isScrolled || (!isHomePage && !isChatPage) ? "text-primary" : "text-white"}`}>
+              <div
+                  className={`icon flex items-center justify-center gap-6 ${isScrolled || (!isHomePage && !isChatPage) ? "text-primary" : "text-white"}`}>
                 <button onClick={toggleMenu} className="lg:hidden w-10 h-10 flex justify-center items-center bg-black text-white focus:outline-none">
                   {isOpen ? <AiOutlineClose size={24} /> : <AiOutlineMenu size={24} />}
                 </button>
