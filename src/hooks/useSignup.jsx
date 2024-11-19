@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authService } from '../services/authService';
+import {useNotification} from "../notifications/NotificationContext";
 
 export const useSignup = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +19,7 @@ export const useSignup = () => {
 
   const [errors, setErrors] = useState({});
   const [isSuccess, setIsSuccess] = useState(false);  
+  const { createNotification } = useNotification();
 
   const validateInput = (name, value) => {
     let error = "";
@@ -121,6 +123,7 @@ export const useSignup = () => {
 
     try {
       await authService.signup(formData);
+      await createNotification(`Welcome back! You've successfully logged in.`);
       setIsSuccess(true);
     } catch (error) {
       console.error(error);

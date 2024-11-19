@@ -33,14 +33,18 @@ import {
   Payment,
   SellerHubRoute,
 } from "./router/index.js";
+import {NotificationProvider} from "./notifications/NotificationContext";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <>
+          <BrowserRouter>
       <UserProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
+            <NotificationProvider>
+            <ScrollToTop />
+            <Routes>
             <Route
               path="/auth/*"
               element={
@@ -336,8 +340,22 @@ function App() {
               }
             />
           </Routes>
-        </BrowserRouter>
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={true}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                    style={{ zIndex: 9999 }}
+                />
+            </NotificationProvider>
       </UserProvider>
+          </BrowserRouter>
     </>
   );
 }
