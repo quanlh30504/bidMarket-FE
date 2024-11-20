@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { NavLink } from "react-router-dom";
 
-const Title = ({ level, children, className }) => {
+const Title = ({ level = 6, children, className }) => {
   const Heading = `h${level}`;
   const classes = `${
     level === 1
@@ -64,9 +64,10 @@ const Container = ({ children, className }) => {
   return <div className={`${className} w-[85%] m-auto`}>{children}</div>;
 };
 
-const PrimaryButton = ({ children, className }) => {
+const PrimaryButton = ({ children, className, disabled }) => {
   return (
-    <button type="submit" className={`${className} text-white bg-green font-medium rounded-full text-lg px-16 py-3 hover:bg-primary transition ease-in-out`}>
+    <button type="submit" className={`${className} text-white bg-green font-medium rounded-full text-lg px-16 py-3 hover:bg-primary transition ease-in-out`}
+     disabled={disabled}>
       {children}
     </button>
   );

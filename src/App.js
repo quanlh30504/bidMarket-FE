@@ -1,8 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import {
-  LoginAsSeller,
-  Register,
-  Login,
+  AuthRoute,
   UserProfile,
   DashboardLayout,
   Layout,
@@ -25,6 +23,14 @@ import {
   PrivateRoute,
   UserProvider,
   SearchList,
+  ChatLayout,
+  Chat,
+  Account,
+  Tab,
+  Watchlist,
+  Order,
+  Shipping,
+  Payment,
   SellerHubRoute,
   AdminRoute,
 } from "./router/index.js";
@@ -37,6 +43,14 @@ function App() {
           <ScrollToTop />
           <Routes>
             <Route
+              path="/auth/*"
+              element={
+                <Layout>
+                  <AuthRoute />
+                </Layout>
+              }
+            />
+            <Route
               path="/"
               element={
                 <Layout>
@@ -44,38 +58,22 @@ function App() {
                 </Layout>
               }
             />
-            <Route 
-            path="/search"
-            element={
-              <Layout>
-                <SearchList />
-              </Layout>
-            }
-          />
             <Route
-              path="/login"
+              path="/search"
               element={
                 <Layout>
-                  <Login />
+                  <SearchList />
                 </Layout>
               }
             />
             <Route
-              path="/seller/login"
+              path="/chat"
               element={
-                <PrivateRoute allowedRoles={["BIDDER", "SELLER", "ADMIN"]}>
-                  <Layout>
-                    <LoginAsSeller />
-                  </Layout>
+                <PrivateRoute allowedRoles={["bidder", "seller", "admin"]}>
+                  <ChatLayout>
+                    <Chat />
+                  </ChatLayout>
                 </PrivateRoute>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <Layout>
-                  <Register />
-                </Layout>
               }
             />
             <Route
@@ -223,7 +221,7 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={["ADMIN"]}>
                   <Layout>
-                    <DashboardLayout> 
+                    <DashboardLayout>
                       <CreateCategory />
                     </DashboardLayout>
                   </Layout>
@@ -276,7 +274,77 @@ function App() {
                 <Layout>
                   <NotFound />
                 </Layout>
-              } 
+              }
+            />
+            <Route
+              path="/profiletest"
+              element={
+                <PrivateRoute allowedRoles={["BIDDER"]}>
+                  <Layout>
+                    <Account />
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/account"
+              element={
+                <PrivateRoute allowedRoles={["BIDDER"]}>
+                  <Layout>
+                    <Tab>
+                      <Account />
+                    </Tab>
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/watchlist"
+              element={
+                <PrivateRoute allowedRoles={["BIDDER"]}>
+                  <Layout>
+                    <Tab>
+                      <Watchlist />
+                    </Tab>
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/order"
+              element={
+                <PrivateRoute allowedRoles={["BIDDER"]}>
+                  <Layout>
+                    <Tab>
+                      <Order />
+                    </Tab>
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/payment-history"
+              element={
+                <PrivateRoute allowedRoles={["BIDDER"]}>
+                  <Layout>
+                    <Tab>
+                      <Payment />
+                    </Tab>
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/shipping"
+              element={
+                <PrivateRoute allowedRoles={["BIDDER"]}>
+                  <Layout>
+                    <Tab>
+                      <Shipping />
+                    </Tab>
+                  </Layout>
+                </PrivateRoute>
+              }
             />
           </Routes>
         </BrowserRouter>

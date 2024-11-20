@@ -1,19 +1,17 @@
 import { Routes, Route } from "react-router-dom";
-import {
-  SellerHub,
-  Listings,
-  Marketing,
-  Orders,
-  Overview,
-  Payments,
-  Performance,
-  Reports,
-  Research,
-  Store,
-  Shipping,
-  CreateProduct,
-  CreateAuction,
-} from "../../router/index.js";
+import { SellerHub } from "./SellerHub";
+import { Overview } from "./sub-pages/Overview";
+import { Orders } from "./sub-pages/Orders";
+import { Listings } from "./sub-pages/Listings";
+import { Marketing } from "./sub-pages/Marketing";
+import { Store } from "./sub-pages/Store";
+import { Shipping } from "./sub-pages/Shipping";
+import { Performance } from "./sub-pages/Performance";
+import { Payments } from "./sub-pages/Payments";
+import { Reports } from "./sub-pages/Reports";
+import { Research } from "./sub-pages/Research";
+import { CreateProduct } from "./sub-pages/CreateProduct";
+import { CreateAuction } from "./sub-pages/CreateAuction";
 
 export const SellerHubRoute = () => {
   return (

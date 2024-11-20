@@ -1,11 +1,24 @@
 import React from "react";
 
-// Chưa làm : Chọn định dạng tiền
+// Chưa làm: Chọn định dạng tiền
 export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
-  const handleChange = (field) => (event) => {
+  const handleChange = (field, parseType = 'string') => (event) => {
+    let value = event.target.value;
+
+    switch (parseType) {
+      case 'number':
+        value = parseFloat(value) || 0; // Chuyển đổi thành số (nếu không hợp lệ sẽ thành 0)
+        break;
+      case 'datetime':
+        value = new Date(value); // Chuyển đổi thành Date
+        break;
+      default:
+        break; // giữ nguyên giá trị chuỗi
+    }
+
     setAuctionSettings((prevSettings) => ({
       ...prevSettings,
-      [field]: event.target.value,
+      [field]: value,
     }));
   };
 
@@ -32,8 +45,8 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
             <td className="px-4 py-2">
               <input
                 type="datetime-local"
-                value={auctionSettings.startTime}
-                onChange={handleChange("startTime")}
+                value={auctionSettings.startTime ? auctionSettings.startTime.toISOString().slice(0, 16) : ''}
+                onChange={handleChange("startTime", 'datetime')}
                 className="border rounded w-full px-2 py-1"
               />
             </td>
@@ -45,8 +58,8 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
             <td className="px-4 py-2">
               <input
                 type="datetime-local"
-                value={auctionSettings.endTime}
-                onChange={handleChange("endTime")}
+                value={auctionSettings.endTime ? auctionSettings.endTime.toISOString().slice(0, 16) : ''}
+                onChange={handleChange("endTime", 'datetime')}
                 className="border rounded w-full px-2 py-1"
               />
             </td>
@@ -57,9 +70,9 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
             </td>
             <td className="px-4 py-2">
               <input
-                type="text"
+                type="number"
                 value={auctionSettings.startPrice}
-                onChange={handleChange("startPrice")}
+                onChange={handleChange("startPrice", 'number')}
                 className="border rounded w-full px-2 py-1"
               />
             </td>
@@ -70,9 +83,9 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
             </td>
             <td className="px-4 py-2">
               <input
-                type="text"
+                type="number"
                 value={auctionSettings.minimumBidIncrement}
-                onChange={handleChange("minimumBidIncrement")}
+                onChange={handleChange("minimumBidIncrement", 'number')}
                 className="border rounded w-full px-2 py-1"
               />
             </td>

@@ -4,7 +4,6 @@ export { NotFound } from "../components/common/NotFound";
 export { WinningBidList } from "../screens/product/WinningBidList";
 export { UserList } from "../admin/UserList";
 export { UserProvider } from "../context/UserContext";
-export { useUser } from "../context/UserContext";
 
 // Home Section
 export { CategoryCard } from "../components/cards/CategoryCard";
@@ -45,40 +44,39 @@ export { Title, Body, Caption, CustomLink, CustomNavLink, Container, PrimaryButt
 // Layout Routes
 export { DashboardLayout } from "../components/common/layout/DashboardLayout";
 export { Layout } from "../components/common/layout/Layout";
+export { ChatLayout } from "../components/common/layout/ChatLayout"
 
 // Hook Routes
+export { useUser } from "../context/UserContext";
+export { useSignup } from "../hooks/useSignup";
+export { useSignin } from "../hooks/useSignin";
+export { useOtpService } from "../hooks/useOtpService";
 
-// Auth Routes
-export { Register } from "../screens/auth/Register";
-export { Login } from "../screens/auth/Login";
-export { LoginAsSeller } from "../screens/auth/LoginAsSeller";
+// Auth Routes ????
 export { UserProfile } from "../screens/auth/UserProfile";
 
 // SearchList
 export {SearchList} from "../screens/search/Search";
 
-
-// Seller Hub Routes
-export { SellerHubRoute } from "../screens/seller-hub/SellerHubRoute";
-export { SellerHub } from "../screens/seller-hub/SellerHub";
-export { Overview } from "../screens/seller-hub/sub-pages/Overview";
-export { Orders } from "../screens/seller-hub/sub-pages/Orders";
-export { Listings } from "../screens/seller-hub/sub-pages/Listings";
-export { Marketing } from "../screens/seller-hub/sub-pages/Marketing";
-export { Payments } from "../screens/seller-hub/sub-pages/Payments";
-export {Performance} from "../screens/seller-hub/sub-pages/Performance";
-export { Reports } from "../screens/seller-hub/sub-pages/Reports";
-export { Research } from "../screens/seller-hub/sub-pages/Research";
-export { Store } from "../screens/seller-hub/sub-pages/Store";
-export { Shipping } from "../screens/seller-hub/sub-pages/Shipping";
-export { CreateProduct } from "../screens/seller-hub/sub-pages/CreateProduct";
-export { CreateAuction } from "../screens/seller-hub/sub-pages/CreateAuction";
-
-
 // Enum Routes
 export { AuctionStatus, ProductStatus, OrderStatus } from "../screens/seller-hub/Enum/StatusType";
 
+// Chat
+export { Chat } from "../screens/chat/Chat";
 
-// Admin Routes
+//Profile
+export { Account } from "../screens/profile/Account";
+export { Tab } from "../screens/profile/Tab";
+export { Order } from "../screens/profile/Order";
+export { Payment } from "../screens/profile/Payment";
+export { Watchlist} from "../screens/profile/Watchlist";
+export { Shipping } from "../screens/profile/Shipping";
+
+// Services Routes
+export { authService } from "../services/authService";
+export { default as axiosClient } from "../services/axiosClient";
+
+// Combine Routes
+export { AuthRoute } from "../screens/auth/AuthRoute";
 export { AdminRoute } from "../screens/admin/AdminRoute";
-
+export { SellerHubRoute } from "../screens/seller-hub/SellerHubRoute";
