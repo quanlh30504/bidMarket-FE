@@ -1,9 +1,23 @@
-import { Title } from "../../router";
+import React, {useState} from "react";
+import { Title, Pagination } from "../../router";
 import { IoIosSearch } from "react-icons/io";
-import { MdOutlineDeleteOutline } from "react-icons/md";
-import { RiAuctionFill } from "react-icons/ri";
+import { orders } from "../../utils/data";
 
 export const Order = () => {
+  const itemsPerPage = 5;
+  const pagesPerGroup = 3; 
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Pagination logic
+  const totalItems = orders.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = orders.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex items-center justify-between gap-4 mb-6">
@@ -15,7 +29,13 @@ export const Order = () => {
       
       <div className="h-px bg-gray-200 my-6" />
       
-      <Table />
+      <Table items={currentItems} />
+      <Pagination
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        pagesPerGroup={pagesPerGroup}
+        onPageChange={handlePageChange}
+      /> 
     </div>
   );
 };
@@ -35,7 +55,7 @@ const SearchBox = () => {
   );
 }
 
-const Table = () => {
+const Table = ({items}) => {
   return (
     <>
       <div className="relative overflow-x-auto rounded-lg">
@@ -63,37 +83,27 @@ const Table = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-white border-b hover:bg-gray-50">
+            {items.map((item, index) => (
+            <tr key = {index} className="bg-white border-b hover:bg-gray-50">
             <td className="px-6 py-4">
-                <img className="w-20 h-20 rounded-md" src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg" alt="Jeseimage" />
+                <img className="w-20 h-20 rounded-md" src={item.image} alt="Item" />
             </td>
-              <td className="px-6 py-4">Couple Wedding Ring</td>
-              <td className="px-6 py-4 text-center">$500</td>
-              <td className="px-6 py-4 text-center text-red-500">19-May-16 20:38:03</td>
+              <td className="px-6 py-4">{item.title}</td>
+              <td className="px-6 py-4 text-center">${item.totalAmount}</td>
+              <td className="px-6 py-4 text-center text-red-500">{item.paymentDueDate}</td>
               <td className="px-6 py-4  text-center">
-                 <div className="inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-red-500 bg-red-500 text-center truncate">Unpaid</div>
+              <div className={`inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white ${ item.status === 'Paid' ? 'border-emerald-600 bg-emerald-600' : 'border-red-500 bg-red-500'} text-center truncate`}>
+                    {item.status}
+              </div>
               </td>
               <td className="px-6 py-4  text-center">
-                 <div className="inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-black border-black-500 text-center truncate">Pay</div>
+                {item.status === "Unpaid" && (
+                  <div className="inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-black border-black-500 text-center truncate">Pay</div>
+                )}    
               </td>
             </tr>
-          </tbody>
-          <tbody>
-            <tr className="bg-white border-b hover:bg-gray-50">
-            <td className="px-6 py-4">
-                <img className="w-20 h-20 rounded-md" src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg" alt="Jeseimage" />
-            </td>
-              <td className="px-6 py-4">Couple Wedding Ring</td>
-              <td className="px-6 py-4 text-center">$500</td>
-              <td className="px-6 py-4 text-center text-red-500">19-May-16 20:38:03</td>
-              <td className="px-6 py-4  text-center">
-                 <div className="inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green text-center truncate">Paid</div>
-              </td>
-              <td className="px-6 py-4  text-center">
-                 <div className=""> </div>
-              </td>
-            </tr>
-          </tbody>
+            ))}
+          </tbody>         
         </table>
       </div>
     </>
