@@ -8,6 +8,7 @@ import { authService, Container, CustomNavLink, CustomNavLinkList, ProfileCard }
 import { User1 } from "../hero/Hero";
 import { menulists } from "../../utils/data";
 import { useUser } from "../../router";
+import {NotificationBell} from "../../notifications/NotificationBell";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,11 +62,13 @@ export const Header = () => {
               </div>
               <div className="hidden lg:flex items-center justify-between gap-8">
                 {menulists.map((list) => (
-                  <li key={list.id} className="capitalize list-none">
-                    <CustomNavLinkList href={list.path} isActive={location.pathname === list.path} className={`${isScrolled || (!isHomePage && !isChatPage) ? "text-black" : "text-white"}`}>
-                      {list.link}
-                    </CustomNavLinkList>
-                  </li>
+                  (list.id !== 7 || role === "SELLER") && (
+                    <li key={list.id} className="capitalize list-none">
+                      <CustomNavLinkList href={list.path} isActive={location.pathname === list.path} className={`${isScrolled || (!isHomePage && !isChatPage) ? "text-black" : "text-white"}`}>
+                        {list.link}
+                      </CustomNavLinkList>
+                    </li>
+                  )
                 ))}
               </div>
             </div>
@@ -79,27 +82,34 @@ export const Header = () => {
                 )}
                 {role === null ? (
                   <div className="flex items-center gap-8">
-                    <CustomNavLink href="/login" className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
+                    <CustomNavLink href="/auth/login" className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
                       Sign in
                     </CustomNavLink>
-                    <CustomNavLink href="/register" className={`${!isHomePage || isScrolled ? "bg-green" : "bg-white"} px-8 py-2 rounded-full text-primary shadow-md`}>
+                    <CustomNavLink href="/auth/register" className={`${!isHomePage || isScrolled ? "bg-green" : "bg-white"} px-8 py-2 rounded-full text-primary shadow-md`}>
                       Join
                     </CustomNavLink>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-8">
-                    <button onClick={() => authService.logout()} className="border rounded-full p-2 px-4 bg-red-500">
-                      Logout
-                    </button>
-                    <CustomNavLink href="/dashboard">
-                      <ProfileCard>
-                        <img src={User1} alt="" className="w-full h-full object-cover" />
-                      </ProfileCard>
-                    </CustomNavLink>
-                  </div>
+
+                    <div className="flex items-center gap-8">
+                      <div className="flex items-center gap-4">
+                        {/* Show notification bell only if user is logged in */}
+                        {user.role && <NotificationBell/>}
+                        {/* Other header items */}
+                      </div>
+                      <button onClick={() => authService.logout()} className="border rounded-full p-2 px-4 bg-red-500">
+                        Logout
+                      </button>
+                      <CustomNavLink href="/account">
+                        <ProfileCard>
+                          <img src={User1} alt="" className="w-full h-full object-cover"/>
+                        </ProfileCard>
+                      </CustomNavLink>
+                    </div>
                 )}
               </div>
-              <div className={`icon flex items-center justify-center gap-6 ${isScrolled || (!isHomePage && !isChatPage) ? "text-primary" : "text-white"}`}>
+              <div
+                  className={`icon flex items-center justify-center gap-6 ${isScrolled || (!isHomePage && !isChatPage) ? "text-primary" : "text-white"}`}>
                 <button onClick={toggleMenu} className="lg:hidden w-10 h-10 flex justify-center items-center bg-black text-white focus:outline-none">
                   {isOpen ? <AiOutlineClose size={24} /> : <AiOutlineMenu size={24} />}
                 </button>
@@ -109,9 +119,11 @@ export const Header = () => {
             {/* Responsive Menu if below 768px */}
             <div ref={menuRef} className={`lg:flex lg:items-center lg:w-auto w-full p-5 absolute right-0 top-full menu-container ${isOpen ? "open" : "closed"}`}>
               {menulists.map((list) => (
-                <li href={list.path} key={list.id} className="uppercase list-none">
-                  <CustomNavLink className="text-white">{list.link}</CustomNavLink>
-                </li>
+                (list.id !== 7 || role === "SELLER") && (
+                  <li href={list.path} key={list.id} className="uppercase list-none">
+                    <CustomNavLink className="text-white">{list.link}</CustomNavLink>
+                  </li>
+                )
               ))}
             </div>
           </nav>

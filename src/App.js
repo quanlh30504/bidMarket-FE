@@ -1,8 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import {
-  LoginAsSeller,
-  Register,
-  Login,
+  AuthRoute,
   UserProfile,
   DashboardLayout,
   Layout,
@@ -32,16 +30,29 @@ import {
   Watchlist,
   Order,
   Shipping,
-  Payment
+  Payment,
+  SellerHubRoute,
 } from "./router/index.js";
+import {NotificationProvider} from "./notifications/NotificationContext";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <>
+          <BrowserRouter>
       <UserProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
+            <NotificationProvider>
+            <ScrollToTop />
+            <Routes>
+            <Route
+              path="/auth/*"
+              element={
+                <Layout>
+                  <AuthRoute />
+                </Layout>
+              }
+            />
             <Route
               path="/"
               element={
@@ -50,37 +61,11 @@ function App() {
                 </Layout>
               }
             />
-            <Route 
-            path="/search"
-            element={
-              <Layout>
-                <SearchList />
-              </Layout>
-            }
-          />
             <Route
-              path="/login"
+              path="/search"
               element={
                 <Layout>
-                  <Login />
-                </Layout>
-              }
-            />
-            <Route
-              path="/seller/login"
-              element={
-                <PrivateRoute allowedRoles={["BIDDER", "SELLER", "ADMIN"]}>
-                  <Layout>
-                    <LoginAsSeller />
-                  </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <Layout>
-                  <Register />
+                  <SearchList />
                 </Layout>
               }
             />
@@ -88,9 +73,9 @@ function App() {
               path="/chat"
               element={
                 <PrivateRoute allowedRoles={["bidder", "seller", "admin"]}>
-                    <ChatLayout>
-                      <Chat />
-                    </ChatLayout>
+                  <ChatLayout>
+                    <Chat />
+                  </ChatLayout>
                 </PrivateRoute>
               }
             />
@@ -239,7 +224,7 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={["ADMIN"]}>
                   <Layout>
-                    <DashboardLayout> 
+                    <DashboardLayout>
                       <CreateCategory />
                     </DashboardLayout>
                   </Layout>
@@ -259,6 +244,16 @@ function App() {
               }
             />
             <Route
+              path="/seller-hub/*"
+              element={
+                <PrivateRoute allowedRoles={["SELLER"]}>
+                  <Layout>
+                    <SellerHubRoute />
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/*"
               element={
                 <Layout>
@@ -272,14 +267,14 @@ function App() {
                 <Layout>
                   <NotFound />
                 </Layout>
-              } 
+              }
             />
             <Route
               path="/profiletest"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
-                    <Account/>
+                    <Account />
                   </Layout>
                 </PrivateRoute>
               }
@@ -290,8 +285,8 @@ function App() {
                 <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
-                    <Account/>
-                    </Tab>              
+                      <Account />
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
@@ -299,11 +294,11 @@ function App() {
             <Route
               path="/watchlist"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
-                    <Watchlist/>
-                    </Tab>              
+                      <Watchlist />
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
@@ -311,11 +306,11 @@ function App() {
             <Route
               path="/order"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
-                    <Order/>
-                    </Tab>              
+                      <Order />
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
@@ -323,11 +318,11 @@ function App() {
             <Route
               path="/payment-history"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
-                    <Payment/>
-                    </Tab>              
+                      <Payment />
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
@@ -335,18 +330,32 @@ function App() {
             <Route
               path="/shipping"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
-                    <Shipping/>
-                    </Tab>              
+                      <Shipping />
+                    </Tab>
                   </Layout>
                 </PrivateRoute>
               }
             />
           </Routes>
-        </BrowserRouter>
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={true}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="light"
+                    style={{ zIndex: 9999 }}
+                />
+            </NotificationProvider>
       </UserProvider>
+          </BrowserRouter>
     </>
   );
 }

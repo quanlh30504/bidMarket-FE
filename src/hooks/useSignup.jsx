@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authService } from '../services/authService';
+import {useNotification} from "../notifications/NotificationContext";
 
 export const useSignup = () => {
   const [formData, setFormData] = useState({
@@ -9,8 +10,6 @@ export const useSignup = () => {
     fullName: '',
     phoneNumber: '',
     role: 'BIDDER',
-
-    // SELLER
     idCard: '',
     frontImage: null,
     backImage: null,
@@ -18,24 +17,73 @@ export const useSignup = () => {
     expirationDate: ''
   });
 
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [errors, setErrors] = useState({});
+  const [isSuccess, setIsSuccess] = useState(false);  
+  const { createNotification } = useNotification();
+
+  const validateInput = (name, value) => {
+    let error = "";
+
+    switch (name) {
+      case 'email':
+        const emailRegex = /\S+@\S+\.\S+/;
+        if (!emailRegex.test(value)) {
+          error = "Invalid email format";
+        }
+        break;
+
+      case 'password':
+        if (value.length < 8) {
+          error = "Password must be at least 8 characters";
+        }
+        break;
+
+      case 'confirmPassword':
+        if (value !== formData.password) {
+          error = "Passwords do not match";
+        }
+        break;
+
+      case 'phoneNumber':
+        const phoneRegex = /^[0-9]{10,12}$/;
+        if (!phoneRegex.test(value)) {
+          error = "Phone number must be between 10 and 12 digits";
+        }
+        break;
+
+      case 'idCard':
+        const idCardRegex = /^[0-9]{9,12}$/;
+        if (!idCardRegex.test(value)) {
+          error = "ID card number must be between 9 and 12 digits";
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: error,
+    }));
+  };
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target; // get data from input (name, value/files(if it's file input))
+    const { name, value, files } = e.target;
 
-    // image
     if (files) {
       setFormData({
         ...formData,
-        [name]: files[0] // only get the first file
+        [name]: files[0],
       });
     } else {
       setFormData({
-        ...formData,  
-        [name]: value
+        ...formData,
+        [name]: value,
       });
     }
+
+    validateInput(name, files ? files[0] : value);
   };
 
   const handleBecomeSellerClick = () => {
@@ -54,46 +102,40 @@ export const useSignup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccessMessage('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Confirm password does not match');
-      setSuccessMessage('');
+    let formIsValid = true;
+    Object.keys(formData).forEach((key) => {
+      validateInput(key, formData[key]);
+      if (errors[key]) {
+        formIsValid = false;
+      }
+    });
+
+    if (!formIsValid) {
+      window.alert('Please fix the errors in the form');
       return;
     }
 
-    // const formDataToSend = new FormData();
-    // formDataToSend.append('email', formData.email);
-    // formDataToSend.append('password', formData.password);
-    // formDataToSend.append('role', formData.role);
-    // formDataToSend.append('fullName', formData.fullName);
-    // formDataToSend.append('phoneNumber', formData.phoneNumber);
-    
-    // if (formData.role === 'SELLER') {
-    //   formDataToSend.append('idCard', formData.idCard);
-    //   formDataToSend.append('issuedDate', formData.issuedDate);
-    //   formDataToSend.append('expirationDate', formData.expirationDate);
-    //   formDataToSend.append('frontImage', formData.frontImage);
-    //   formDataToSend.append('backImage', formData.backImage);
-    // }
+    if (formData.password !== formData.confirmPassword) {
+      window.alert('Password and confirm password do not match!');
+      return;
+    }
 
     try {
       await authService.signup(formData);
-      setSuccessMessage('Đăng ký thành công!');
-      setError('');
+      await createNotification(`Welcome back! You've successfully logged in.`);
+      setIsSuccess(true);
     } catch (error) {
-      setError(error.message || error.toString());
-      setSuccessMessage('');
+      console.error(error);
     }
   };
 
   return {
     formData,
+    errors,
+    isSuccess,
     handleChange,
     handleBecomeSellerClick,
     handleSubmit,
-    error,
-    successMessage,
   };
 };
