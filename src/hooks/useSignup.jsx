@@ -20,6 +20,7 @@ export const useSignup = () => {
   const [errors, setErrors] = useState({});
   const [isSuccess, setIsSuccess] = useState(false);  
   const { showToastNotification } = useNotification();
+  const [loading, setLoading] = useState(false);
 
   const validateInput = (name, value) => {
     let error = "";
@@ -121,12 +122,15 @@ export const useSignup = () => {
       return;
     }
 
+    setLoading(true);
     try {
       await authService.signup(formData);
       await showToastNotification(`Welcome back! You've successfully logged in.`);
       setIsSuccess(true);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,5 +141,6 @@ export const useSignup = () => {
     handleChange,
     handleBecomeSellerClick,
     handleSubmit,
+    loading
   };
 };
