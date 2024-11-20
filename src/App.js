@@ -287,7 +287,7 @@ function App() {
             <Route
               path="/account"
               element={
-                <PrivateRoute allowedRoles={["bidder"]}>
+                <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
                     <Account/>
