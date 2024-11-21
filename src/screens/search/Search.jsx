@@ -48,7 +48,9 @@ export const SearchList = () => {
   
         const response = await axiosClient.get(`/api/auctions/search?${queryString}`);
         setSearchResults(response.data.content);
+        
         setTotalResults(response.data.totalElements);
+        console.log(searchResults)
       } catch (error) {
         console.error("Error fetching search results:", error);
       }
@@ -183,13 +185,14 @@ export const SearchList = () => {
     </div>
   );
 };
-
 const SearchBox = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    onSearch(searchTerm);
+    if (searchTerm.trim()) {
+      onSearch(searchTerm);
+    }
   };
 
   return (
@@ -212,6 +215,7 @@ const SearchBox = ({ onSearch }) => {
     </form>
   );
 };
+
 
 const FilterSection = ({ title, filters, selectedFilters, onFilterToggle }) => (
   <div>

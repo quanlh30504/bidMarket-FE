@@ -19,7 +19,7 @@ export const useSignup = () => {
 
   const [errors, setErrors] = useState({});
   const [isSuccess, setIsSuccess] = useState(false);  
-  const { createNotification } = useNotification();
+  const { showToastNotification } = useNotification();
 
   const validateInput = (name, value) => {
     let error = "";
@@ -111,6 +111,7 @@ export const useSignup = () => {
       }
     });
 
+    console.log(errors)
     if (!formIsValid) {
       window.alert('Please fix the errors in the form');
       return;
@@ -123,7 +124,7 @@ export const useSignup = () => {
 
     try {
       await authService.signup(formData);
-      await createNotification(`Welcome back! You've successfully logged in.`);
+      await showToastNotification(`You've successfully sign up, please insert OTP from your email`);
       setIsSuccess(true);
     } catch (error) {
       console.error(error);
