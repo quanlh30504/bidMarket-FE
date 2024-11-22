@@ -2,35 +2,214 @@ import { Body, Caption, Container, Title } from "../../router";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 import { commonClassNameOfInput } from "../../components/common/Design";
 import { AiOutlinePlus } from "react-icons/ai";
-import { useState } from "react";
-import { MdOutlineFavorite } from "react-icons/md";
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
+import {
+  MdOutlineFavorite,
+  MdFavoriteBorder,
+  MdFavorite,
+} from "react-icons/md";
 import { PrimaryButton } from "../../components/common/Design";
 import { FaCheckCircle } from "react-icons/fa";
+import axiosClient from "../../services/axiosClient";
+import ProductImages from "./ProductImages";
+import { authUtils } from "../../utils/authUtils";
+import { LoginRequire } from "../../components/common/LoginRequire";
 
 export const ProductsDetailsPage = () => {
-  const [activeTab, setActiveTab] = useState("description");
+  const { id } = useParams(); // Lấy id từ URL
 
+  const [activeTab, setActiveTab] = useState("description");
+  const [auction, setAuction] = useState(null); // Trạng thái lưu thông tin sản phẩm
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [loading, setLoading] = useState(true); // Trạng thái loading
+  const [error, setError] = useState(null); // Trạng thái lỗi
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [watchlistId, setWatchlistId] = useState("");
+  const [isHovered, setIsHovered] = useState(false); // Trạng thái hover
+  const [showLoginModal, setShowLoginModal] = useState(false); // Trạng thái modal đăng nhập
+
+  function formatTime(dateString) {
+    const date = new Date(dateString);
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    // Lấy các thành phần của ngày giờ
+    const month = months[date.getMonth()]; // Lấy tên tháng
+    const day = date.getDate(); // Lấy ngày
+    const year = date.getFullYear(); // Lấy năm
+
+    // Lấy giờ và định dạng am/pm
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0"); // Lấy phút (thêm 0 nếu cần)
+    const ampm = hours >= 12 ? "pm" : "am"; // Xác định am/pm
+    hours = hours % 12 || 12; // Đổi giờ về dạng 12 giờ (1-12)
+
+    return `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
+  }
+
+  const fetchProductDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await axiosClient.get(`/api/auctions/${id}`);
+      setAuction(data);
+    } catch (err) {
+      setError("Failed to fetch auction details.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  const fetchWatchlistStatus = useCallback(async () => {
+    if (!authUtils.isAuthenticated) return;
+    try {
+      const { data } = await axiosClient.get(`/api/watchlist/getWatchlist`, {
+        params: {
+          userId: authUtils.getCurrentUserId(),
+          auctionId: id,
+        },
+      });
+      setIsInWatchlist(!!data);
+      setWatchlistId(data || "");
+    } catch (err) {
+      console.error("Error fetching watchlist status:", err);
+    }
+  }, [authUtils.isAuthenticated(), id]);
+
+  useEffect(() => {
+    fetchProductDetails();
+    fetchWatchlistStatus();
+  }, [fetchProductDetails, fetchWatchlistStatus]);
+
+  useEffect(() => {
+    if (auction?.endTime) {
+      const interval = setInterval(() => {
+        const difference = new Date(auction.endTime) - new Date();
+        setTimeLeft(
+          difference > 0
+            ? {
+                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                minutes: Math.floor((difference / (1000 * 60)) % 60),
+                seconds: Math.floor((difference / 1000) % 60),
+              }
+            : null
+        );
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [auction?.endTime]);
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
+
+  const addToWatchlist = async () => {
+    try {
+      const response = await axiosClient.post(`/api/watchlist/add`, null, {
+        params: {
+          userId: authUtils.getCurrentUserId(),
+          auctionId: auction.id,
+        },
+      });
+      setIsInWatchlist(true);
+      setWatchlistId(response.data.id);
+    } catch (error) {
+      console.error("Lỗi khi thêm vào Watchlist:", error);
+      alert("Không thể thêm vào Watchlist. Vui lòng thử lại sau.");
+    }
+  };
+
+  const removeFromWatchlist = async () => {
+    try {
+      await axiosClient.delete(`/api/watchlist/remove/${watchlistId}`);
+      setIsInWatchlist(false);
+    } catch (error) {
+      console.error("Lỗi khi xóa khỏi Watchlist:", error);
+      alert("Không thể xóa khỏi Watchlist. Vui lòng thử lại sau.");
+    }
+  };
+
+  const handleWatchlistClick = () => {
+    if (!authUtils.isAuthenticated()) {
+      // Nếu chưa đăng nhập, hiển thị modal
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (isInWatchlist) {
+      removeFromWatchlist();
+    } else {
+      addToWatchlist();
+    }
+  };
+
   return (
     <>
       <section className="pt-24 px-8">
         <Container>
           <div className="flex justify-between gap-8">
             <div className="w-1/2">
-              <div className="h-[70vh]">
-                <img src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg" alt="" className="w-full h-full object-cover rounded-xl" />
-              </div>
+              {auction && (
+                <ProductImages images={auction.productDto.productImages} />
+              )}
               <div className="flex justify-center">
-              <PrimaryButton className=" rounded-lg px-5 py-3 mt-4 flex items-center">
-              <MdOutlineFavorite className="mr-2" size={20} /> Add to watchlist
-            </PrimaryButton>
-            </div>
+                <PrimaryButton
+                  onClick={handleWatchlistClick}
+                  className={`${
+                    isInWatchlist
+                      ? "bg-green-500 hover:bg-red-500"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  } rounded-lg px-5 py-3 mt-4 flex items-center`}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                >
+                  {isInWatchlist ? (
+                    <>
+                      {isHovered ? (
+                        <>
+                          <MdFavoriteBorder className="mr-2" size={20} />
+                          Unwatch
+                        </>
+                      ) : (
+                        <>
+                          <MdFavorite className="mr-2" size={20} />
+                          Watching
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <MdOutlineFavorite className="mr-2" size={20} />
+                      Add to Watchlist
+                    </>
+                  )}
+                </PrimaryButton>
+                {/* Modal đăng nhập */}
+                {showLoginModal && (
+                  <LoginRequire
+                    onClose={() => setShowLoginModal(false)}
+                    onLogin={() => (window.location.href = "/auth/login")}
+                    content={"Log in to use the add to Watchlist feature."}
+                  />
+                )}
+              </div>
             </div>
             <div className="w-1/2">
               <Title level={2} className="capitalize">
-                Couple Wedding Ring
+                {auction?.title}
               </Title>
               <div className="flex gap-5">
                 <div className="flex text-green ">
@@ -43,7 +222,11 @@ export const ProductsDetailsPage = () => {
                 <Caption>(2 customer reviews)</Caption>
               </div>
               <br />
-              <Body>Korem ipsum dolor amet, consectetur adipiscing elit. Maece nas in pulvinar neque. Nulla finibus lobortis pulvinar. Donec a consectetur nulla.</Body>
+              <Body>
+                Korem ipsum dolor amet, consectetur adipiscing elit. Maece nas
+                in pulvinar neque. Nulla finibus lobortis pulvinar. Donec a
+                consectetur nulla.
+              </Body>
               <br />
               <Caption>Item condition: New</Caption>
               <br />
@@ -52,44 +235,63 @@ export const ProductsDetailsPage = () => {
               <Caption>Time left:</Caption>
               <br />
               <div className="flex gap-8 text-center">
-                <div className="p-5 px-10 shadow-s1">
-                  <Title level={4}>149</Title>
-                  <Caption>Days</Caption>
-                </div>
-                <div className="p-5 px-10 shadow-s1">
-                  <Title level={4}>12</Title>
-                  <Caption>Hours</Caption>
-                </div>
-                <div className="p-5 px-10 shadow-s1">
-                  <Title level={4}>36</Title>
-                  <Caption>Minutes</Caption>
-                </div>
-                <div className="p-5 px-10 shadow-s1">
-                  <Title level={4}>51</Title>
-                  <Caption>Seconds</Caption>
-                </div>
+                {timeLeft ? (
+                  <>
+                    <div className="p-5 px-10 shadow-s1">
+                      <Title level={4}>{timeLeft.days}</Title>
+                      <Caption>Days</Caption>
+                    </div>
+                    <div className="p-5 px-10 shadow-s1">
+                      <Title level={4}>{timeLeft.hours}</Title>
+                      <Caption>Hours</Caption>
+                    </div>
+                    <div className="p-5 px-10 shadow-s1">
+                      <Title level={4}>{timeLeft.minutes}</Title>
+                      <Caption>Minutes</Caption>
+                    </div>
+                    <div className="p-5 px-10 shadow-s1">
+                      <Title level={4}>{timeLeft.seconds}</Title>
+                      <Caption>Seconds</Caption>
+                    </div>
+                  </>
+                ) : (
+                  <div>Auction ended</div>
+                )}
               </div>
               <br />
               <Title className="flex items-center gap-2">
                 Auction ends:
-                <Caption>December 31, 2024 12:00 am</Caption>
+                <Caption>{formatTime(auction?.endTime)}</Caption>
               </Title>
               <Title className="flex items-center gap-2 my-5">
                 Timezone: <Caption>UTC 0</Caption>
               </Title>
               <Title className="flex items-center gap-2 my-5">
-                Price:<Caption>$200 </Caption>
+                Start Price:<Caption>${auction?.startingPrice} </Caption>
               </Title>
               <Title className="flex items-center gap-2">
-                Current bid:<Caption className="text-3xl">$500 </Caption>
+                Current bid:
+                <Caption className="text-3xl">
+                  ${auction?.currentPrice}{" "}
+                </Caption>
               </Title>
               <div className="p-5 px-10 shadow-s3 py-8">
                 <form className="flex gap-3 justify-between">
-                  <input className={commonClassNameOfInput} type="number" name="price" />
-                  <button type="button" className="bg-gray-100 rounded-md px-5 py-3">
+                  <input
+                    className={commonClassNameOfInput}
+                    type="number"
+                    name="price"
+                  />
+                  <button
+                    type="button"
+                    className="bg-gray-100 rounded-md px-5 py-3"
+                  >
                     <AiOutlinePlus />
                   </button>
-                  <button type="submit" className={`py-3 px-8 rounded-lg ${"bg-gray-400 text-gray-700 cursor-not-allowed"}`}>
+                  <button
+                    type="submit"
+                    className={`py-3 px-8 rounded-lg ${"bg-gray-400 text-gray-700 cursor-not-allowed"}`}
+                  >
                     Submit
                   </button>
                 </form>
@@ -98,16 +300,42 @@ export const ProductsDetailsPage = () => {
           </div>
           <div className="details mt-8">
             <div className="flex items-center gap-5">
-              <button className={`rounded-md px-10 py-4 text-black shadow-s3 ${activeTab === "description" ? "bg-green text-white" : "bg-white"}`} onClick={() => handleTabClick("description")}>
+              <button
+                className={`rounded-md px-10 py-4 text-black shadow-s3 ${
+                  activeTab === "description"
+                    ? "bg-green text-white"
+                    : "bg-white"
+                }`}
+                onClick={() => handleTabClick("description")}
+              >
                 Description
               </button>
-              <button className={`rounded-md px-10 py-4 text-black shadow-s3 ${activeTab === "auctionHistory" ? "bg-green text-white" : "bg-white"}`} onClick={() => handleTabClick("auctionHistory")}>
+              <button
+                className={`rounded-md px-10 py-4 text-black shadow-s3 ${
+                  activeTab === "auctionHistory"
+                    ? "bg-green text-white"
+                    : "bg-white"
+                }`}
+                onClick={() => handleTabClick("auctionHistory")}
+              >
                 Auction History
               </button>
-              <button className={`rounded-md px-10 py-4 text-black shadow-s3 ${activeTab === "reviews" ? "bg-green text-white" : "bg-white"}`} onClick={() => handleTabClick("reviews")}>
+              <button
+                className={`rounded-md px-10 py-4 text-black shadow-s3 ${
+                  activeTab === "reviews" ? "bg-green text-white" : "bg-white"
+                }`}
+                onClick={() => handleTabClick("reviews")}
+              >
                 Reviews(2)
               </button>
-              <button className={`rounded-md px-10 py-4 text-black shadow-s3 ${activeTab === "moreProducts" ? "bg-green text-white" : "bg-white"}`} onClick={() => handleTabClick("moreProducts")}>
+              <button
+                className={`rounded-md px-10 py-4 text-black shadow-s3 ${
+                  activeTab === "moreProducts"
+                    ? "bg-green text-white"
+                    : "bg-white"
+                }`}
+                onClick={() => handleTabClick("moreProducts")}
+              >
                 More Products
               </button>
             </div>
@@ -118,14 +346,24 @@ export const ProductsDetailsPage = () => {
                   <Title level={4}>Description</Title>
                   <br />
                   <Caption className="leading-7">
-                    If you’ve been following the crypto space, you’ve likely heard of Non-Fungible Tokens (Biddings), more popularly referred to as ‘Crypto Collectibles.’ The world of Biddings is
-                    growing rapidly. It seems there is no slowing down of these assets as they continue to go up in price. This growth comes with the opportunity for people to start new businesses to
-                    create and capture value. The market is open for players in every kind of field. Are you a collector.
+                    If you’ve been following the crypto space, you’ve likely
+                    heard of Non-Fungible Tokens (Biddings), more popularly
+                    referred to as ‘Crypto Collectibles.’ The world of Biddings
+                    is growing rapidly. It seems there is no slowing down of
+                    these assets as they continue to go up in price. This growth
+                    comes with the opportunity for people to start new
+                    businesses to create and capture value. The market is open
+                    for players in every kind of field. Are you a collector.
                   </Caption>
                   <Caption className="leading-7">
-                    If you’ve been following the crypto space, you’ve likely heard of Non-Fungible Tokens (Biddings), more popularly referred to as ‘Crypto Collectibles.’ The world of Biddings is
-                    growing rapidly. It seems there is no slowing down of these assets as they continue to go up in price. This growth comes with the opportunity for people to start new businesses to
-                    create and capture value. The market is open for players in every kind of field. Are you a collector.
+                    If you’ve been following the crypto space, you’ve likely
+                    heard of Non-Fungible Tokens (Biddings), more popularly
+                    referred to as ‘Crypto Collectibles.’ The world of Biddings
+                    is growing rapidly. It seems there is no slowing down of
+                    these assets as they continue to go up in price. This growth
+                    comes with the opportunity for people to start new
+                    businesses to create and capture value. The market is open
+                    for players in every kind of field. Are you a collector.
                   </Caption>
                   <br />
                   <Title level={4}>Product Overview</Title>
@@ -178,7 +416,11 @@ export const ProductsDetailsPage = () => {
                     </div>
                     <div className="w-1/2">
                       <div className="h-[60vh] p-2 bg-green rounded-xl">
-                        <img src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg" alt="" className="w-full h-full object-cover rounded-xl" />
+                        <img
+                          src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg"
+                          alt=""
+                          className="w-full h-full object-cover rounded-xl"
+                        />
                       </div>
                     </div>
                   </div>
@@ -208,6 +450,21 @@ export const ProductsDetailsPage = () => {
     </>
   );
 };
+const CountdownTimer = ({ timeLeft }) => (
+  <div className="flex gap-8 text-center">
+    {timeLeft ? (
+      ["days", "hours", "minutes", "seconds"].map((unit) => (
+        <div key={unit} className="p-5 px-10 shadow-s1">
+          <Title level={4}>{timeLeft[unit]}</Title>
+          <Caption>{unit.charAt(0).toUpperCase() + unit.slice(1)}</Caption>
+        </div>
+      ))
+    ) : (
+      <div>Auction ended</div>
+    )}
+  </div>
+);
+
 export const AuctionHistory = () => {
   return (
     <>
@@ -216,8 +473,8 @@ export const AuctionHistory = () => {
           Auction History
         </Title>
         <Caption className="flex item-centers mt-4">
-            <FaCheckCircle className="font-medium text-green mr-2" size={25} />
-           toasthall, you are the winner! 
+          <FaCheckCircle className="font-medium text-green mr-2" size={25} />
+          toasthall, you are the winner!
         </Caption>
         <hr className="my-5" />
 
@@ -255,13 +512,12 @@ export const AuctionHistory = () => {
             </tbody>
           </table>
         </div>
-        
       </div>
       <div className="shadow-s1 p-8 rounded-lg mt-5">
-      <Title level={5} className=" font-normal">
+        <Title level={5} className=" font-normal">
           Bid retraction and cancellation history
         </Title>
-      <div className="relative overflow-x-auto rounded-lg">
+        <div className="relative overflow-x-auto rounded-lg">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-100">
               <tr>
@@ -273,8 +529,8 @@ export const AuctionHistory = () => {
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Date of Bid and Retraction
-                </th>    
-                <th></th>           
+                </th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -282,16 +538,19 @@ export const AuctionHistory = () => {
                 <td className="px-6 py-4 text-blue-500">toasthall</td>
                 <td className="px-6 py-4 text-red-500"> Retracted: $200</td>
                 <td className="px-6 py-4">
-                  <span className="font-bold">Bid:</span> 18-May-16 20:57:23 
-                  <br/>
-                  <span className="font-bold">Retracted:</span> 18-May-16 20:57:23
+                  <span className="font-bold">Bid:</span> 18-May-16 20:57:23
+                  <br />
+                  <span className="font-bold">Retracted:</span> 18-May-16
+                  20:57:23
                 </td>
                 <td className="px-6 py-4"></td>
               </tr>
             </tbody>
           </table>
         </div>
-        </div>
+      </div>
     </>
   );
 };
+
+

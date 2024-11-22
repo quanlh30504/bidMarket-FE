@@ -15,9 +15,12 @@ export const ProductCard = ({ item }) => {
   const now = new Date();
   const endTime = new Date(item.endTime);
   const timeLeft = Math.max(0, endTime - now); // Thời gian còn lại (ms)
-  const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
+
+  // Nếu thời gian đã hết, tất cả giá trị đặt về 0
+  const isTimeOver = timeLeft <= 0;
+  const days = isTimeOver ? 0 : Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+  const hours = isTimeOver ? 0 : Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+  const minutes = isTimeOver ? 0 : Math.floor((timeLeft / (1000 * 60)) % 60);
 
   return (
     <div className="bg-white shadow-s1 rounded-xl p-3">
@@ -37,12 +40,18 @@ export const ProductCard = ({ item }) => {
           <div className="flex items-center justify-between">
             <Caption
               className={`px-3 py-1 text-sm rounded-full ${
-                product.productStatus === "ACTIVE"
-                  ? "text-green bg-green_100"
-                  : "text-red-500 bg-white"
+                {
+                  PENDING: "text-gray-700 bg-yellow-400",
+                  READY: "text-blue-700 bg-blue-200",
+                  OPEN: "text-white bg-green",
+                  CLOSED: "text-gray-700 bg-gray-200",
+                  CANCELED: "text-red-700 bg-red-200",
+                  COMPLETED: "text-blue-500 bg-slate-200",
+                  EXTENDED: "text-orange-700 bg-orange-200",
+                }[item.status] || "text-black bg-white" // Mặc định nếu status không khớp
               }`}
             >
-              {product.productStatus}
+              {item.status}
             </Caption>
             <Caption className="text-green bg-green_100 px-3 py-1 text-sm rounded-full">
               {item.bidCount} Bids
@@ -79,7 +88,9 @@ export const ProductCard = ({ item }) => {
         <hr className="mb-3" />
 
         <div className="flex items-center justify-between mt-3">
-          <PrimaryButton className="rounded-lg text-sm">Place Bid</PrimaryButton>
+          <PrimaryButton className="rounded-lg text-sm">
+            Place Bid
+          </PrimaryButton>
           <PrimaryButton className="rounded-lg px-4 py-3">
             <MdOutlineFavorite size={20} />
           </PrimaryButton>

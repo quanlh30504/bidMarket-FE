@@ -30,8 +30,10 @@ export const SearchList = () => {
       try {
         // Chuyển đổi filters.categoryType thành chuỗi phù hợp
 
-        const categoryType = filters.categoryType.map((item) => categoryMapping[item]).join(",");
-  
+        const categoryType = filters.categoryType
+          .map((item) => categoryMapping[item])
+          .join(",");
+
         const params = {
           ...filters,
           categoryType,
@@ -39,23 +41,26 @@ export const SearchList = () => {
           page: pagination.page - 1, // Adjust for zero-based pagination
           size: pagination.size,
         };
-  
+
         // Tạo URL với encoding
         const queryString = Object.keys(params)
           .filter((key) => params[key] !== null && params[key] !== "") // Bỏ qua null hoặc rỗng
           .map((key) => `${key}=${encodeURIComponent(params[key])}`)
           .join("&");
-  
-        const response = await axiosClient.get(`/api/auctions/search?${queryString}`);
+        console.log("queryString: " + queryString);
+
+        const response = await axiosClient.get(
+          `/api/auctions/search?${queryString}`
+        );
         setSearchResults(response.data.content);
-        
+
         setTotalResults(response.data.totalElements);
-        console.log(searchResults)
+        console.log(searchResults);
       } catch (error) {
         console.error("Error fetching search results:", error);
       }
     };
-  
+
     fetchSearchResults();
   }, [filters, pagination]);
 
@@ -64,6 +69,16 @@ export const SearchList = () => {
       ...prev,
       [key]: value,
     }));
+  };
+
+  const toggleStatusFilter = (status) => {
+    setFilters((prev) => {
+      const normalizedStatus = status.toUpperCase(); // Chuyển thành chữ in hoa
+      return {
+        ...prev,
+        status: prev.status === normalizedStatus ? "" : normalizedStatus, // Hủy chọn nếu nhấn lại
+      };
+    });
   };
 
   const toggleFilter = (filter) => {
@@ -125,7 +140,8 @@ export const SearchList = () => {
                   title="Status"
                   filters={status}
                   selectedFilters={[filters.status]}
-                  onFilterToggle={(status) => handleSearch("status", status)}
+                  onFilterToggle={toggleStatusFilter}
+                  isSingleSelection={true} // Chỉ cho phép chọn một
                 />
 
                 {/* Price */}
@@ -176,7 +192,9 @@ export const SearchList = () => {
                 totalItems={totalResults}
                 itemsPerPage={pagination.size}
                 pagesPerGroup={3}
-                onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+                onPageChange={(page) =>
+                  setPagination((prev) => ({ ...prev, page }))
+                }
               />
             </div>
           </div>
@@ -216,24 +234,60 @@ const SearchBox = ({ onSearch }) => {
   );
 };
 
-
-const FilterSection = ({ title, filters, selectedFilters, onFilterToggle }) => (
+// const FilterSection = ({ title, filters, selectedFilters, onFilterToggle }) => (
+//   <div>
+//     <h3 className="text-lg font-semibold mb-4">{title}</h3>
+//     <div>
+//       {filters.map((filter) => (
+//         <div key={filter}>
+//           <a
+//             onClick={(e) => {
+//               e.preventDefault();
+//               onFilterToggle(filter);
+//             }}
+//             className={`text-[15px] font-[500] text-gray_100 cursor-pointer list-none hover:text-green transition-all ease-in-out ${
+//               selectedFilters.includes(filter) ? "text-green" : ""
+//             }`}
+//           >
+//             {filter}
+//           </a>
+//         </div>
+//       ))}
+//     </div>
+//     <div className="h-px bg-gray-200 my-6" />
+//   </div>
+// );
+const FilterSection = ({
+  title,
+  filters,
+  selectedFilters,
+  onFilterToggle,
+  isSingleSelection,
+}) => (
   <div>
     <h3 className="text-lg font-semibold mb-4">{title}</h3>
     <div>
       {filters.map((filter) => (
-        <div key={filter}>
-          <a
-            onClick={(e) => {
-              e.preventDefault();
-              onFilterToggle(filter);
-            }}
-            className={`text-[15px] font-[500] text-gray_100 cursor-pointer list-none hover:text-green transition-all ease-in-out ${
+        <div key={filter} className="flex items-center mb-2">
+          <input
+            type="checkbox"
+            id={filter}
+            checked={selectedFilters.includes(filter)}
+            onChange={() => onFilterToggle(filter)}
+            disabled={
+              isSingleSelection &&
+              selectedFilters[0] !== filter &&
+              selectedFilters.length > 0
+            }
+          />
+          <label
+            htmlFor={filter}
+            className={`ml-2 text-[15px] font-[500] text-gray_100 cursor-pointer ${
               selectedFilters.includes(filter) ? "text-green" : ""
             }`}
           >
             {filter}
-          </a>
+          </label>
         </div>
       ))}
     </div>
