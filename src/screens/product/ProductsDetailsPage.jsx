@@ -1,7 +1,6 @@
 import { Body, Caption, Container, Title } from "../../router";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 import { commonClassNameOfInput } from "../../components/common/Design";
-import { AiOutlinePlus } from "react-icons/ai";
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -15,6 +14,7 @@ import axiosClient from "../../services/axiosClient";
 import ProductImages from "./ProductImages";
 import { authUtils } from "../../utils/authUtils";
 import { LoginRequire } from "../../components/common/LoginRequire";
+import { Pagination } from "../../components/pagination";
 
 export const ProductsDetailsPage = () => {
   const { id } = useParams(); // Lấy id từ URL
@@ -28,6 +28,8 @@ export const ProductsDetailsPage = () => {
   const [watchlistId, setWatchlistId] = useState("");
   const [isHovered, setIsHovered] = useState(false); // Trạng thái hover
   const [showLoginModal, setShowLoginModal] = useState(false); // Trạng thái modal đăng nhập
+  const [bidAmount, setBidAmount] = useState(""); // Track the bid amount
+  const [isSubmittingBid, setIsSubmittingBid] = useState(false);
 
   function formatTime(dateString) {
     const date = new Date(dateString);
@@ -156,6 +158,38 @@ export const ProductsDetailsPage = () => {
     }
   };
 
+  const placeBid = async () => {
+    if (!authUtils.isAuthenticated()) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (bidAmount - auction?.currentPrice < auction?.minimumBidIncrement) {
+      alert(
+        "Your bid must be higher than the current bid at least $" +
+          auction?.minimumBidIncrement
+      );
+      return;
+    }
+
+    try {
+      setIsSubmittingBid(true);
+      const userId = authUtils.getCurrentUserId();
+      await axiosClient.post("/api/bids", {
+        userId,
+        auctionId: auction.id,
+        bidAmount,
+      });
+      alert("Bid placed successfully!");
+      fetchProductDetails(); 
+    } catch (error) {
+      console.error("Error placing bid:", error);
+      alert("Failed to place the bid. Please try again.");
+    } finally {
+      setIsSubmittingBid(false);
+    }
+  };
+
   return (
     <>
       <section className="pt-24 px-8">
@@ -202,7 +236,7 @@ export const ProductsDetailsPage = () => {
                   <LoginRequire
                     onClose={() => setShowLoginModal(false)}
                     onLogin={() => (window.location.href = "/auth/login")}
-                    content={"Log in to use the add to Watchlist feature."}
+                    content={"Log in to use the feature"}
                   />
                 )}
               </div>
@@ -264,37 +298,39 @@ export const ProductsDetailsPage = () => {
                 <Caption>{formatTime(auction?.endTime)}</Caption>
               </Title>
               <Title className="flex items-center gap-2 my-5">
-                Timezone: <Caption>UTC 0</Caption>
+                Minimum bid increment:
+                <Caption className="text-3xl">
+                  US ${auction?.minimumBidIncrement}{" "}
+                </Caption>
               </Title>
               <Title className="flex items-center gap-2 my-5">
-                Start Price:<Caption>${auction?.startingPrice} </Caption>
+                Start Price:<Caption>US ${auction?.startingPrice} </Caption>
               </Title>
               <Title className="flex items-center gap-2">
                 Current bid:
                 <Caption className="text-3xl">
-                  ${auction?.currentPrice}{" "}
+                  US ${auction?.currentPrice}{" "}
                 </Caption>
               </Title>
-              <div className="p-5 px-10 shadow-s3 py-8">
-                <form className="flex gap-3 justify-between">
-                  <input
-                    className={commonClassNameOfInput}
-                    type="number"
-                    name="price"
-                  />
-                  <button
-                    type="button"
-                    className="bg-gray-100 rounded-md px-5 py-3"
-                  >
-                    <AiOutlinePlus />
-                  </button>
-                  <button
-                    type="submit"
-                    className={`py-3 px-8 rounded-lg ${"bg-gray-400 text-gray-700 cursor-not-allowed"}`}
-                  >
-                    Submit
-                  </button>
-                </form>
+              <div className="mt-6 flex items-center gap-4">
+                <input
+                  type="number"
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(e.target.value)}
+                  placeholder="Enter your bid"
+                  className={`${commonClassNameOfInput} w-1/3`} // Ensuring input has width
+                />
+                <PrimaryButton
+                  onClick={placeBid}
+                  disabled={isSubmittingBid}
+                  className={`${
+                    isSubmittingBid || bidAmount - auction?.currentPrice < auction?.minimumBidIncrement
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  } text-white rounded-lg w-1/3`}
+                >
+                  {isSubmittingBid ? "Placing..." : "Place"}
+                </PrimaryButton>
               </div>
             </div>
           </div>
@@ -426,7 +462,7 @@ export const ProductsDetailsPage = () => {
                   </div>
                 </div>
               )}
-              {activeTab === "auctionHistory" && <AuctionHistory />}
+              {activeTab === "auctionHistory" && <AuctionHistory auctionId={auction.id} currentUserId={authUtils.getCurrentUserId()} winnerName={""} />}
               {activeTab === "reviews" && (
                 <div className="reviews-tab shadow-s3 p-8 rounded-md">
                   <Title level={5} className=" font-normal">
@@ -450,107 +486,253 @@ export const ProductsDetailsPage = () => {
     </>
   );
 };
-const CountdownTimer = ({ timeLeft }) => (
-  <div className="flex gap-8 text-center">
-    {timeLeft ? (
-      ["days", "hours", "minutes", "seconds"].map((unit) => (
-        <div key={unit} className="p-5 px-10 shadow-s1">
-          <Title level={4}>{timeLeft[unit]}</Title>
-          <Caption>{unit.charAt(0).toUpperCase() + unit.slice(1)}</Caption>
-        </div>
-      ))
-    ) : (
-      <div>Auction ended</div>
-    )}
-  </div>
-);
 
-export const AuctionHistory = () => {
+// export const AuctionHistory = () => {
+//   return (
+//     <>
+//       <div className="shadow-s1 p-8 rounded-lg">
+//         <Title level={5} className=" font-normal">
+//           Auction History
+//         </Title>
+//         <Caption className="flex item-centers mt-4">
+//           <FaCheckCircle className="font-medium text-green mr-2" size={25} />
+//           toasthall, you are the winner!
+//         </Caption>
+//         <hr className="my-5" />
+
+//         <div className="relative overflow-x-auto rounded-lg">
+//           <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+//             <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+//               <tr>
+//                 <th scope="col" className="px-6 py-5">
+//                   Bidder
+//                 </th>
+//                 <th scope="col" className="px-6 py-3">
+//                   Bid Amount
+//                 </th>
+//                 <th scope="col" className="px-6 py-3">
+//                   Bid Time
+//                 </th>
+//                 <th scope="col" className="px-6 py-3">
+//                   Action
+//                 </th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               <tr className="bg-white border-b hover:bg-gray-50">
+//                 <td className="px-6 py-4 text-blue-500">toasthall</td>
+//                 <td className="px-6 py-4">$200</td>
+//                 <td className="px-6 py-4">18-May-16 20:57:23</td>
+//                 <td className="px-6 py-4"></td>
+//               </tr>
+//               <tr className="bg-white border-b hover:bg-gray-50">
+//                 <td className="px-6 py-4">Starting Price</td>
+//                 <td className="px-6 py-4">$2</td>
+//                 <td className="px-6 py-4">12-May-16 20:57:23</td>
+//                 <td className="px-6 py-4"></td>
+//               </tr>
+//             </tbody>
+//           </table>
+//         </div>
+//       </div>
+//       <div className="shadow-s1 p-8 rounded-lg mt-5">
+//         <Title level={5} className=" font-normal">
+//           Bid retraction and cancellation history
+//         </Title>
+//         <div className="relative overflow-x-auto rounded-lg">
+//           <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+//             <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+//               <tr>
+//                 <th scope="col" className="px-6 py-5">
+//                   Bidder
+//                 </th>
+//                 <th scope="col" className="px-6 py-3">
+//                   Action
+//                 </th>
+//                 <th scope="col" className="px-6 py-3">
+//                   Date of Bid and Retraction
+//                 </th>
+//                 <th></th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               <tr className="bg-white border-b hover:bg-gray-50">
+//                 <td className="px-6 py-4 text-blue-500">toasthall</td>
+//                 <td className="px-6 py-4 text-red-500"> Retracted: $200</td>
+//                 <td className="px-6 py-4">
+//                   <span className="font-bold">Bid:</span> 18-May-16 20:57:23
+//                   <br />
+//                   <span className="font-bold">Retracted:</span> 18-May-16
+//                   20:57:23
+//                 </td>
+//                 <td className="px-6 py-4"></td>
+//               </tr>
+//             </tbody>
+//           </table>
+//         </div>
+//       </div>
+//     </>
+//   );
+// };
+// const AuctionHistory = ({ auctionId, currentUserId }) => {
+//   const [bids, setBids] = useState([]);
+//   const [totalItems, setTotalItems] = useState(0);
+//   const itemsPerPage = 10; // Số lượng item mỗi trang
+//   const pagesPerGroup = 5; // Số lượng trang mỗi nhóm
+
+//   // Gọi API để lấy lịch sử đấu giá
+//   const fetchBids = async (page) => {
+//     try {
+//       const response = await axiosClient.get(`/api/bids/${auctionId}`, {
+//         params: {
+//           page: page - 1, // API nhận page từ 0
+//           size: itemsPerPage,
+//           status: 'VALID',
+//           sortField: 'bidTime',
+//           direction: 'DESC',
+//         },
+//       });
+//       const data = response.data;
+//       console.log(data)
+//       setBids(data.content);
+//       setTotalItems(data.totalElements);
+//     } catch (error) {
+//       console.error('Error fetching auction bids:', error);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchBids(1); // Gọi dữ liệu trang đầu tiên
+//   }, []);
+
+//   return (
+//     <div className="p-4 bg-gray-100 rounded shadow">
+//       <h3 className="text-xl font-bold mb-4">Lịch sử đấu giá</h3>
+//       <div className="overflow-x-auto">
+//         <table className="table-auto w-full border-collapse border border-gray-300">
+//           <thead>
+//             <tr className="bg-gray-200">
+//               <th className="px-4 py-2 border border-gray-300 text-left">Số tiền đấu giá</th>
+//               <th className="px-4 py-2 border border-gray-300 text-left">Trạng thái</th>
+//               <th className="px-4 py-2 border border-gray-300 text-left">Thời gian</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {bids.map((bid, index) => (
+//               <tr
+//                 key={index}
+//                 className={`${
+//                   bid.userId === currentUserId ? 'bg-yellow-100' : 'bg-white'
+//                 } hover:bg-gray-100`}
+//               >
+//                 <td className="px-4 py-2 border border-gray-300">
+//                   {bid.bidAmount.toLocaleString()} đ
+//                 </td>
+//                 <td className="px-4 py-2 border border-gray-300">{bid.status}</td>
+//                 <td className="px-4 py-2 border border-gray-300">
+//                   {new Date(bid.bidTime).toLocaleString()}
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       </div>
+//       {/* Sử dụng Pagination */}
+//       <Pagination
+//         totalItems={totalItems}
+//         itemsPerPage={itemsPerPage}
+//         pagesPerGroup={pagesPerGroup}
+//         onPageChange={fetchBids}
+//         className="mt-4"
+//         buttonClassName="bg-blue-500 text-white hover:bg-blue-700"
+//       />
+//     </div>
+//   );
+// };
+export const AuctionHistory = ({ auctionId, currentUserId, winnerName }) => {
+  const [bids, setBids] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 10; // Số lượng item mỗi trang
+  const pagesPerGroup = 5; // Số lượng trang mỗi nhóm
+
+  const fetchBids = async (page) => {
+    try {
+      const response = await axiosClient.get(`/api/bids/auction/${auctionId}`, {
+        params: {
+          page: page - 1, // API nhận page từ 0
+          size: itemsPerPage,
+          status: 'VALID',
+          sortField: 'bidTime',
+          direction: 'DESC',
+        },
+      });
+      const data = response.data;
+      setBids(data.content);
+      setTotalItems(data.totalElements);
+    } catch (error) {
+      console.error('Error fetching auction bids:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBids(1); // Gọi dữ liệu trang đầu tiên
+  }, []);
+
   return (
-    <>
-      <div className="shadow-s1 p-8 rounded-lg">
-        <Title level={5} className=" font-normal">
-          Auction History
-        </Title>
-        <Caption className="flex item-centers mt-4">
-          <FaCheckCircle className="font-medium text-green mr-2" size={25} />
-          toasthall, you are the winner!
-        </Caption>
-        <hr className="my-5" />
+    <div className="shadow-s1 p-8 rounded-lg bg-white">
+      {/* Tiêu đề */}
+      <h5 className="text-lg font-normal">Auction History</h5>
+      {/* Caption */}
+      {winnerName && (
+        <div className="flex items-center mt-4 text-green-600">
+          <FaCheckCircle className="mr-2" size={25} />
+          <span className="text-sm">Congratulations {winnerName}, you are the winner!</span>
+        </div>
+      )}
+      <hr className="my-5" />
 
-        <div className="relative overflow-x-auto rounded-lg">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-100">
-              <tr>
-                <th scope="col" className="px-6 py-5">
-                  Bidder
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Bid Amount
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Bid Time
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="bg-white border-b hover:bg-gray-50">
-                <td className="px-6 py-4 text-blue-500">toasthall</td>
-                <td className="px-6 py-4">$200</td>
-                <td className="px-6 py-4">18-May-16 20:57:23</td>
-                <td className="px-6 py-4"></td>
-              </tr>
-              <tr className="bg-white border-b hover:bg-gray-50">
-                <td className="px-6 py-4">Starting Price</td>
-                <td className="px-6 py-4">$2</td>
-                <td className="px-6 py-4">12-May-16 20:57:23</td>
-                <td className="px-6 py-4"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div className="shadow-s1 p-8 rounded-lg mt-5">
-        <Title level={5} className=" font-normal">
-          Bid retraction and cancellation history
-        </Title>
-        <div className="relative overflow-x-auto rounded-lg">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-100">
-              <tr>
-                <th scope="col" className="px-6 py-5">
-                  Bidder
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Action
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Date of Bid and Retraction
-                </th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="bg-white border-b hover:bg-gray-50">
-                <td className="px-6 py-4 text-blue-500">toasthall</td>
-                <td className="px-6 py-4 text-red-500"> Retracted: $200</td>
+      {/* Bảng hiển thị lịch sử */}
+      <div className="relative overflow-x-auto rounded-lg">
+        <table className="w-full text-sm text-left text-gray-500">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+            <tr>
+              <th scope="col" className="px-6 py-5">Bidder</th>
+              <th scope="col" className="px-6 py-3">Bid Amount</th>
+              <th scope="col" className="px-6 py-3">Bid Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bids.map((bid, index) => (
+              <tr
+                key={index}
+                className={`bg-white border-b hover:bg-gray-50 ${
+                  bid.userId === currentUserId ? 'text-blue-500 font-medium' : ''
+                }`}
+              >
                 <td className="px-6 py-4">
-                  <span className="font-bold">Bid:</span> 18-May-16 20:57:23
-                  <br />
-                  <span className="font-bold">Retracted:</span> 18-May-16
-                  20:57:23
+                  {bid.userId === currentUserId ? 'You' : bid?.userId}
                 </td>
-                <td className="px-6 py-4"></td>
+                <td className="px-6 py-4">
+                  US ${bid.bidAmount.toLocaleString()} 
+                </td>
+                <td className="px-6 py-4">
+                  {new Date(bid.bidTime).toLocaleString()}
+                </td>
               </tr>
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </>
+
+      {/* Pagination */}
+      <Pagination
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        pagesPerGroup={pagesPerGroup}
+        onPageChange={fetchBids}
+        className="mt-4"
+        buttonClassName="bg-blue-500 text-white hover:bg-blue-700"
+      />
+    </div>
   );
 };
-
-

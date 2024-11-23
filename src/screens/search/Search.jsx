@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import axiosClient from "../../services/axiosClient";
 import { Container, PrimaryButton } from "../../router";
 import { Pagination } from "../../components/pagination";
@@ -8,12 +9,15 @@ import { commonClassNameOfInput } from "../../components/common/Design";
 import { categoryMapping, statusMapping, sortByMapping } from "./filterMapping";
 
 export const SearchList = () => {
+  const [searchParams] = useSearchParams();
+  const title = searchParams.get("title") || ""; // Lấy title từ URL
+
   const [searchResults, setSearchResults] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [filters, setFilters] = useState({
-    title: "",
+    title: title,
     categoryType: [],
-    status: "",
+    status: null,
     minPrice: null,
     maxPrice: null,
     sortField: "currentPrice",
@@ -47,7 +51,7 @@ export const SearchList = () => {
           .filter((key) => params[key] !== null && params[key] !== "") // Bỏ qua null hoặc rỗng
           .map((key) => `${key}=${encodeURIComponent(params[key])}`)
           .join("&");
-        console.log("queryString: " + queryString);
+        // console.log("queryString: " + queryString);
 
         const response = await axiosClient.get(
           `/api/auctions/search?${queryString}`
@@ -65,29 +69,70 @@ export const SearchList = () => {
   }, [filters, pagination]);
 
   const handleSearch = (key, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFilters((prev) => {
+      const updatedFilters = { ...prev, [key]: value };
+      
+      // Kiểm tra nếu key là minPrice hoặc maxPrice, đảm bảo logic hợp lệ
+      if (key === "minPrice" && updatedFilters.maxPrice !== null && value !== "") {
+        if (Number(value) > Number(updatedFilters.maxPrice)) {
+          alert("Min price không được lớn hơn Max price.");
+          return prev; // Không cập nhật filter
+        }
+      }
+      if (key === "maxPrice" && updatedFilters.minPrice !== null && value !== "") {
+        if (Number(value) < Number(updatedFilters.minPrice)) {
+          alert("Max price không được nhỏ hơn Min price.");
+          return prev; // Không cập nhật filter
+        }
+      }
+  
+      return updatedFilters;
+    });
   };
-
+  
   const toggleStatusFilter = (status) => {
     setFilters((prev) => {
-      const normalizedStatus = status.toUpperCase(); // Chuyển thành chữ in hoa
       return {
         ...prev,
-        status: prev.status === normalizedStatus ? "" : normalizedStatus, // Hủy chọn nếu nhấn lại
+        status: prev.status === status ? null : status, // Dùng null thay cho giá trị trống
       };
     });
   };
 
+  const debounce = (func, delay) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
+  
+
   const toggleFilter = (filter) => {
-    setFilters((prev) => ({
-      ...prev,
-      categoryType: prev.categoryType.includes(filter)
-        ? prev.categoryType.filter((item) => item !== filter)
-        : [...prev.categoryType, filter],
-    }));
+    setFilters((prev) => {
+      const isFilterSelected = prev.categoryType.includes(filter);
+      return {
+        ...prev,
+        categoryType: isFilterSelected
+          ? prev.categoryType.filter((item) => item !== filter) // Loại bỏ
+          : [...prev.categoryType, filter], // Thêm
+      };
+    });
+  };
+
+  // Hàm bổ sung: Reset tất cả bộ lọc
+  const clearFilters = () => {
+    setFilters({
+      categoryType: [],
+      status: null,
+      minPrice: null,
+      maxPrice: null,
+      sortField: "currentPrice",
+      sortDirection: "ASC",
+    });
+    console.log(filters)
   };
 
   const category = [
@@ -109,7 +154,15 @@ export const SearchList = () => {
     "Office supplies",
   ];
 
-  const status = ["Pending", "Ready", "Open", "Closed", "Cancelled"];
+  const status = [
+    "PENDING",
+    "READY",
+    "OPEN",
+    "CLOSED",
+    "COMPLETED",
+    "CANCELLED",
+  ];
+
   const sortByTime = ["Newly listed", "Ending soonest"];
 
   return (
@@ -117,7 +170,10 @@ export const SearchList = () => {
       <div className="bg-[#241C37] pt-8 h-[40vh] flex items-center justify-center">
         <Container className="flex justify-center">
           <div className="w-full md:w-1/2 text-white pr-12">
-            <SearchBox onSearch={(title) => handleSearch("title", title)} />
+            <SearchBox
+              onSearch={(title) => handleSearch("title", title)}
+              title={title}
+            />
           </div>
         </Container>
       </div>
@@ -139,7 +195,7 @@ export const SearchList = () => {
                 <FilterSection
                   title="Status"
                   filters={status}
-                  selectedFilters={[filters.status]}
+                  selectedFilters={[filters.status].filter(Boolean)}
                   onFilterToggle={toggleStatusFilter}
                   isSingleSelection={true} // Chỉ cho phép chọn một
                 />
@@ -151,30 +207,36 @@ export const SearchList = () => {
                   <input
                     className={commonClassNameOfInput}
                     type="number"
-                    placeholder="VND"
+                    value={filters.minPrice}
+                    placeholder="$"
+                    min={0} // Giá trị nhỏ nhất là 0
                     onBlur={(e) => handleSearch("minPrice", e.target.value)}
                   />
                   <div>Max price:</div>
                   <input
                     className={commonClassNameOfInput}
                     type="number"
-                    placeholder="VND"
+                    value={filters.maxPrice}
+                    placeholder="$"
+                    min={0} // Giá trị nhỏ nhất là 0
                     onBlur={(e) => handleSearch("maxPrice", e.target.value)}
                   />
                 </div>
+
                 <div className="h-px bg-gray-200 my-6" />
 
-                {/* Sort by time */}
-                <FilterSection
-                  title="Sort by time"
+                {/* <FilterSection
+                  title="Sort by"
                   filters={sortByTime}
                   selectedFilters={[filters.sortField]}
                   onFilterToggle={(sortField) =>
                     handleSearch("sortField", sortField)
                   }
-                />
+                /> */}
 
-                <PrimaryButton className="ml-3">More filters</PrimaryButton>
+                <PrimaryButton className="ml-3" onClick={clearFilters}>
+                  Clear Filters
+                </PrimaryButton>
               </div>
             </div>
 
@@ -203,8 +265,8 @@ export const SearchList = () => {
     </div>
   );
 };
-const SearchBox = ({ onSearch }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+const SearchBox = ({ onSearch, title }) => {
+  const [searchTerm, setSearchTerm] = useState(title);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -270,15 +332,10 @@ const FilterSection = ({
       {filters.map((filter) => (
         <div key={filter} className="flex items-center mb-2">
           <input
-            type="checkbox"
+            type={"checkbox"} // Sử dụng radio nếu chọn duy nhất
             id={filter}
             checked={selectedFilters.includes(filter)}
             onChange={() => onFilterToggle(filter)}
-            disabled={
-              isSingleSelection &&
-              selectedFilters[0] !== filter &&
-              selectedFilters.length > 0
-            }
           />
           <label
             htmlFor={filter}
