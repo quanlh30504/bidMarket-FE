@@ -32,7 +32,8 @@ import {
   Watchlist,
   Order,
   Shipping,
-  Payment
+  Payment,
+  ShopView
 } from "./router/index.js";
 
 function App() {
@@ -138,6 +139,14 @@ function App() {
                 </Layout>
               }
             />
+            <Route
+              path="/shop"
+              element={
+                <Layout>
+                  <ShopView />
+                </Layout>
+              }
+              />
             <Route
               path="/dashboard"
               element={
@@ -273,16 +282,6 @@ function App() {
                   <NotFound />
                 </Layout>
               } 
-            />
-            <Route
-              path="/profiletest"
-              element={
-                <PrivateRoute allowedRoles={["bidder"]}>
-                  <Layout>
-                    <Account/>
-                  </Layout>
-                </PrivateRoute>
-              }
             />
             <Route
               path="/account"

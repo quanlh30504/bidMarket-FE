@@ -198,7 +198,7 @@ export const ProductsDetailsPage = () => {
               {activeTab === "reviews" && (
                 <div className="reviews-tab shadow-s3 p-8 rounded-md">
                   <div className="flex items-center gap-5">
-                  <Title level={5} className=" font-normal">
+                  <Title level={4} className="">
                     Reviews
                   </Title> 
                   <button className="w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green" onClick={handleRateClick}>Rate</button>
@@ -283,7 +283,7 @@ export const AuctionHistory = () => {
   return (
     <>
       <div className="shadow-s1 p-8 rounded-lg">
-        <Title level={5} className=" font-normal">
+        <Title level={4} className="">
           Auction History
         </Title>
         <Caption className="flex item-centers mt-4">
@@ -329,9 +329,10 @@ export const AuctionHistory = () => {
         
       </div>
       <div className="shadow-s1 p-8 rounded-lg mt-5">
-      <Title level={5} className=" font-normal">
+      <Title level={4} className="">
           Bid retraction and cancellation history
         </Title>
+        <hr className="my-5" />
       <div className="relative overflow-x-auto rounded-lg">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-100">

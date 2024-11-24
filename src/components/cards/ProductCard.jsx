@@ -39,7 +39,7 @@ export const ProductCard = ({ item }) => {
           </div>
         </div>
         <div className="details mt-4">
-          <Title className="uppercase">{item.title}</Title>
+          <Title className="uppercase">{item?.name}</Title>
           <hr className="mt-3" />
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center justify-between gap-5">
