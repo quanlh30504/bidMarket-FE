@@ -19,6 +19,12 @@ class AuctionCreateRequest {
       this.startingPrice = startingPrice;
       this.minimumBidIncrement = minimumBidIncrement;
       this.extensionCount = extensionCount;
+
+      try {
+        this.validate();
+      } catch (error) {
+        throw error;
+      }
     }
   
     validate() {

@@ -1,78 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FilterBar } from '../components/FilterBar';
 import { Table } from '../components/Table';
 import { Sidebar } from '../components/Sidebar';
-
-//sample
-const auctionData = [ 
-  {
-    auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    Start: 'August 1, 2024',
-    End: 'August 15, 2024',
-    "start price": '$100',
-    "current price": '$200',
-    status: 'Open'
-  },
-  {
-    auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    Start: 'August 1, 2024',
-    End: 'August 15, 2024',
-    "start price": '$100',
-    "current price": '$200',
-    status: 'Pending'
-  },
-  {
-    auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    Start: 'August 1, 2024',
-    End: 'August 15, 2024',
-    "start price": '$100',
-    "current price": '$200',
-    status: 'Canceled'
-  },
-  {
-    auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    Start: 'August 1, 2024',
-    End: 'August 15, 2024',
-    "start price": '$100',
-    "current price": '$200',
-    status: 'Closed'
-  },
-  {
-    auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    Start: 'August 1, 2024',
-    End: 'August 15, 2024',
-    "start price": '$100',
-    "current price": '$200',
-    status: 'Completed'
-  },
-];
-
-const productData = [
-  {
-    product: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    categories: ['Coins', 'Metalware'],
-    status: 'Active'
-  },
-  {
-    product: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    categories: ['Coins', 'Metalware'],
-    status: 'Inactive'
-  },
-  {
-    product: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    categories: ['Coins', 'Metalware'],
-    status: 'Sold'
-  },
-]
+import AuctionService from '../../../services/auctionService';
+import ProductService from '../../../services/productService';
+import { useUser, ProductStatus, CategoryType, AuctionStatus } from '../../../router';
 
 
 export const Listings = () => {
+  const { user } = useUser();
   const menuItems = [
     'Auction',
     'Products'
   ];
   const [activeMenuItem, setActiveMenuItem] = useState('Auction');
-  const [items, setItems] = useState(auctionData);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
   const sortOptions = [
     { value: 'newest', label: 'Newest first' },
     { value: 'oldest', label: 'Oldest first' },
@@ -80,24 +23,56 @@ export const Listings = () => {
     { value: 'lowest', label: 'Lowest price' }
   ];
 
-  function handleChangeMenuItems(activeMenuItem) {  // change table data based on menu item
-    // api + logic (later)
-    if(activeMenuItem === 'Auction') {
-      setItems(auctionData);
-    } else {
-      setItems(productData);
+  const formatProductData = (response) => {
+    return response.content.map(product => {
+      return {
+        product: product.name,
+        categories: product.categories && product.categories.length > 0 
+        ? product.categories.map(category => CategoryType[category] || category) // Ánh xạ từng danh mục
+        : ['No Category'], // Trường hợp mảng trống hoặc undefined
+        status: ProductStatus[product.productStatus] || product.productStatus,
+      };
+    });
+  }
+
+  const formatAuctionData = (response) => {
+    return response.content.map(auction => {
+      return {
+        auction: auction.title,
+        start: auction.startTime,
+        end: auction.endTime,
+        "start price": `$${auction.startingPrice.toFixed(2)}`, // Định dạng lại để có dấu $
+        "current price": `$${auction.currentPrice.toFixed(2)}`, // Định dạng lại để có dấu $
+        status: AuctionStatus[auction.status] || auction.status,
+      };
+    });
+  }
+
+  const handleChangeMenuItems = async (activeMenuItem) => {
+    setLoading(true);
+    try {
+      if (activeMenuItem === 'Auction') {
+        // Call AuctionService to get auction data
+        const response = await AuctionService.searchAuctions({ sellerId: user.UUID });
+        setItems(formatAuctionData(response.data));
+      } else if (activeMenuItem === 'Products') {
+        // Call ProductService to get product data
+        const response = await ProductService.searchProducts({ sellerId: user.UUID });
+        setItems(formatProductData(response.data));
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
     }
   }
-  React.useEffect(() => {
-    handleChangeMenuItems(activeMenuItem);
-  }, [activeMenuItem]);
 
-  function sortListings(sortBy) {  // có thể là 2 sort function riêng cho Auction và Products
+  const sortListings = (sortBy) => {  // có thể là 2 sort function riêng cho Auction và Products
     window.alert(`Sorting by ${sortBy}`);
     // some sorting logic return ordered items (use setItems) (later)
   }
 
-  function header(activeMenuItems) {
+  const header = (activeMenuItems) => {
     switch (activeMenuItems) {
       case 'Auction':
         return 'Manage auctions';
@@ -108,13 +83,23 @@ export const Listings = () => {
     }
   }
 
+  useEffect(() => {
+    handleChangeMenuItems(activeMenuItem);
+  }, [activeMenuItem]);
+
   return (
     <div className="flex">
       <Sidebar menuItems={menuItems} activeMenuItem={activeMenuItem} setActiveMenuItem={setActiveMenuItem} />
       <div className="w-5/6 p-6">
         <h1 className="text-2xl mb-4">{ header(activeMenuItem) }</h1>
-        <FilterBar />
-        <Table items={items} sortOptions={sortOptions} sortFuntion={sortListings} />
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+            <FilterBar />
+            <Table items={items} sortOptions={sortOptions} sortFunction={sortListings} />
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CategoryType } from '../Enum/CategoryType';
+import { CategoryType } from '../../../router';
 
 export const ProductDetails = ({ productDetails, setProductDetails }) => {
   const [showCategories, setShowCategories] = useState(false);  // show list of categories for choosing

@@ -3,15 +3,6 @@ import { AuctionStatus, ProductStatus, OrderStatus } from "../../../router/index
 
 const StatusBadge = ({ status }) => {
   const statusColor = {
-    // Unpaid: "bg-red-500 text-red-100",
-    // Open: "bg-green text-white",
-    // Pending: "bg-yellow-500 text-yellow-100",
-    // Canceled: "bg-red-800 text-red-100",
-    // Closed: "bg-gray-500 text-gray-100",
-    // Completed: "bg-blue-500 text-blue-100",
-    // Active: "bg-green text-white",
-    // Inactive: "bg-red-800 text-red-100",
-    // Sold: "bg-yellow-500 text-yellow-100",
     [OrderStatus.PENDING]: "bg-red-500 text-red-100",
     [OrderStatus.SHIPPING]: "bg-gray-200 text-red-500",
     [AuctionStatus.OPEN]: "bg-green text-white",
@@ -77,7 +68,7 @@ const CategoriesBadge = ({ categories }) => {
   return (
     <div className="flex flex-wrap justify-center">
       {categories.map((category, index) => (
-        <span key={index} className="px-2 py-1 bg-yellow-200 text-gray-800 rounded-full text-center">
+        <span key={index} className="px-2 py-1 bg-yellow-200 text-gray-800 rounded-full text-center ml-2 my-1">
           {category}
         </span>
       ))}

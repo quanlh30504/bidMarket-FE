@@ -77,7 +77,8 @@ export { CreateAuction } from "../screens/seller-hub/sub-pages/CreateAuction";
 
 
 // Enum Routes
-export { AuctionStatus, ProductStatus, OrderStatus } from "../screens/seller-hub/Enum/StatusType";
+export { AuctionStatus, ProductStatus, OrderStatus } from "../Enum/StatusType";
+export { CategoryType } from "../Enum/CategoryType";
 
 
 // Chat

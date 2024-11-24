@@ -2,6 +2,7 @@ import axiosClient from './axiosClient';
 import imageUtils from '../utils/imageUtils';
 
 class ProductService {
+  
   // Lấy thông tin sản phẩm theo ID
   static getProduct(id) {
     return axiosClient.get(`/api/products/${id}`);
@@ -13,16 +14,26 @@ class ProductService {
   }
 
   // Tìm kiếm sản phẩm với phân trang và các tham số tùy chọn
-  static searchProducts({ name, categoryType, status, page = 0, size = 10, sortField = 'createdAt', sortDirection = 'ASC' }) {
+  static searchProducts({
+    sellerId = '',
+    name = '',
+    categoryType = '',
+    status = '',
+    page = 0,
+    size = 10,
+    sortField = 'createdAt',
+    sortDirection = 'ASC',
+  }) {
     return axiosClient.get('/api/products/search', {
       params: {
+        sellerId,
         name,
         categoryType,
         status,
         page,
         size,
         sortField,
-        sortDirection
+        sortDirection,
       },
     });
   }

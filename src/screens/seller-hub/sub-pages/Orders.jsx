@@ -1,21 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FilterBar } from '../components/FilterBar';
 import { Table } from '../components/Table';
 import { Sidebar } from '../components/Sidebar';
+import OrderService from '../../../services/orderService';
+import { useUser, OrderStatus } from '../../../router';
 
 //sample
-const ordersData = [ 
-  {
-    auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
-    quantity: 1,
-    price: 'US $7.99',
-    winner: 'tonystack@gmail.com',
-    carrier: 'ABC',
-    status: 'Unpaid'
-  },
-];
+// const ordersData = [ 
+//   // {
+//   //   auction: '1883 Sweden 50 Ore - Original Silver Coin - Lot 36a',
+//   //   quantity: 1,
+//   //   price: 'US $7.99',
+//   //   winner: 'tonystack@gmail.com',
+//   //   carrier: 'ABC',
+//   //   status: 'Unpaid'
+//   // },
+// ];
 
 export const Orders = () => {
+  const { user } = useUser();
   const menuItems = [
     'All orders',
     'Awaiting payment',
@@ -26,7 +29,7 @@ export const Orders = () => {
     'Returns'
   ];
   const [activeMenuItem, setActiveMenuItem] = useState('All orders');
-  const [items, setItems] = useState(ordersData);
+  const [items, setItems] = useState([]);
   const sortOptions = [
     { value: 'newest', label: 'Newest first' },
     { value: 'oldest', label: 'Oldest first' },
@@ -34,12 +37,25 @@ export const Orders = () => {
     { value: 'lowest', label: 'Lowest price' }
   ];
 
-  function sortOrders(sortBy) {
+  const formatOrderData = (response) => {
+    return response.content.map(order => {
+      return {
+        auction: order.auction.title,
+        quantity: order.quantity,
+        price: `$${order.price.toFixed(2)}`,
+        winner: order.bidder.email,
+        carrier: order.carrier,
+        status: order.status,
+      };
+    });
+  }
+
+  const sortOrders = (sortBy) => {
     window.alert(`Sorting by ${sortBy}`);
     // some sorting logic return ordered items (use setItems) (later)
   }
 
-  function header(activeMenuItems) {
+  const header = (activeMenuItems) => {
     switch (activeMenuItems) {
       case 'All orders':
         return 'Manage all orders';
@@ -59,6 +75,18 @@ export const Orders = () => {
         return 'All orders';
     }
   }
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await OrderService.searchOrdersBySeller({ sellerId: user.UUID });
+        setItems(formatOrderData(response.data));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchData();
+  }, []);
 
   return (
     <div className="flex">
