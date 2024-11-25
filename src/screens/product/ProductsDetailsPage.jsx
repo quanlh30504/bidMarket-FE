@@ -1,4 +1,4 @@
-import { Body, Caption, Container, Title } from "../../router";
+import { Body, Caption, Container, Title, ProfileCard } from "../../router";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 import { commonClassNameOfInput } from "../../components/common/Design";
 import { AiOutlinePlus } from "react-icons/ai";
@@ -6,6 +6,8 @@ import { useState } from "react";
 import { MdOutlineFavorite } from "react-icons/md";
 import { PrimaryButton } from "../../components/common/Design";
 import { FaCheckCircle } from "react-icons/fa";
+import { User2 } from "../../components/hero/Hero";
+import { FaStar } from "react-icons/fa";
 
 export const ProductsDetailsPage = () => {
   const [activeTab, setActiveTab] = useState("description");
@@ -13,6 +15,14 @@ export const ProductsDetailsPage = () => {
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
+
+  const [rateSection, setRateSection] = useState(false);
+
+  const handleRateClick = () => {
+    setRateSection(!rateSection);
+  }
+  const [selectedRating, setSelectedRating] = useState(0); 
+
   return (
     <>
       <section className="pt-24 px-8">
@@ -187,13 +197,74 @@ export const ProductsDetailsPage = () => {
               {activeTab === "auctionHistory" && <AuctionHistory />}
               {activeTab === "reviews" && (
                 <div className="reviews-tab shadow-s3 p-8 rounded-md">
-                  <Title level={5} className=" font-normal">
+                  <div className="flex items-center gap-5">
+                  <Title level={4} className="">
                     Reviews
-                  </Title>
+                  </Title> 
+                  <button className="w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green" onClick={handleRateClick}>Rate</button>
+                  </div>
                   <hr className="my-5" />
-                  <Title level={5} className=" font-normal text-red-500">
-                    Cooming Soon!
-                  </Title>
+                  {rateSection && (
+                    <div className="shadow-s3 border p-8 mb-5 gap-5 flex-col rounded-xl">        
+                    <div>
+              <Title level={6} className="font-semibold text-center mb-5"> Rate your experience</Title>
+              <StarRating
+            maxStars={5}
+            onRate={(rating) => setSelectedRating(rating)}
+          />
+              <textarea name="description" className={`${commonClassNameOfInput}`} cols="30" rows="5"></textarea>
+              <PrimaryButton type="submit" className="rounded-none my-5 flex items-center justify-center">
+              SEND
+            </PrimaryButton>
+            </div>
+                </div>
+                  )}                  
+                  <div className="shadow-s3 border p-8 mb-5 gap-5 flex-col rounded-xl">
+              <div className="flex items-center">
+              <ProfileCard>
+                  <img src={User2} alt={User2} />
+                </ProfileCard>
+                <Title level ={6} className=" font-normal p-3"> Nguyen Van A </Title>
+              </div>
+              <div className="flex item-center gap-4 ml-12 ps-3">
+                <div className="flex item-center">
+                  <FaStar className="text-yellow-300"></FaStar>
+                  <FaStar className="text-yellow-300"></FaStar>
+                  <FaStar className="text-yellow-300"></FaStar>
+                  <FaStar className="text-yellow-300"></FaStar>
+                  <FaStar className="text-gray-300"></FaStar>
+                </div>
+                  <div className="text-gray-500">2024-11-19 12:30:28</div>
+              </div>
+              <Caption className="leading-7">
+                    If you’ve been following the crypto space, you’ve likely heard of Non-Fungible Tokens (Biddings), more popularly referred to as ‘Crypto Collectibles.’ The world of Biddings is
+                    growing rapidly. It seems there is no slowing down of these assets as they continue to go up in price. This growth comes with the opportunity for people to start new businesses to
+                    create and capture value. The market is open for players in every kind of field. Are you a collector.
+                  </Caption>
+              </div>
+              <div className="shadow-s3 border p-8 mb-5 gap-5 flex-col rounded-xl">
+              <div className="flex">
+              <ProfileCard>
+                  <img src={User2} alt={User2} />
+                </ProfileCard>
+                <Title level ={6} className=" font-normal p-3"> Nguyen Van A </Title>
+              </div>
+              <div className="flex items-center gap-4 ml-12 ps-3">
+                <div className="flex items-center">
+                  <FaStar className="text-yellow-300"></FaStar>
+                  <FaStar className="text-yellow-300"></FaStar>
+                  <FaStar className="text-yellow-300"></FaStar>
+                  <FaStar className="text-yellow-300"></FaStar>
+                  <FaStar className="text-gray-300"></FaStar>
+                </div>
+                  <div className="text-gray-500">2024-11-19 12:30:28</div>
+              </div>
+              <Caption className="leading-7">
+                    If you’ve been following the crypto space, you’ve likely heard of Non-Fungible Tokens (Biddings), more popularly referred to as ‘Crypto Collectibles.’ The world of Biddings is
+                    growing rapidly. It seems there is no slowing down of these assets as they continue to go up in price. This growth comes with the opportunity for people to start new businesses to
+                    create and capture value. The market is open for players in every kind of field. Are you a collector.
+                  </Caption>
+              </div>       
                 </div>
               )}
               {activeTab === "moreProducts" && (
@@ -212,7 +283,7 @@ export const AuctionHistory = () => {
   return (
     <>
       <div className="shadow-s1 p-8 rounded-lg">
-        <Title level={5} className=" font-normal">
+        <Title level={4} className="">
           Auction History
         </Title>
         <Caption className="flex item-centers mt-4">
@@ -258,9 +329,10 @@ export const AuctionHistory = () => {
         
       </div>
       <div className="shadow-s1 p-8 rounded-lg mt-5">
-      <Title level={5} className=" font-normal">
+      <Title level={4} className="">
           Bid retraction and cancellation history
         </Title>
+        <hr className="my-5" />
       <div className="relative overflow-x-auto rounded-lg">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500">
             <thead className="text-xs text-gray-700 uppercase bg-gray-100">
@@ -293,5 +365,29 @@ export const AuctionHistory = () => {
         </div>
         </div>
     </>
+  );
+};
+
+const StarRating = ({ maxStars = 5, onRate }) => {
+  const [rating, setRating] = useState(0);
+
+  const handleStarClick = (index) => {
+    setRating(index + 1);
+    if (onRate) onRate(index + 1);
+  };
+
+  return (
+    <div className="flex items-center justify-center mb-5">
+      {Array.from({ length: maxStars }, (_, index) => (
+        <FaStar
+          key={index}
+          className={`cursor-pointer ${
+            index < rating ? "text-yellow-300" : "text-gray-300"
+          }`}
+          size={25}
+          onClick={() => handleStarClick(index)}
+        />
+      ))}
+    </div>
   );
 };

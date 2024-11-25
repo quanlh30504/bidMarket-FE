@@ -22,14 +22,24 @@ export const ProductCard = ({ item }) => {
               {item?.isSoldout ? (
                 <Caption className="text-red-500 bg-white px-3 py-1 text-sm rounded-full">Sold Out</Caption>
               ) : (
-                <Caption className="text-green bg-green_100 px-3 py-1 text-sm rounded-full">On Stock</Caption>
+                <Caption
+  className={`
+    ${item?.productStatus === "Open" ? "text-green bg-green_100" : ""}
+    ${item?.productStatus === "Cancelled" ? "text-red-600 bg-red-100" : ""}
+    ${item?.productStatus === "Closed" ? "text-gray-600 bg-gray-100" : ""}
+    ${item?.productStatus === "Pending" ? "text-yellow-600 bg-yellow-100" : ""}
+    px-3 py-1 text-sm rounded-full
+  `}
+>
+  {item?.productStatus}
+</Caption>
               )}
               <Caption className="text-green bg-green_100 px-3 py-1 text-sm rounded-full">{item?.bids} Bids</Caption>
             </div>
           </div>
         </div>
         <div className="details mt-4">
-          <Title className="uppercase">{item.title}</Title>
+          <Title className="uppercase">{item?.name}</Title>
           <hr className="mt-3" />
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center justify-between gap-5">

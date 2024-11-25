@@ -32,6 +32,7 @@ import {
   Shipping,
   Payment,
   SellerHubRoute,
+  ShopView
 } from "./router/index.js";
 import {NotificationProvider} from "./notifications/NotificationContext";
 import { ToastContainer } from 'react-toastify';
@@ -72,7 +73,7 @@ function App() {
             <Route
               path="/chat"
               element={
-                <PrivateRoute allowedRoles={["bidder", "seller", "admin"]}>
+                <PrivateRoute allowedRoles={["BIDDER", "SELLER", "ADMIN"]}>
                   <ChatLayout>
                     <Chat />
                   </ChatLayout>
@@ -123,6 +124,14 @@ function App() {
                 </Layout>
               }
             />
+            <Route
+              path="/shop"
+              element={
+                <Layout>
+                  <ShopView />
+                </Layout>
+              }
+              />
             <Route
               path="/dashboard"
               element={
