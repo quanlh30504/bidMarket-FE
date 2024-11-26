@@ -35,7 +35,7 @@ export const useSignin = () => {
         }
       }
       setError(error.message || "An error occurred");
-      toast.error(error.message || "Login failed");
+      showToastNotification(error?.response?.data?.message || 'An error occurred', 'error');
     }
   };
 

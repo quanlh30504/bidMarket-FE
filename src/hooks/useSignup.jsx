@@ -105,12 +105,14 @@ export const useSignup = () => {
     e.preventDefault();
 
     let formIsValid = true;
+    console.log('Current errors:', errors);
     Object.keys(formData).forEach((key) => {
       validateInput(key, formData[key]);
       if (errors[key]) {
         formIsValid = false;
       }
     });
+    setErrors({});  // clear errors
 
     if (!formIsValid) {
       window.alert('Please fix the errors in the form');
@@ -125,10 +127,13 @@ export const useSignup = () => {
     setLoading(true);
     try {
       await authService.signup(formData);
-      await showToastNotification(`Welcome back! You've successfully logged in.`);
+      await showToastNotification(`Register successful. Please check your email for the OTP code.`, 'success');
       setIsSuccess(true);
     } catch (error) {
-      console.error(error);
+      if (error?.response?.data?.code === 1009) {  // email already exists
+        await showToastNotification(`Email already exists. Please login instead.`, 'error');
+      }
+      console.error('Signup failed:', error);
     } finally {
       setLoading(false);
     }

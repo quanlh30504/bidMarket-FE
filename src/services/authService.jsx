@@ -22,7 +22,7 @@ class AuthService {
       }
       throw new Error('Invalid response from server');
     } catch (error) {
-      throw this.handleError(error);
+      throw error;
     }
   }
 

@@ -2,6 +2,7 @@ import { Container, Title, PrimaryButton, Caption } from "../../../router";
 import { commonClassNameOfInput } from "../../../components/common/Design";
 import { useState } from "react";
 import { useOtpService } from "../../../router";
+import { useNotification } from "../../../notifications/NotificationContext";
 
 export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) => { 
   const [otp, setOtp] = useState(""); // OTP input
@@ -10,6 +11,7 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
   const [emailSubmitted, setEmailSubmitted] = useState(!!email); // If props already passes the email value, skip the email import step
   const [verified, setVerified] = useState(false);
   const { sendOtp, verifyOtp, verifyOtpForgotPassword, resendOtp, loading, isCooldownActive, cooldown } = useOtpService();
+  const { showToastNotification } = useNotification();
 
   const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
@@ -43,12 +45,15 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
       }
       setVerified(true);
       if (isForgotPassword) {
-        setSuccessMessage("OTP has been verified successfully. A new password has been sent to your email.");
+        // setSuccessMessage("OTP has been verified successfully. A new password has been sent to your email.");
+        window.location.href = "/auth/login";
       } else {
-        setSuccessMessage("OTP has been verified successfully. You can now login.");
+        // setSuccessMessage("OTP has been verified successfully. You can now login.");
+        window.location.href = "/auth/login";
       }
     } catch {
-      setErrorMessage("Failed to verify OTP. Please try again.");
+      // setErrorMessage("Failed to verify OTP. Please try again.");
+      showToastNotification("Failed to verify OTP. Please try again.", "error");
     }
   };
 
@@ -61,10 +66,12 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
 
     try {
       await sendOtp(email);
-      setSuccessMessage("OTP has been sent successfully.");
+      // setSuccessMessage("OTP has been sent successfully.");
+      showToastNotification("OTP has been sent successfully.", "info");
       setEmailSubmitted(true);
     } catch {
-      setErrorMessage("Failed to send OTP. Please try again.");
+      // setErrorMessage("Failed to send OTP. Please try again.");
+      showToastNotification("Failed to send OTP. Please try again.", "error");
     }
   };
 
@@ -72,9 +79,11 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
   const handleResendOtp = async () => {
     try {
       await resendOtp(email);
-      setSuccessMessage("OTP has been sent successfully.");
+      // setSuccessMessage("OTP has been sent successfully.");
+      showToastNotification("OTP has been sent successfully.", "info");
     } catch {
-      setErrorMessage("Failed to send OTP. Please try again.");
+      // setErrorMessage("Failed to send OTP. Please try again.");
+      showToastNotification("Failed to send OTP. Please try again.", "error");
     }
   };
 
