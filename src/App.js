@@ -32,6 +32,7 @@ import {
   Shipping,
   Payment,
   SellerHubRoute,
+  ShopView
 } from "./router/index.js";
 import {NotificationProvider} from "./notifications/NotificationContext";
 import { ToastContainer } from 'react-toastify';
@@ -123,6 +124,14 @@ function App() {
                 </Layout>
               }
             />
+            <Route
+              path="/shop"
+              element={
+                <Layout>
+                  <ShopView />
+                </Layout>
+              }
+              />
             <Route
               path="/dashboard"
               element={
@@ -267,16 +276,6 @@ function App() {
                 <Layout>
                   <NotFound />
                 </Layout>
-              }
-            />
-            <Route
-              path="/profiletest"
-              element={
-                <PrivateRoute allowedRoles={["BIDDER"]}>
-                  <Layout>
-                    <Account />
-                  </Layout>
-                </PrivateRoute>
               }
             />
             <Route
