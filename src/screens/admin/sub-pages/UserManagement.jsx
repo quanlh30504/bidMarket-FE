@@ -2,81 +2,91 @@ import React, { useState, useEffect } from 'react';
 import { FilterBar } from '../components/FilterBar';
 import { Table } from '../components/Table';
 import { Sidebar } from '../components/Sidebar';
-
-//sample
-const userData = [
-    {
-      username: 'john_doe',
-      email: 'john@example.com',
-      role: 'Seller',
-      status: 'Active'
-    },
-    {
-      username: 'jane_doe',
-      email: 'jane@example.com',
-      role: 'Buyer',
-      status: 'Inactive'
-    },
-    // ... More users
-  ];
+import AdminService from '../../../services/adminService';
+import { Role } from '../Enum/Role';
 
 export const UserManagement = () => {
+  const [items, setItems] = useState([]);
+  const [activeMenuItem, setActiveMenuItem] = useState('All users');
+
   const menuItems = [
     'All users',
     'Sellers',
-    'Buyers',
+    'Bidders',
     'Inactive',
+    'Banned',
   ];
-  const [activeMenuItem, setActiveMenuItem] = useState('All users');
-  const [items, setItems] = useState(userData);
+
   const sortOptions = [
     { value: 'username', label: 'Username' },
     { value: 'email', label: 'Email' },
     { value: 'status', label: 'Status' },
   ];
 
-  const sideBarFilter = (activeMenuItem) => {
-    switch (activeMenuItem) {
-        case 'All users':
-            setItems(userData);
-            return;
-        case 'Sellers':
-            setItems(userData.filter((user) => user.role === 'Seller'));
-            return;
-        case 'Buyers':
-            setItems(userData.filter((user) => user.role === 'Buyer'));
-            return;
-        case 'Inactive':
-            setItems(userData.filter((user) => user.status === 'Inactive'));
-            return;
-        default:
-            return;
-        }
-  }
-
-  useEffect(() => {
-    sideBarFilter(activeMenuItem);
-  }, [activeMenuItem]);
-
-  function sortOrders(sortBy) {
-    window.alert(`Sorting by ${sortBy}`);
-    // some sorting logic return ordered items (use setItems) (later)
-  }
-
-  function header(activeMenuItems) {
+  const header = (activeMenuItems) => {
     switch (activeMenuItems) {
         case 'All users':
             return 'Manage all users';
         case 'Sellers':
             return 'Manage sellers';
-        case 'Buyers':
-            return 'Manage buyers';
+        case 'Bidders':
+            return 'Manage Bidders';
         case 'Inactive':
             return 'Manage inactive users';
         default:
             return 'All users';
         }
   }
+
+  function sortOrders(sortBy) {
+    window.alert(`Sorting by ${sortBy}`);
+    // some sorting logic return ordered items (use setItems) (later)
+  }
+
+  const formatUserData = (response) => {
+    return response.content.map(user => {
+      return {
+        username: user.profile && user.profile.fullName ? user.profile.fullName : 'Unknown',
+        email: user.email,
+        role: Role[user.role],
+        "Is verified": user.verified ? 'Yes' : 'No',
+        "Is banned": user.banned ? 'Yes' : 'No',
+      };
+    });
+  }
+
+  const handleChangeActiveMenuItem = async (activeMenuItem) => {
+    let filterRole = '';
+    let filterVerify = '';
+    let filterBanned = '';
+    switch (activeMenuItem) {
+      case 'Sellers':
+          filterRole = 'SELLER';
+          break;
+      case 'Bidders':
+          filterRole = 'BIDDER';
+          break;
+      case 'Inactive':
+          filterVerify = false;
+          break;
+      case 'Banned':
+          filterBanned = true;
+          break;
+      default:
+          break;
+    }
+    const response = await (await AdminService.searchUsers({ role: filterRole, isVerified: filterVerify, isBanned: filterBanned })).data
+    console.log("response", response);
+    setItems(formatUserData(response));
+  }
+
+  useEffect(() => {
+    try {
+      handleChangeActiveMenuItem(activeMenuItem);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [activeMenuItem, items]);
 
   return (
     <div className="flex">
