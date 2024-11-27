@@ -98,7 +98,5 @@ export { default as axiosClient } from "../services/axiosClient";
 export { Pagination } from "../components/pagination"
 // Combine Routes
 export { AuthRoute } from "../screens/auth/AuthRoute";
-export { Pagination } from "../components/pagination";
-
 //shop view
 export { ShopView } from "../screens/shop/shopView";

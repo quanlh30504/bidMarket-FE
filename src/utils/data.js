@@ -41,76 +41,91 @@ export const categorylists = [
     id: 1,
     image: "../images/category/c1.png",
     title: "electronics",
+    value: "Electronics"
   },
   {
     id: 2,
     image: "../images/category/c2.png",
     title: "fashion",
+    value: "Fashion"
   },
   {
     id: 3,
     image: "../images/category/c3.png",
     title: "collectibles",
+    value: "Collectibles"
   },
   {
     id: 4,
     image: "../images/category/c4.png",
     title: "home appliances",
+    value: "Home appliances"
   },
   {
     id: 5,
     image: "../images/category/c5.png",
     title: "sports equipments",
+    value: "Sports equipment"
   },
   {
     id: 6,
     image: "../images/category/c6.png",
     title: "toys and games",
+    value: "Toys and games"
   },
   {
     id: 7,
     image: "../images/category/c7.png",
     title: "vehicles",
+    value: "Vehicles"
   },
   {
     id: 8,
     image: "../images/category/c8.png",
     title: "real estate",
+    value: "Real estate"
   },
   {
     id: 9,
     image: "../images/category/c9.png",
     title: "art and crafts",
+    value: "Art and crafts"
   },
   {
     id: 10,
     image: "../images/category/c10.png",
     title: "jewelry and accessories",
+    value: "Jewelry and accessories"
   },
   {
     id: 11,
     image: "../images/category/c11.png",
     title: "health and beauty",
+    value: "Health and beauty"
   },
   {
     id: 12,
     image: "../images/category/c12.png",
     title: "garden and outdoors",
+    value: "Garden and outdoors"
   },
   {
     id: 13,
     image: "../images/category/c13.png",
     title: "music instruments",
+    value: "Music instruments"
   },
   {
     id: 14,
     image: "../images/category/c14.png",
     title: "pet supplies",
+    value: "Pet supplies"
   },
   {
     id: 15,
     image: "../images/category/c15.png",
     title: "office supplies",
+    value: "Office supplies"
   },
 ];
 

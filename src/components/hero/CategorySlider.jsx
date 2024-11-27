@@ -24,6 +24,7 @@ export const CategorySlider = () => {
       <Container>
         <Heading title="Browse the categories" subtitle="Most viewed and all-time top-selling categories" />
 
+        <br />
         <div className="relative flex justify-center items-center">
           {showPrevButton && (
             <button

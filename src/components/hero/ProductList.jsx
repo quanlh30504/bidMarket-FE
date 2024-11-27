@@ -16,6 +16,7 @@ export const ProductList = () => {
           params: {
             page: 0,
             size: 12,
+            status: "OPEN",
             sortField: "currentPrice",
             sortDirection: "ASC",
           },

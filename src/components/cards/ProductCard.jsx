@@ -39,8 +39,7 @@ export const ProductCard = ({ item }) => {
         <div className="absolute top-0 left-0 p-2 w-full">
           <div className="flex items-center justify-between">
             <Caption
-              className={`px-3 py-1 text-sm rounded-full ${
-                {
+              className={`px-3 py-1 text-sm rounded-full ${{
                   PENDING: "text-gray-700 bg-yellow-400",
                   READY: "text-blue-700 bg-blue-200",
                   OPEN: "text-white bg-green",
@@ -49,7 +48,7 @@ export const ProductCard = ({ item }) => {
                   COMPLETED: "text-blue-500 bg-slate-200",
                   EXTENDED: "text-orange-700 bg-orange-200",
                 }[item.status] || "text-black bg-white" // Mặc định nếu status không khớp
-              }`}
+                }`}
             >
               {item.status}
             </Caption>
@@ -87,14 +86,18 @@ export const ProductCard = ({ item }) => {
         </div>
         <hr className="mb-3" />
 
-        <div className="flex items-center justify-between mt-3">
-          <PrimaryButton className="rounded-lg text-sm">
-            Place Bid
-          </PrimaryButton>
-          <PrimaryButton className="rounded-lg px-4 py-3">
-            <MdOutlineFavorite size={20} />
-          </PrimaryButton>
-        </div>
+          <NavLink to={`/details/${item.id}`}>
+          <div className="flex items-center justify-between mt-3">
+
+<PrimaryButton className="rounded-lg text-sm" onClick={(e) => window.navigator}>
+    Place Bid
+  </PrimaryButton>
+  <PrimaryButton className="rounded-lg px-4 py-3">
+    <MdOutlineFavorite size={20} />
+  </PrimaryButton>
+</div>
+          </NavLink>
+
       </div>
     </div>
   );

@@ -12,17 +12,22 @@ export const SearchList = () => {
   const [searchParams] = useSearchParams();
   const title = searchParams.get("title") || ""; // Lấy title từ URL
 
+  const categoryType = searchParams.get("categoryType")?.split(',').map(cate => cate.trim()) || [];
+
   const [searchResults, setSearchResults] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [filters, setFilters] = useState({
     title: title,
-    categoryType: [],
+    categoryType: categoryType,
     status: null,
     minPrice: null,
     maxPrice: null,
     sortField: "currentPrice",
     sortDirection: "ASC",
   });
+
+  const [minPrice,setMinPrice] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(null);
 
   const [pagination, setPagination] = useState({
     page: 1,
@@ -32,7 +37,6 @@ export const SearchList = () => {
   useEffect(() => {
     const fetchSearchResults = async () => {
       try {
-        // Chuyển đổi filters.categoryType thành chuỗi phù hợp
 
         const categoryType = filters.categoryType
           .map((item) => categoryMapping[item])
@@ -42,16 +46,14 @@ export const SearchList = () => {
           ...filters,
           categoryType,
           sortField: sortByMapping[filters.sortField] || filters.sortField,
-          page: pagination.page - 1, // Adjust for zero-based pagination
+          page: pagination.page - 1, 
           size: pagination.size,
         };
 
-        // Tạo URL với encoding
         const queryString = Object.keys(params)
-          .filter((key) => params[key] !== null && params[key] !== "") // Bỏ qua null hoặc rỗng
+          .filter((key) => params[key] !== null && params[key] !== "") 
           .map((key) => `${key}=${encodeURIComponent(params[key])}`)
           .join("&");
-        // console.log("queryString: " + queryString);
 
         const response = await axiosClient.get(
           `/api/auctions/search?${queryString}`
@@ -72,18 +74,19 @@ export const SearchList = () => {
     setFilters((prev) => {
       const updatedFilters = { ...prev, [key]: value };
       
-      // Kiểm tra nếu key là minPrice hoặc maxPrice, đảm bảo logic hợp lệ
       if (key === "minPrice" && updatedFilters.maxPrice !== null && value !== "") {
         if (Number(value) > Number(updatedFilters.maxPrice)) {
           alert("Min price không được lớn hơn Max price.");
-          return prev; // Không cập nhật filter
+          return prev; 
         }
+        setMinPrice(value);
       }
       if (key === "maxPrice" && updatedFilters.minPrice !== null && value !== "") {
         if (Number(value) < Number(updatedFilters.minPrice)) {
           alert("Max price không được nhỏ hơn Min price.");
-          return prev; // Không cập nhật filter
+          return prev; 
         }
+        setMaxPrice(value);
       }
   
       return updatedFilters;
@@ -94,21 +97,10 @@ export const SearchList = () => {
     setFilters((prev) => {
       return {
         ...prev,
-        status: prev.status === status ? null : status, // Dùng null thay cho giá trị trống
+        status: prev.status === status ? null : status,
       };
     });
   };
-
-  const debounce = (func, delay) => {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
-  
 
   const toggleFilter = (filter) => {
     setFilters((prev) => {
@@ -122,7 +114,6 @@ export const SearchList = () => {
     });
   };
 
-  // Hàm bổ sung: Reset tất cả bộ lọc
   const clearFilters = () => {
     setFilters({
       categoryType: [],
@@ -132,7 +123,9 @@ export const SearchList = () => {
       sortField: "currentPrice",
       sortDirection: "ASC",
     });
-    console.log(filters)
+    setMinPrice(null);
+    setMaxPrice(null);
+
   };
 
   const category = [
@@ -160,7 +153,7 @@ export const SearchList = () => {
     "OPEN",
     "CLOSED",
     "COMPLETED",
-    "CANCELLED",
+    "CANCELED",
   ];
 
   const sortByTime = ["Newly listed", "Ending soonest"];
@@ -197,7 +190,6 @@ export const SearchList = () => {
                   filters={status}
                   selectedFilters={[filters.status].filter(Boolean)}
                   onFilterToggle={toggleStatusFilter}
-                  isSingleSelection={true} // Chỉ cho phép chọn một
                 />
 
                 {/* Price */}
@@ -207,18 +199,18 @@ export const SearchList = () => {
                   <input
                     className={commonClassNameOfInput}
                     type="number"
-                    value={filters.minPrice}
+                    value={minPrice}
                     placeholder="$"
-                    min={0} // Giá trị nhỏ nhất là 0
+                    min={0} 
                     onBlur={(e) => handleSearch("minPrice", e.target.value)}
                   />
                   <div>Max price:</div>
                   <input
                     className={commonClassNameOfInput}
                     type="number"
-                    value={filters.maxPrice}
+                    value={maxPrice}
                     placeholder="$"
-                    min={0} // Giá trị nhỏ nhất là 0
+                    min={0} 
                     onBlur={(e) => handleSearch("maxPrice", e.target.value)}
                   />
                 </div>
@@ -296,35 +288,11 @@ const SearchBox = ({ onSearch, title }) => {
   );
 };
 
-// const FilterSection = ({ title, filters, selectedFilters, onFilterToggle }) => (
-//   <div>
-//     <h3 className="text-lg font-semibold mb-4">{title}</h3>
-//     <div>
-//       {filters.map((filter) => (
-//         <div key={filter}>
-//           <a
-//             onClick={(e) => {
-//               e.preventDefault();
-//               onFilterToggle(filter);
-//             }}
-//             className={`text-[15px] font-[500] text-gray_100 cursor-pointer list-none hover:text-green transition-all ease-in-out ${
-//               selectedFilters.includes(filter) ? "text-green" : ""
-//             }`}
-//           >
-//             {filter}
-//           </a>
-//         </div>
-//       ))}
-//     </div>
-//     <div className="h-px bg-gray-200 my-6" />
-//   </div>
-// );
 const FilterSection = ({
   title,
   filters,
   selectedFilters,
   onFilterToggle,
-  isSingleSelection,
 }) => (
   <div>
     <h3 className="text-lg font-semibold mb-4">{title}</h3>
