@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { RiAuctionFill } from "react-icons/ri";
-import { GiTakeMyMoney } from "react-icons/gi";
+import { CiTimer } from "react-icons/ci";
 import { MdOutlineFavorite } from "react-icons/md";
 import { Caption, PrimaryButton, ProfileCard, Title } from "../common/Design";
 import { NavLink } from "react-router-dom";
@@ -11,7 +11,7 @@ export const ProductCard = ({ item }) => {
       <div className="bg-white shadow-s1 rounded-xl p-3">
         <div className="h-56 relative overflow-hidden">
           <NavLink to={`/details/${item?._id}`}>
-            <img src={item?.image} alt={item?.image} className="w-full h-full object-cover rounded-xl hover:scale-105 hover:cursor-pointer transition-transform duration-300 ease-in-out" />
+            <img src={item?.productImages} alt={item?.productImages} className="w-full h-full object-cover rounded-xl hover:scale-105 hover:cursor-pointer transition-transform duration-300 ease-in-out" />
           </NavLink>
           <ProfileCard className="shadow-s1 absolute right-3 bottom-3">
             <RiAuctionFill size={22} className="text-green" />
@@ -22,14 +22,24 @@ export const ProductCard = ({ item }) => {
               {item?.isSoldout ? (
                 <Caption className="text-red-500 bg-white px-3 py-1 text-sm rounded-full">Sold Out</Caption>
               ) : (
-                <Caption className="text-green bg-green_100 px-3 py-1 text-sm rounded-full">On Stock</Caption>
+                <Caption
+  className={`
+    ${item?.productStatus === "Open" ? "text-green bg-green_100" : ""}
+    ${item?.productStatus === "Cancelled" ? "text-red-600 bg-red-100" : ""}
+    ${item?.productStatus === "Closed" ? "text-gray-600 bg-gray-100" : ""}
+    ${item?.productStatus === "Pending" ? "text-yellow-600 bg-yellow-100" : ""}
+    px-3 py-1 text-sm rounded-full
+  `}
+>
+  {item?.productStatus}
+</Caption>
               )}
-              <Caption className="text-green bg-green_100 px-3 py-1 text-sm rounded-full">{item?.totalBids} Bids</Caption>
+              <Caption className="text-green bg-green_100 px-3 py-1 text-sm rounded-full">{item?.bids} Bids</Caption>
             </div>
           </div>
         </div>
         <div className="details mt-4">
-          <Title className="uppercase">{item.title}</Title>
+          <Title className="uppercase">{item?.name}</Title>
           <hr className="mt-3" />
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center justify-between gap-5">
@@ -44,11 +54,11 @@ export const ProductCard = ({ item }) => {
             <div className="w-[1px] h-10 bg-gray-300"> </div>
             <div className="flex items-center justify-between gap-5">
               <div>
-                <GiTakeMyMoney size={40} className="text-red-500" />
+                {/* <CiTimer size={25} className="text-red-500" /> */}
               </div>
               <div>
-                <Caption className="text-red-500">Buy Now</Caption>
-                <Title>${item?.price}.00</Title>
+              <Caption className="text-green">Time left</Caption>
+                <Title>{item?.timeleft}</Title>
               </div>
             </div>
           </div>

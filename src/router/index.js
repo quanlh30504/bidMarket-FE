@@ -74,3 +74,9 @@ export { Watchlist} from "../screens/profile/Watchlist";
 // Services Routes
 export { authService } from "../services/authService";
 export { default as axiosClient } from "../services/axiosClient";
+
+// Pagination
+export { Pagination } from "../components/pagination";
+
+//shop view
+export { ShopView } from "../screens/shop/shopView";
