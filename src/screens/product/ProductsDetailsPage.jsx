@@ -20,6 +20,8 @@ import { } from "react-icons/fa";
 import WebSocketService from "../../services/WebSocketService"
 import { FaEllipsisH, FaStar } from 'react-icons/fa'; // Import 3 dot icon
 import { useNotification } from "../../notifications/NotificationContext";
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { CiLocationOn } from "react-icons/ci";
 
 function formatTime(dateString) {
   const date = new Date(dateString);
@@ -473,6 +475,26 @@ export const ProductsDetailsPage = () => {
                   />
                 )}
               </div>
+              <div className="flex items-center justify-center border p-3 rounded-lg shadow-md mt-8 ml-5 w-11/12 h-32" style={{ background: 'linear-gradient(to bottom, #5bbb7b 50%, white 50%)' }}>
+  <div className="flex items-center gap-3">
+    <ProfileCard className="w-16 h-16">
+      <img src={User2} alt="User2" />
+    </ProfileCard>
+    <div>
+      <Title level={5} className="text-xl">ABC Store</Title>
+      <div className="flex items-center gap-1 mt-3">
+        <CiLocationOn />
+        <Caption>Ha Noi, Vietnam</Caption>
+      </div>
+    </div>
+    <div className="flex justify-center ltr mt-8 -my-5">
+      <button className="w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green">+ Follow</button>
+      <button className="ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1">
+        <IoChatbubbleEllipsesOutline className="ml-3" />Chat
+      </button>
+    </div>
+  </div>
+</div>
             </div>
             <div className="w-1/2">
               <Title level={2} className="capitalize">
