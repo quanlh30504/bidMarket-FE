@@ -9,7 +9,7 @@ export const SellerHub = () => {
     <Container>
       <Title level={1} className="mb-6 text-center">Seller Hub</Title>
       <nav className="flex space-x-6 mb-8">
-        <CustomNavLinkList href="/seller-hub/overview" isActive={location.pathname === '/seller-hub/overview'}>
+        <CustomNavLinkList href="/seller-hub/overview" isActive={location.pathname === '/seller-hub/overview' || location.pathname === '/seller-hub'}>
           Overview
         </CustomNavLinkList>
         <CustomNavLinkList href="/seller-hub/orders" isActive={location.pathname === '/seller-hub/orders'}>
