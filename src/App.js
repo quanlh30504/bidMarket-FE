@@ -32,12 +32,14 @@ import {
   Shipping,
   Payment,
   SellerHubRoute,
+  WarningProvider,
 } from "./router/index.js";
 
 function App() {
   return (
     <>
       <UserProvider>
+      <WarningProvider>
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
@@ -337,6 +339,7 @@ function App() {
             />
           </Routes>
         </BrowserRouter>
+      </WarningProvider>
       </UserProvider>
     </>
   );

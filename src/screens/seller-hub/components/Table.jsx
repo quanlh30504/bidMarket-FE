@@ -5,8 +5,9 @@ export const Table = ({ items, sortOptions, sortFuntion }) => {
   if (items.length === 0) return null;
 
   // get all fields from the first item
-  const fields = Object.keys(items[0]).map(
-    (field) => field.charAt(0).toUpperCase() + field.slice(1)
+  const fields = Object.keys(items[0])
+    .filter((field) => !field.startsWith("hidden_"))
+    .map((field) => field.charAt(0).toUpperCase() + field.slice(1)
   );
   
   return (

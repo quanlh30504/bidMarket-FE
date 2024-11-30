@@ -1,67 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PhotoUpload } from '../components/PhotoUpload';
 import { ProductDetails } from '../components/ProductDetails';
 import { ItemSpecifics } from '../components/ItemSpecifics';
-import { CreationAgreement } from '../components/CreationAgreement';
 import ProductService from '../../../services/productService';
-import ProductCreateRequest from '../../../dto/Request/ProductCreateRequest';
-import { useUser } from '../../../router';
+import ProductUpdateRequest from '../../../dto/Request/ProductUpdateRequest';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export const EditProduct = () => {
   const { productId } = useParams();
+  // console.log('productId:', productId);
   const navigate = useNavigate();
+  const [currentTitle, setCurrentTitle] = useState('');
   const [productDetails, setProductDetails] = useState({
     title: '',
-    itemCategory: {},
+    itemCategory: [],
     specifics: {},
     stockQuantity: 1,
     photos: [],
     videos: [],
   });
   const [loading, setLoading] = useState(false);
-  const UUID = useUser().user.UUID;
 
   const handleSubmit = async () => {
-    console.log('Create Auction Data:', {
-      productDetails,
-    });
-    // API call
     try {
       setLoading(true);
-      console.log('Creating product...');
-      console.log('productDetails:', productDetails);
+      console.log('Updating product:', productDetails);
 
-      let imageUrls = [];
-      if (productDetails.photos) {
-        imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
-      }
-      const categoryKeys = Object.keys(productDetails.itemCategory);  // Get category keys only
+      // let imageUrls = [];
+      // if (productDetails.photos) {
+      //   imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
+      // }
 
-      const productCreateRequest = new ProductCreateRequest({
+      const productUpdateRequest = new ProductUpdateRequest({
         name: productDetails.title,
-        description: JSON.stringify(productDetails.specifics), // Convert to JSON string
-        sellerId: UUID,
+        description: JSON.stringify(productDetails.specifics),  // Convert object to JSON string
         stockQuantity: productDetails.stockQuantity,
-        categories: new Set(categoryKeys),
-        imageUrls: imageUrls,
+        categories: Array.from(new Set(productDetails.itemCategory)),
+        productImages: [],  // chưa xử lý
+        newImages: [],
       });
-      console.log('productCreateRequest:', productCreateRequest);
-      productCreateRequest.validate();
-      await ProductService.createProduct(productCreateRequest);
-      window.alert('Product created successfully');
+      console.log('productUpdateRequest:', JSON.stringify(productUpdateRequest));
+      productUpdateRequest.validate();
+
+      await ProductService.updateProduct(productId, productUpdateRequest);
+      window.alert('Product updated successfully');
     } catch (error) {
-      console.error('Error creating product:', error);
-      window.alert('Error creating product');
+      console.error('Error updating product:', error);
+      window.alert('Error updating product. Please try again later');
     } finally {
       setLoading(false);
       navigate('/seller-hub/listings');
     }
   };
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const product = (await ProductService.getProduct(productId)).data;
+        console.log('Product:', product);
+        setCurrentTitle(product.name);
+        setProductDetails({
+          title: product.name,
+          itemCategory: product.categories,
+          specifics: JSON.parse(product.description),  // Convert JSON string to object
+          stockQuantity: product.stockQuantity,
+        });
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProduct();
+  }, []);
+
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow">
-      <h1 className="text-3xl font-semibold mb-6 text-center">Edit your product</h1>
+      <h1 className="text-3xl font-semibold mb-6 text-center">You are editing product: <span className="text-green">{currentTitle}</span></h1>
       <PhotoUpload productDetails={productDetails} setProductDetails={setProductDetails} />
       <ProductDetails productDetails={productDetails} setProductDetails={setProductDetails} />
       <ItemSpecifics productDetails={productDetails} setProductDetails={setProductDetails} />
@@ -76,7 +92,6 @@ export const EditProduct = () => {
           placeholder="Enter stock quantity"
         />
       </div>
-      <CreationAgreement createButtonName="Create product" />
 
       <div className="mt-8 flex flex-col space-y-2 items-center">
         <button
@@ -84,7 +99,7 @@ export const EditProduct = () => {
           onClick={handleSubmit}
           disabled={loading}
         >
-          {loading ? 'Creating...' : 'Create product'}
+          {loading ? 'Updating...' : 'Update product'}
         </button>
         <button 
           className="w-52 px-4 py-2 bg-gray-100 border border-gray-300 rounded-full" 

@@ -6,11 +6,13 @@ import { CreationAgreement } from '../components/CreationAgreement';
 import ProductService from '../../../services/productService';
 import ProductCreateRequest from '../../../dto/Request/ProductCreateRequest';
 import { useUser } from '../../../router';
+import { useNavigate } from 'react-router-dom';
 
 export const CreateProduct = () => {
+  const navigate = useNavigate();
   const [productDetails, setProductDetails] = useState({
     title: '',
-    itemCategory: {},
+    itemCategory: [],
     specifics: {},
     stockQuantity: 1,
     photos: [],
@@ -33,17 +35,17 @@ export const CreateProduct = () => {
       if (productDetails.photos) {
         imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
       }
-      const categoryKeys = Object.keys(productDetails.itemCategory);  // Get category keys only
+      // const categoryKeys = Object.keys(productDetails.itemCategory);  // Get category keys only
 
       const productCreateRequest = new ProductCreateRequest({
         name: productDetails.title,
         description: JSON.stringify(productDetails.specifics), // Convert to JSON string
         sellerId: UUID,
         stockQuantity: productDetails.stockQuantity,
-        categories: new Set(categoryKeys),
+        categories: new Set(productDetails.itemCategory),
         imageUrls: imageUrls,
       });
-      console.log('productCreateRequest:', productCreateRequest);
+      console.log('productCreateRequest:', JSON.stringify(productCreateRequest));
       productCreateRequest.validate();
       await ProductService.createProduct(productCreateRequest);
       window.alert('Product created successfully');
@@ -52,6 +54,7 @@ export const CreateProduct = () => {
       window.alert('Error creating product');
     } finally {
       setLoading(false);
+      navigate('/seller-hub/listings');
     }
   };
 
@@ -82,7 +85,11 @@ export const CreateProduct = () => {
         >
           {loading ? 'Creating...' : 'Create product'}
         </button>
-        <button className="w-52 px-4 py-2 bg-gray-100 border border-gray-300 rounded-full" disabled={loading}>
+        <button 
+          className="w-52 px-4 py-2 bg-gray-100 border border-gray-300 rounded-full" 
+          onClick={() => navigate('/seller-hub/listings')}
+          disabled={loading}
+        >
           Cancel
         </button>
       </div>

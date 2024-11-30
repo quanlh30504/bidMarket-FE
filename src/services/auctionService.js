@@ -7,6 +7,11 @@ class AuctionService {
     return axiosClient.post('/api/auctions', request);
   }
 
+  // Xóa một phiên đấu giá theo ID
+  static deleteAuction(id) {
+    return axiosClient.delete(`/api/auctions/${id}`);
+  }
+
   // Cập nhật thông tin của phiên đấu giá bằng ID
   static updateAuction(id, request, newImages = null) {
     const formData = new FormData();

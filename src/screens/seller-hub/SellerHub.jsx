@@ -39,12 +39,12 @@ export const SellerHub = () => {
         <CustomNavLinkList href="/seller-hub/reports" isActive={location.pathname === '/seller-hub/reports'}>
           Reports
         </CustomNavLinkList>
-        <CustomNavLinkList href="/seller-hub/create-product" isActive={location.pathname === '/seller-hub/create-product'}>
+        {/* <CustomNavLinkList href="/seller-hub/create-product" isActive={location.pathname === '/seller-hub/create-product'}>
           Create Product
         </CustomNavLinkList>
         <CustomNavLinkList href="/seller-hub/create-auction" isActive={location.pathname === '/seller-hub/create-auction'}>
           Create Auction
-        </CustomNavLinkList>
+        </CustomNavLinkList> */}
       </nav>
       
       <Outlet /> {/* nested routes */}

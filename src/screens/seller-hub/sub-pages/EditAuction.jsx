@@ -1,21 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PhotoUpload } from "../components/PhotoUpload";
 import { ProductDetails } from "../components/ProductDetails";
 import { ItemSpecifics } from "../components/ItemSpecifics";
 import { AuctionSettings } from "../components/AuctionSettings";
 import { CreationAgreement } from "../components/CreationAgreement";
+import ProductUpdateRequest from "../../../dto/Request/ProductUpdateRequest";
+import AuctionUpdateRequest from "../../../dto/Request/AuctionUpdateRequest";
 import ProductService from "../../../services/productService";
-import ProductCreateRequest from "../../../dto/Request/ProductCreateRequest";
-import AuctionCreateRequest from "../../../dto/Request/AuctionCreateRequest";
-import { useUser } from "../../../router";
 import AuctionService from "../../../services/auctionService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-export const CreateAuction = () => {
+export const EditAuction = () => {
+  const { auctionId } = useParams();
   const navigate = useNavigate();
+  const [currentTitle, setCurrentTitle] = useState("");
   const [productDetails, setProductDetails] = useState({
     title: '',
-    itemCategory: {},
+    itemCategory: [],
     specifics: {},
     stockQuantity: 1,
     photos: [],
@@ -31,38 +32,31 @@ export const CreateAuction = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const UUID = useUser().user.UUID;
 
   const handleSubmit = async () => {
-    console.log('Create Auction Data:', {
-      productDetails,
-    });
-    // API call
     try {
       setLoading(true);
-      console.log('Creating product...');
-      console.log('productDetails:', productDetails);
+      console.log('Updating product:', productDetails);
 
-      let imageUrls = [];
-      if (productDetails.photos) {
-        imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
-      }
-      const categoryKeys = Object.keys(productDetails.itemCategory);  // Get category keys only
+      // let imageUrls = [];
+      // if (productDetails.photos) {
+      //   imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
+      // }
 
-      const productCreateRequest = new ProductCreateRequest({
+      const productUpdateRequest = new ProductUpdateRequest({
         name: productDetails.title,
-        description: JSON.stringify(productDetails.specifics), // Convert to JSON string
-        sellerId: UUID,
+        description: JSON.stringify(productDetails.specifics),  // Convert object to JSON string
         stockQuantity: productDetails.stockQuantity,
-        categories: new Set(categoryKeys),
-        imageUrls: imageUrls,
+        categories: Array.from(new Set(productDetails.itemCategory)),
+        productImages: [],  // chưa xử lý
+        newImages: [],
       });
-      console.log('productCreateRequest:', productCreateRequest);
-      productCreateRequest.validate();
+      console.log('productUpdateRequest:', JSON.stringify(productUpdateRequest));
+      productUpdateRequest.validate();
 
-      const auctionCreateRequest = new AuctionCreateRequest({
+      const auctionUpdateRequest = new AuctionUpdateRequest({
         title: auctionSettings.title,
-        productCreateRequest: productCreateRequest,
+        productUpdateRequest: productUpdateRequest,
         startTime: auctionSettings.startTime,
         endTime: auctionSettings.endTime,
         currentPrice: auctionSettings.startPrice,
@@ -70,48 +64,56 @@ export const CreateAuction = () => {
         minimumBidIncrement: auctionSettings.minimumBidIncrement,
         extensionCount: 0,
       });
-      auctionCreateRequest.validate();
+      console.log('auctionUpdateRequest:', JSON.stringify(auctionUpdateRequest));
+      auctionUpdateRequest.validate();
 
-      await AuctionService.createAuction(auctionCreateRequest); 
-      window.alert('Auction created successfully');
+      await AuctionService.updateAuction(auctionId, auctionUpdateRequest);
+      window.alert('Product updated successfully');
     } catch (error) {
-      console.error('Error creating product:', error);
-      window.alert('Error creating product');
+      console.error('Error updating product:', error);
+      window.alert('Error updating product. Please try again later');
     } finally {
       setLoading(false);
       navigate('/seller-hub/listings');
     }
   };
 
-  function handleSelectProduct(e) {
-    // API call // chưa có API
-    // sample response
-    const responseProductDetails = {
-      title: "Apple Watch Series 4 40mm GPS",
-      itemCategory: {
-        COINS: 'Coins',
-        METALWARE: 'Metalware',
-      },
-      specifics: {},
-      photos: [],
-    };
-    setProductDetails(responseProductDetails);
-  }
+  useEffect(() => {
+    const fetchAuction = async () => {
+      setLoading(true);
+      try {
+        const auction = (await AuctionService.getAuctionById(auctionId)).data;
+        const product = (await ProductService.getProduct(auction.productId)).data; // api get auction không trả về product
+        console.log('Auction:', auction);
+        console.log('Product:', product);
+        setCurrentTitle(auction.title);
+        setProductDetails({
+          title: product.name,
+          itemCategory: product.categories,
+          specifics: JSON.parse(product.description),  // Convert JSON string to object
+          stockQuantity: product.stockQuantity,
+        });
+        setAuctionSettings({
+          title: auction.title,
+          startTime: new Date(auction.startTime),
+          endTime: new Date(auction.endTime),
+          startPrice: auction.startingPrice,
+          minimumBidIncrement: auction.minimumBidIncrement,
+        });
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAuction();
+  }, []);
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow">
       <h1 className="text-3xl font-semibold mb-6 text-center">
-        Edit your Auction
+        You are editing auction: <span className="text-green">{currentTitle}</span>
       </h1>
-      <div className="flex justify-end">
-        <button
-          className="border py-1 px-4 rounded-full bg-green"
-          onClick={handleSelectProduct}
-          disabled={loading}
-        >
-          Select available product
-        </button>
-      </div>
 
       <PhotoUpload
         productDetails={productDetails}
@@ -140,7 +142,6 @@ export const CreateAuction = () => {
         auctionSettings={auctionSettings}
         setAuctionSettings={setAuctionSettings}
       />
-      <CreationAgreement createButtonName="Create auction" />
 
       <div className="mt-8 flex flex-col space-y-2 items-center">
         <button
@@ -148,13 +149,7 @@ export const CreateAuction = () => {
           onClick={handleSubmit}
           disabled={loading}
         >
-          Create auction
-        </button>
-        <button
-          className="w-52 py-2 bg-gray-100 border border-gray-300 rounded-full"
-          disabled={loading}
-        >
-          Save for later
+          {loading ? 'Updating...' : 'Update auction'}
         </button>
         <button
           className="w-52 py-2 bg-gray-100 border border-gray-300 rounded-full"
