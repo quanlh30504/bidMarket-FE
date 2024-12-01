@@ -40,7 +40,6 @@ export const Header = () => {
     };
   }, []);
 
-  // Check if it's the home page
   const isHomePage = location.pathname === "/";
 
   const isChatPage = location.pathname === "/chat";
@@ -93,9 +92,7 @@ export const Header = () => {
 
                     <div className="flex items-center gap-8">
                       <div className="flex items-center gap-4">
-                        {/* Show notification bell only if user is logged in */}
                         {user.role && <NotificationBell/>}
-                        {/* Other header items */}
                       </div>
                       <button onClick={() => authService.logout()} className="border rounded-full p-2 px-4 bg-red-500">
                         Logout
@@ -116,7 +113,6 @@ export const Header = () => {
               </div>
             </div>
 
-            {/* Responsive Menu if below 768px */}
             <div ref={menuRef} className={`lg:flex lg:items-center lg:w-auto w-full p-5 absolute right-0 top-full menu-container ${isOpen ? "open" : "closed"}`}>
               {menulists.map((list) => (
                 (list.id !== 7 || role === "SELLER") && (
