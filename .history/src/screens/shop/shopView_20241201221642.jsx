@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductCard } from "../../components/cards/ProductCard";
@@ -57,6 +57,18 @@ export const ShopView = () => {
     }
   };
 
+  const fetchProductDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await axiosClient.get(`/api/auctions/${id}`);
+      setAuction(data);
+      setCurrentPrice(data.currentPrice)
+    } catch (err) {
+      setError("Failed to fetch auction details.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   const fetchIsFollowing = async () => {
     try {

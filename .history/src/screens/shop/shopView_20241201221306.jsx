@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams,  useHistory} from 'react-router-dom';
 import axios from 'axios';
 import { ProductCard } from "../../components/cards/ProductCard";
 // import { productlists } from "../../utils/data";
@@ -17,6 +17,7 @@ export const ShopView = () => {
   const PAGES_PER_GROUP = 3; 
 
   const { sellerId } = useParams();
+  const history = useHistory();
   const [sellerData, setSellerData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sellerProducts, setSellerProducts] = useState([]);
@@ -24,9 +25,6 @@ export const ShopView = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const userId = authUtils.getCurrentUserId();
-  const [auction, setAuction] = useState(null);
-  const [loading, setLoading] = useState(true); 
-  const [currentPrice, setCurrentPrice] = useState(null);
 
 
 
@@ -57,7 +55,6 @@ export const ShopView = () => {
     }
   };
 
-
   const fetchIsFollowing = async () => {
     try {
       const isFollowingResponse = await axiosClient.get(`/api/follows/${sellerId}/isFollowing`, {
@@ -82,6 +79,10 @@ export const ShopView = () => {
    useEffect(() => {
     fetchSellerProducts(currentPage);
   }, [sellerId, currentPage]);
+
+  const handleProductClick = (id) => {
+    history.push(`api/auctions/${id}`);
+  };
 
   const calculateTimeLeft = (endTime) => {
     const now = new Date();
@@ -217,7 +218,7 @@ export const ShopView = () => {
         <Container>
           <Title className="pt-8" level={4}>All Auction</Title>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 my-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 my-8" >
           {
             paginatedProducts?.map((item, index) => (
               <ProductCard item={item} key={index + 1} />

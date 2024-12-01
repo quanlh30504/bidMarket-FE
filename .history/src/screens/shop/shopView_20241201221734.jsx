@@ -57,6 +57,18 @@ export const ShopView = () => {
     }
   };
 
+  const fetchProductDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await axiosClient.get(`/api/auctions/${id}`);
+      setAuction(data);
+      setCurrentPrice(data.currentPrice)
+    } catch (err) {
+      console.error("Failed to fetch auction details.", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   const fetchIsFollowing = async () => {
     try {

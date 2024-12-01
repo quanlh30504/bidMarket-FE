@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductCard } from "../../components/cards/ProductCard";
@@ -23,10 +23,7 @@ export const ShopView = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
-  const userId = authUtils.getCurrentUserId();
-  const [auction, setAuction] = useState(null);
-  const [loading, setLoading] = useState(true); 
-  const [currentPrice, setCurrentPrice] = useState(null);
+  const userId = authUtils.getUserId();
 
 
 
@@ -56,7 +53,6 @@ export const ShopView = () => {
       console.error('Error fetching seller products:', error);
     }
   };
-
 
   const fetchIsFollowing = async () => {
     try {
@@ -121,7 +117,7 @@ export const ShopView = () => {
   const handleFollow = async () => {
     try {
       await axiosClient.post(`/api/follows/${sellerId}/follow`, null, {
-        params: { followerId: userId }
+        params: { followerId: "010bb242-c6e1-403e-8bca-2825bd329861" }
       });
 
       setIsFollowing(true);
@@ -134,7 +130,7 @@ export const ShopView = () => {
   const handleUnfollow = async () => {
     try {
       await axiosClient.delete(`/api/follows/${sellerId}/unfollow`, { 
-        params: { followerId: userId } 
+        params: { followerId: "010bb242-c6e1-403e-8bca-2825bd329861" } 
       });
       setIsFollowing(false);
       setFollowersCount(followersCount - 1);
@@ -222,10 +218,12 @@ export const ShopView = () => {
             paginatedProducts?.map((item, index) => (
               <ProductCard item={item} key={index + 1} />
             ))}
+            {console.log(paginatedProducts)}
     </div>
         </Container>
       </section>
       <Pagination
+        // currentPage={currentPage}
         totalItems={totalProducts}
         itemsPerPage={ITEMS_PER_PAGE}
         pagesPerGroup={PAGES_PER_GROUP}

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams,  useHistory} from 'react-router-dom';
 import axios from 'axios';
 import { ProductCard } from "../../components/cards/ProductCard";
 // import { productlists } from "../../utils/data";
@@ -17,6 +17,7 @@ export const ShopView = () => {
   const PAGES_PER_GROUP = 3; 
 
   const { sellerId } = useParams();
+  
   const [sellerData, setSellerData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sellerProducts, setSellerProducts] = useState([]);
@@ -24,9 +25,6 @@ export const ShopView = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const userId = authUtils.getCurrentUserId();
-  const [auction, setAuction] = useState(null);
-  const [loading, setLoading] = useState(true); 
-  const [currentPrice, setCurrentPrice] = useState(null);
 
 
 
@@ -56,7 +54,6 @@ export const ShopView = () => {
       console.error('Error fetching seller products:', error);
     }
   };
-
 
   const fetchIsFollowing = async () => {
     try {

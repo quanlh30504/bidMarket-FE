@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductCard } from "../../components/cards/ProductCard";
@@ -24,9 +24,6 @@ export const ShopView = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const userId = authUtils.getCurrentUserId();
-  const [auction, setAuction] = useState(null);
-  const [loading, setLoading] = useState(true); 
-  const [currentPrice, setCurrentPrice] = useState(null);
 
 
 
@@ -57,7 +54,19 @@ export const ShopView = () => {
     }
   };
 
-
+  const fetchProductDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await axiosClient.get(`/api/auctions/${id}`);
+      setAuction(data);
+      setCurrentPrice(data.currentPrice)
+    } catch (err) {
+      setError("Failed to fetch auction details.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+  
   const fetchIsFollowing = async () => {
     try {
       const isFollowingResponse = await axiosClient.get(`/api/follows/${sellerId}/isFollowing`, {
