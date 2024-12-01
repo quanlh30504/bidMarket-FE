@@ -102,20 +102,7 @@ export const ShopView = () => {
     const paginatedProducts = sellerProducts.slice(
       (currentPage - 1) * ITEMS_PER_PAGE,
       currentPage * ITEMS_PER_PAGE
-    ).map((item) => ({
-      id: item.productDto.id,
-      productImages: item.productDto.productImages.find((img) => img.isPrimary)?.imageUrl || "https://via.placeholder.com/150",
-      name: item.title,
-      description: item.productDto.description || "",
-      productStatus: item.status,
-      sellerId: item.productDto.sellerId,
-      stockQuantity: item.productDto.stockQuantity || "",
-      categories: item.productDto.categories || "Unknown",
-      bprice: item.startingPrice,
-      price: item.currentPrice,
-      bids: item.bidCount,
-      timeleft: calculateTimeLeft(item.endTime),
-    }));
+    );
 
 
   const handleFollow = async () => {
