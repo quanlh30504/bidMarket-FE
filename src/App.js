@@ -33,12 +33,14 @@ import {
   Payment,
   SellerHubRoute,
   AdminRoute,
+  WarningProvider,
 } from "./router/index.js";
 
 function App() {
   return (
     <>
       <UserProvider>
+      <WarningProvider>
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
@@ -69,7 +71,7 @@ function App() {
             <Route
               path="/chat"
               element={
-                <PrivateRoute allowedRoles={["bidder", "seller", "admin"]}>
+                <PrivateRoute allowedRoles={["BIDDER", "SELLER", "ADMIN"]}>
                   <ChatLayout>
                     <Chat />
                   </ChatLayout>
@@ -348,6 +350,7 @@ function App() {
             />
           </Routes>
         </BrowserRouter>
+      </WarningProvider>
       </UserProvider>
     </>
   );

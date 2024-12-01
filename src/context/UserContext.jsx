@@ -10,6 +10,7 @@ export const UserProvider = ({ children }) => {
     // -> role === null: user is not
     UUID: "5eeea7fb-9adc-11ef-a43a-00155df1c39f" // Dummy UUID
   });
+  const [loading, setLoading] = useState(true);
 
   const RoleHandler = {
     setRole: (role) => {
@@ -33,14 +34,16 @@ export const UserProvider = ({ children }) => {
         } else {
           setUser({ role: null });
         }
-      };
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchAccessToken();
   }, []);
 
   return (
-    <UserContext.Provider value={{ user }}>
+    <UserContext.Provider value={{ user, loading }}>
       {children}
     </UserContext.Provider>
   );

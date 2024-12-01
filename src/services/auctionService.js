@@ -1,9 +1,15 @@
 import axiosClient from './axiosClient';
 
 class AuctionService {
+  
   // Tạo một phiên đấu giá mới
   static createAuction(request) {
     return axiosClient.post('/api/auctions', request);
+  }
+
+  // Xóa một phiên đấu giá theo ID
+  static deleteAuction(id) {
+    return axiosClient.delete(`/api/auctions/${id}`);
   }
 
   // Cập nhật thông tin của phiên đấu giá bằng ID
@@ -31,13 +37,14 @@ class AuctionService {
 
   // Tìm kiếm phiên đấu giá với các tham số tùy chọn
   static searchAuctions({
-    title,
-    categoryType,
-    status,
-    minPrice,
-    maxPrice,
-    startTime,
-    endTime,
+    sellerId = '',
+    title = '',
+    categoryType = [],
+    status = '',
+    minPrice = '',
+    maxPrice = '',
+    startTime = '',
+    endTime = '',
     page = 0,
     size = 10,
     sortField = 'currentPrice',
@@ -45,6 +52,7 @@ class AuctionService {
   }) {
     return axiosClient.get('/api/auctions/search', {
       params: {
+        sellerId,
         title,
         categoryType,
         status,
@@ -79,6 +87,36 @@ class AuctionService {
   static reOpenAuction(id, auctionUpdateRequest) {
     return axiosClient.put(`/api/auctions/reOpen/${id}`, auctionUpdateRequest);
   }
-}
 
+  // // Tìm kiếm phiên đấu giá của Seller với các tham số tùy chọn (chưa có phương thức tương ứng với endpoint này trong mã BE nhưng endpoint tồn tại)
+  // static searchAuctionsBySellerId(sellerId, {
+  //   title = '',
+  //   categoryType = [],
+  //   status = '',
+  //   minPrice = '',
+  //   maxPrice = '',
+  //   startTime = '',
+  //   endTime = '',
+  //   page = 0,
+  //   size = 10,
+  //   sortField = 'currentPrice',
+  //   sortDirection = 'ASC',
+  // }) {
+  //   return axiosClient.get(`/api/auctions/${sellerId}/search`, {
+  //     params: {
+  //       title,
+  //       categoryType,
+  //       status,
+  //       minPrice,
+  //       maxPrice,
+  //       startTime,
+  //       endTime,
+  //       page,
+  //       size,
+  //       sortField,
+  //       sortDirection,
+  //     },
+  //   });
+  // }
+}
 export default AuctionService;

@@ -12,6 +12,8 @@ import { Reports } from "./sub-pages/Reports";
 import { Research } from "./sub-pages/Research";
 import { CreateProduct } from "./sub-pages/CreateProduct";
 import { CreateAuction } from "./sub-pages/CreateAuction";
+import { EditProduct } from "./sub-pages/EditProduct.jsx";
+import { EditAuction } from "./sub-pages/EditAuction.jsx";
 
 export const SellerHubRoute = () => {
   return (
@@ -30,6 +32,9 @@ export const SellerHubRoute = () => {
         <Route path="research" element={<Research />} />
         <Route path="create-product" element={<CreateProduct />} />
         <Route path="create-auction" element={<CreateAuction />} />
+        <Route path="create-auction/:productId" element={<CreateAuction />} />
+        <Route path="edit-product/:productId" element={<EditProduct />} />
+        <Route path="edit-auction/:auctionId" element={<EditAuction />} />
       </Route>
     </Routes>
   );
