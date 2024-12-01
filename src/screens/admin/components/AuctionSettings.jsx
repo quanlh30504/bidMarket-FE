@@ -1,15 +1,16 @@
 import React from "react";
 
 // Chưa làm: Chọn định dạng tiền
-export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
-  const handleChange = (field, parseType = 'string') => (event) => {
+export const AuctionSettings = ({ auctionSettings, setAuctionSettings, disabled = false }) => {
+  const handleChange = (field, parseType = "string") => (event) => {
+    if (disabled) return; // Không làm gì nếu disabled là true
     let value = event.target.value;
 
     switch (parseType) {
-      case 'number':
+      case "number":
         value = parseFloat(value) || 0; // Chuyển đổi thành số (nếu không hợp lệ sẽ thành 0)
         break;
-      case 'datetime':
+      case "datetime":
         value = new Date(value); // Chuyển đổi thành Date
         break;
       default:
@@ -35,6 +36,7 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
                 value={auctionSettings.title}
                 onChange={handleChange("title")}
                 className="border rounded w-full px-2 py-1"
+                disabled={disabled}
               />
             </td>
           </tr>
@@ -45,9 +47,14 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
             <td className="px-4 py-2">
               <input
                 type="datetime-local"
-                value={auctionSettings.startTime ? auctionSettings.startTime.toISOString().slice(0, 16) : ''}
-                onChange={handleChange("startTime", 'datetime')}
+                value={
+                  auctionSettings.startTime
+                    ? auctionSettings.startTime.toISOString().slice(0, 16)
+                    : ""
+                }
+                onChange={handleChange("startTime", "datetime")}
                 className="border rounded w-full px-2 py-1"
+                disabled={disabled}
               />
             </td>
           </tr>
@@ -58,9 +65,14 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
             <td className="px-4 py-2">
               <input
                 type="datetime-local"
-                value={auctionSettings.endTime ? auctionSettings.endTime.toISOString().slice(0, 16) : ''}
-                onChange={handleChange("endTime", 'datetime')}
+                value={
+                  auctionSettings.endTime
+                    ? auctionSettings.endTime.toISOString().slice(0, 16)
+                    : ""
+                }
+                onChange={handleChange("endTime", "datetime")}
                 className="border rounded w-full px-2 py-1"
+                disabled={disabled}
               />
             </td>
           </tr>
@@ -72,8 +84,9 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
               <input
                 type="number"
                 value={auctionSettings.startPrice}
-                onChange={handleChange("startPrice", 'number')}
+                onChange={handleChange("startPrice", "number")}
                 className="border rounded w-full px-2 py-1"
+                disabled={disabled}
               />
             </td>
           </tr>
@@ -85,8 +98,9 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
               <input
                 type="number"
                 value={auctionSettings.minimumBidIncrement}
-                onChange={handleChange("minimumBidIncrement", 'number')}
+                onChange={handleChange("minimumBidIncrement", "number")}
                 className="border rounded w-full px-2 py-1"
+                disabled={disabled}
               />
             </td>
           </tr>

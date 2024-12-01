@@ -3,7 +3,7 @@ import { FilterBar } from '../components/FilterBar';
 import { Table } from '../components/Table';
 import { Sidebar } from '../components/Sidebar';
 import AdminService from '../../../services/adminService';
-import { Role } from '../Enum/Role';
+import { Role } from '../../../router/index';
 
 export const UserManagement = () => {
   const [items, setItems] = useState([]);
@@ -86,7 +86,7 @@ export const UserManagement = () => {
     } catch (error) {
       console.error(error);
     }
-  }, [activeMenuItem, items]);
+  }, [activeMenuItem]);
 
   return (
     <div className="flex">

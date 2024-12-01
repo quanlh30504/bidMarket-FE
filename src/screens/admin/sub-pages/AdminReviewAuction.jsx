@@ -1,17 +1,40 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PhotoUpload } from "../components/PhotoUpload";
 import { ProductDetails } from "../components/ProductDetails";
 import { ItemSpecifics } from "../components/ItemSpecifics";
 import { AuctionSettings } from "../components/AuctionSettings";
+import { useNavigate, useParams } from "react-router-dom";
+import AuctionService from "../../../services/auctionService";
+import ProductService from "../../../services/productService";
+import { useWarning } from "../../../router";
+import { act } from "react";
 
-export const AdminReviewAuction = ({ productDetails, auctionSettings, onApprove, onReject }) => {
-  // State để lưu trạng thái loading khi admin thực hiện duyệt hoặc từ chối
+export const AdminReviewAuction = () => {
+  const { showWarning } = useWarning();
+  const navigate = useNavigate();
+  const { auctionId } = useParams();
   const [loading, setLoading] = useState(false);
+  const [productDetails, setProductDetails] = useState({
+    title: '',
+    itemCategory: [],
+    specifics: {},
+    stockQuantity: 1,
+    photos: [],
+    videos: [],
+  });
+
+  const [auctionSettings, setAuctionSettings] = useState({
+    title: "",
+    startTime: "",
+    endTime: "",
+    startPrice: "",
+    minimumBidIncrement: "",
+  });
 
   const handleApprove = async () => {
     setLoading(true);
     try {
-      await onApprove(productDetails.id);
+      await AuctionService.openAuction(auctionId);
       alert("Auction approved successfully");
     } catch (error) {
       console.error("Error approving auction:", error);
@@ -24,7 +47,7 @@ export const AdminReviewAuction = ({ productDetails, auctionSettings, onApprove,
   const handleReject = async () => {
     setLoading(true);
     try {
-      await onReject(productDetails.id);
+      await AuctionService.closeAuction(auctionId);
       alert("Auction rejected successfully");
     } catch (error) {
       console.error("Error rejecting auction:", error);
@@ -34,22 +57,65 @@ export const AdminReviewAuction = ({ productDetails, auctionSettings, onApprove,
     }
   };
 
+  useEffect(() => {
+    const fetchAuction = async () => {
+      setLoading(true);
+      try {
+        const auction = (await AuctionService.getAuctionById(auctionId)).data;
+        const product = (await ProductService.getProduct(auction.productId)).data; // api get auction không trả về product
+        console.log('Auction:', auction);
+        console.log('Product:', product);
+        setProductDetails({
+          title: product.name,
+          itemCategory: product.categories,
+          specifics: JSON.parse(product.description),  // Convert JSON string to object
+          stockQuantity: product.stockQuantity,
+        });
+        setAuctionSettings({
+          title: auction.title,
+          startTime: new Date(auction.startTime),
+          endTime: new Date(auction.endTime),
+          startPrice: auction.startingPrice,
+          minimumBidIncrement: auction.minimumBidIncrement,
+        });
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        if (error?.response?.data?.code === 5001) {
+          console.log("Invalid Auction ID");
+          showWarning(
+            <div>
+              <h2 className="text-lg font-semibold mb-2 text-center">Invalid Auction ID for review</h2>
+            </div>,
+            () => {}
+          );
+        }
+        navigate("/admin")
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAuction();
+  }, [auctionId]);
+
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow">
       <h1 className="text-3xl font-semibold mb-6 text-center">
-        Review Auction
+        Reviewing Auction: <span className="text-green">{auctionSettings.title}</span>
       </h1>
       <PhotoUpload
         productDetails={productDetails}
         setProductDetails={() => {}}
+        disabled={true}
       />
       <ProductDetails
         productDetails={productDetails}
         setProductDetails={() => {}}
+        disabled={true}
       />
       <ItemSpecifics
         productDetails={productDetails}
         setProductDetails={() => {}}
+        disabled={true}
       />
       <div className="mb-10 border-t pt-4">
         <h2 className="text-lg font-semibold mb-2">STOCK QUANTITY</h2>
@@ -58,11 +124,13 @@ export const AdminReviewAuction = ({ productDetails, auctionSettings, onApprove,
           className="border border-gray-300 rounded-md px-4 py-2 w-full"
           value={productDetails.stockQuantity}
           readOnly
+          disabled={true}
         />
       </div>
       <AuctionSettings
         auctionSettings={auctionSettings}
         setAuctionSettings={() => {}}
+        disabled={true}
       />
       <div className="mt-8 flex flex-col space-y-4 items-center">
         <button

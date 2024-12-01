@@ -4,7 +4,7 @@ import OrderService from '../../../services/orderService';
 import { useUser } from '../../../router/index';
 
 export const Overview = () => {
-  const user = useUser();
+  const { user } = useUser();
   const [orders, setOrders] = React.useState({
     allOrders: null,
     awaitingPayment: null,
@@ -21,11 +21,11 @@ export const Overview = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const allOrders = (await OrderService.searchOrdersBySeller({ sellerId: user.user.UUID })).data.totalElements;
-        const awaitingPayment = (await OrderService.searchOrdersBySeller({ sellerId: user.user.UUID, status: 'PENDING' })).data.totalElements;
-        const awaitingShipment = (await OrderService.searchOrdersBySeller({ sellerId: user.user.UUID, status: 'SHIPPING' })).data.totalElements;
-        const paidAndShipped = (await OrderService.searchOrdersBySeller({ sellerId: user.user.UUID, status: 'COMPLETED' })).data.totalElements;
-        const cancellations = (await OrderService.searchOrdersBySeller({ sellerId: user.user.UUID, status: 'CANCELED' })).data.totalElements;
+        const allOrders = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID })).data.totalElements;
+        const awaitingPayment = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID, status: 'PENDING' })).data.totalElements;
+        const awaitingShipment = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID, status: 'SHIPPING' })).data.totalElements;
+        const paidAndShipped = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID, status: 'COMPLETED' })).data.totalElements;
+        const cancellations = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID, status: 'CANCELED' })).data.totalElements;
         setOrders({
           allOrders,
           awaitingPayment,
@@ -34,8 +34,8 @@ export const Overview = () => {
           cancellations,
         });
 
-        const auction = (await AuctionService.searchAuctions({ sellerId: user.user.UUID })).data.totalElements;
-        const auctionOpen = await (await AuctionService.searchAuctions({ sellerId: user.user.UUID, status: 'OPEN' })).data.totalElements;
+        const auction = (await AuctionService.searchAuctions({ sellerId: user.UUID })).data.totalElements;
+        const auctionOpen = await (await AuctionService.searchAuctions({ sellerId: user.UUID, status: 'OPEN' })).data.totalElements;
         setListing({
           auction,
           auctionOpen

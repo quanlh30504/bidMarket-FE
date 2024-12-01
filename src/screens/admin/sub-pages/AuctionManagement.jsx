@@ -25,7 +25,8 @@ export const AuctionManagement = () => {
   const formatAuctionData = (response) => {
     return response.content.map(auction => {
       return {
-        Auction: auction.title,
+        hidden_id: auction.id,
+        auction: auction.title,
         "Starting price": auction.startingPrice,
         "Current price": auction.currentPrice,
         "Start time": auction.startTime,
@@ -72,7 +73,7 @@ export const AuctionManagement = () => {
 
   useEffect(() => {
     handleChangeActiveMenuItem(activeMenuItem);
-  }, [activeMenuItem, items]);
+  }, [activeMenuItem]);
 
   // useEffect(() => {
   //   const fetchAuctions = async () => {

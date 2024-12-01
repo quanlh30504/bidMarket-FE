@@ -61,6 +61,7 @@ export {SearchList} from "../screens/search/Search";
 // Enum Routes
 export { AuctionStatus, ProductStatus, OrderStatus } from "../Enum/StatusType";
 export { CategoryType } from "../Enum/CategoryType";
+export { Role } from "../Enum/Role";
 
 
 // Chat

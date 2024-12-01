@@ -15,9 +15,6 @@ export const Admin = () => {
         <CustomNavLinkList href="/admin/auction-management" isActive={location.pathname === '/admin/auction-management'}>
           Auction Management
         </CustomNavLinkList>
-        <CustomNavLinkList href="/admin/review-auction" isActive={location.pathname === '/admin/review-auction'}>
-          Review Auction
-        </CustomNavLinkList>
       </nav>
       <Outlet /> {/* Nested routes */}
     </Container>
