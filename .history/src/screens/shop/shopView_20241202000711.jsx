@@ -82,16 +82,16 @@ export const ShopView = () => {
 
   const handleChatClick = async () => {
     try {
-      const response = await axiosClient.post('/api/chat/get-or-create-room', null, {
+      const response = await axiosClient.post('/api/get-or-create-room', null, {
         params: { otherUserId: sellerId }
       });
       const roomId = response.data.id;
-      navigate(`/chat?roomId=${roomId}`);
+      navigate(`/chat/${roomId}`);
     } catch (error) {
       console.error('Error creating or getting chat room:', error);
     }
   };
-
+  
   // sellerId = 'edf0a2f6-7a29-45e7-84d8-b6ca136525f5';
     const paginatedProducts = sellerProducts.slice(
       (currentPage - 1) * ITEMS_PER_PAGE,
@@ -187,7 +187,7 @@ export const ShopView = () => {
                       <button className=" ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green" onClick={handleFollow} > Follow</button>  
 
                 )}
-                    <button className=" ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1" onClick={handleChatClick}> 
+                    <button className=" ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1"> 
                       <IoChatbubbleEllipsesOutline className='ml-3'/>Chat
                     </button>                   
                     </div>                    

@@ -85,8 +85,9 @@ export const ShopView = () => {
       const response = await axiosClient.post('/api/chat/get-or-create-room', null, {
         params: { otherUserId: sellerId }
       });
+      conn
       const roomId = response.data.id;
-      navigate(`/chat?roomId=${roomId}`);
+      navigate(`/chat/${roomId}`);
     } catch (error) {
       console.error('Error creating or getting chat room:', error);
     }

@@ -71,7 +71,7 @@ function App() {
                 }
               />
               <Route
-                path="/chat"
+                path="/chat/"
                 element={
                   <PrivateRoute allowedRoles={["BIDDER", "SELLER", "ADMIN"]}>
                     <ChatLayout>

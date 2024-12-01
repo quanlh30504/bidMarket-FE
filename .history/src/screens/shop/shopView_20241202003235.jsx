@@ -86,7 +86,7 @@ export const ShopView = () => {
         params: { otherUserId: sellerId }
       });
       const roomId = response.data.id;
-      navigate(`/chat?roomId=${roomId}`);
+      navigate(`/chat/${roomId}`);
     } catch (error) {
       console.error('Error creating or getting chat room:', error);
     }
