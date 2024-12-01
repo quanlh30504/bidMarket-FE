@@ -71,6 +71,14 @@ export const ProductsDetailsPage = () => {
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(null);
 
+  const defaultImageUrl = "https://via.placeholder.com/400x400?text=No+Image";
+
+  // Xử lý mảng images hoặc fallback về ảnh mặc định
+  const images = auction?.productDto?.productImages;
+  const validImages = images && images.length > 0 ? images : [{ imageUrl: defaultImageUrl }];
+
+  const selectedImage = validImages.find((image) => image.isPrimary)?.imageUrl || validImages[0].imageUrl;
+
   const { showToastNotification } = useNotification();
 
   const fetchProductDetails = useCallback(async () => {
@@ -637,7 +645,7 @@ export const ProductsDetailsPage = () => {
                     <div className="w-1/2">
                       <div className="h-[60vh] p-2 bg-green rounded-xl">
                         <img
-                          src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg"
+                          src={selectedImage}
                           alt=""
                           className="w-full h-full object-cover rounded-xl"
                         />
@@ -671,7 +679,7 @@ export const AuctionHistory = ({
   auctionId,
   startingPrice,
   currentUserId,
-  winnerName,
+  winnerName
 }) => {
   const [bids, setBids] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -767,7 +775,7 @@ export const AuctionHistory = ({
                   }`}
               >
                 <td className="px-6 py-4">
-                  {bid.userId === currentUserId ? "You" : bid?.userId}
+                  {bid.userId === currentUserId ? "You" : bid?.userEmail}
                 </td>
                 <td className="px-6 py-4">
                   US ${bid.bidAmount.toLocaleString()}
@@ -1104,7 +1112,7 @@ export const Comments = ({ auctionId, userId, setShowLoginModal }) => {
                 ></textarea>
                 <div className="flex gap-2">
                   <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    className="bg-green text-white px-4 py-2 rounded"
                     onClick={() => handleSaveEdit(comment.id)}
                   >
                     Save
