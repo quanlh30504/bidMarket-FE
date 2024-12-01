@@ -3,6 +3,7 @@ import { commonClassNameOfInput } from "../../../components/common/Design";
 import { useState } from "react";
 import { useOtpService } from "../../../router";
 import { useNotification } from "../../../notifications/NotificationContext";
+import { useNavigate } from "react-router-dom";
 
 export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) => { 
   const [otp, setOtp] = useState(""); // OTP input
@@ -12,6 +13,7 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
   const [verified, setVerified] = useState(false);
   const { sendOtp, verifyOtp, verifyOtpForgotPassword, resendOtp, loading, isCooldownActive, cooldown } = useOtpService();
   const { showToastNotification } = useNotification();
+  const navigate = useNavigate();
 
   const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
@@ -46,10 +48,12 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
       setVerified(true);
       if (isForgotPassword) {
         // setSuccessMessage("OTP has been verified successfully. A new password has been sent to your email.");
-        window.location.href = "/auth/login";
+        showToastNotification("OTP has been verified successfully. A new password has been sent to your email.", "info");
+        navigate("/auth/login");
       } else {
         // setSuccessMessage("OTP has been verified successfully. You can now login.");
-        window.location.href = "/auth/login";
+        showToastNotification("OTP has been verified successfully. You can now login.", "info");
+        navigate("/auth/login");
       }
     } catch {
       // setErrorMessage("Failed to verify OTP. Please try again.");

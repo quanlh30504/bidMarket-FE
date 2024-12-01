@@ -115,12 +115,14 @@ export const useSignup = () => {
     setErrors({});  // clear errors
 
     if (!formIsValid) {
-      window.alert('Please fix the errors in the form');
+      // window.alert('Please fix the errors in the form');
+      showToastNotification('Please fix the errors in the form', 'error');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      window.alert('Password and confirm password do not match!');
+      // window.alert('Password and confirm password do not match!');
+      showToastNotification('Password and confirm password do not match!', 'error');
       return;
     }
 
