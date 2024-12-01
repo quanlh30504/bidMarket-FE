@@ -21,20 +21,34 @@ const Title = ({ level = 6, children, className }) => {
 };
 
 const Body = ({ children, className }) => {
-  return <p className={`${className} text-base font-normal text-[rgb(107, 113, 119)]`}>{children}</p>;
+  return (
+    <p
+      className={`${className} text-base font-normal text-[rgb(107, 113, 119)]`}
+    >
+      {children}
+    </p>
+  );
 };
 
 const Caption = ({ children, className }) => {
-  return <p className={`${className} text-[15px] font-[500] text-gray_100`}>{children}</p>;
+  return (
+    <p className={`${className} text-[15px] font-[500] text-gray_100`}>
+      {children}
+    </p>
+  );
 };
 
 const CustomNavLinkList = ({ href, className, isActive, children }) => {
-  const linkStyles = "text-[17px] font-medium cursor-pointer list-none hover:text-green transition-all ease-in-out";
+  const linkStyles =
+    "text-[17px] font-medium cursor-pointer list-none hover:text-green transition-all ease-in-out";
   const activeClass = isActive ? "text-green" : "";
 
   return (
     <>
-      <NavLink to={href} className={`${className} ${linkStyles} ${activeClass}`}>
+      <NavLink
+        to={href}
+        className={`${className} ${linkStyles} ${activeClass}`}
+      >
         {children}
       </NavLink>
     </>
@@ -42,12 +56,16 @@ const CustomNavLinkList = ({ href, className, isActive, children }) => {
 };
 
 const CustomNavLink = ({ href, className, isActive, children }) => {
-  const linkStyles = "text-[17px] font-medium cursor-pointer list-none hover:text-green transition-all ease-in-out";
+  const linkStyles =
+    "text-[17px] font-medium cursor-pointer list-none hover:text-green transition-all ease-in-out";
   const activeClass = isActive ? "bg-green_100 text-green" : "";
 
   return (
     <>
-      <NavLink to={href} className={`${className} ${linkStyles} ${activeClass}`}>
+      <NavLink
+        to={href}
+        className={`${className} ${linkStyles} ${activeClass}`}
+      >
         {children}
       </NavLink>
     </>
@@ -55,7 +73,8 @@ const CustomNavLink = ({ href, className, isActive, children }) => {
 };
 
 const CustomLink = ({ className, children }) => {
-  const linkStyles = "text-[15px] font-medium text-gray-600 font-sans cursor-pointer list-none";
+  const linkStyles =
+    "text-[15px] font-medium text-gray-600 font-sans cursor-pointer list-none";
 
   return <NavLink className={`${className} ${linkStyles}`}>{children}</NavLink>;
 };
@@ -64,17 +83,29 @@ const Container = ({ children, className }) => {
   return <div className={`${className} w-[85%] m-auto`}>{children}</div>;
 };
 
-const PrimaryButton = ({ children, className, disabled }) => {
+const PrimaryButton = ({ children, className, disabled, onClick, onMouseEnter, onMouseLeave }) => {
   return (
-    <button type="submit" className={`${className} text-white bg-green font-medium rounded-full text-lg px-16 py-3 hover:bg-primary transition ease-in-out`}
-     disabled={disabled}>
+    <button
+      type="submit"
+      className={`${className} text-white bg-green font-medium rounded-full text-lg px-16 py-3 hover:bg-primary transition ease-in-out`}
+      disabled={disabled}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       {children}
     </button>
   );
 };
 
 const ProfileCard = ({ children, className }) => {
-  return <div className={`${className} w-12 h-12 bg-green_100 flex items-center justify-center rounded-full`}>{children}</div>;
+  return (
+    <div
+      className={`${className} w-12 h-12 bg-green_100 flex items-center justify-center rounded-full`}
+    >
+      {children}
+    </div>
+  );
 };
 
 const Heading = ({ title, subtitle }) => {
@@ -88,8 +119,20 @@ const Heading = ({ title, subtitle }) => {
   );
 };
 
-export { Title, Body, Caption, CustomLink, CustomNavLink, Container, PrimaryButton, ProfileCard, Heading, CustomNavLinkList };
-export const commonClassNameOfInput = "w-full p-4 text-sm text-gray-900 border border-gray-200 focus:ring-green focus:border-green outline-none";
+export {
+  Title,
+  Body,
+  Caption,
+  CustomLink,
+  CustomNavLink,
+  Container,
+  PrimaryButton,
+  ProfileCard,
+  Heading,
+  CustomNavLinkList,
+};
+export const commonClassNameOfInput =
+  "w-full p-4 text-sm text-gray-900 border border-gray-200 focus:ring-green focus:border-green outline-none";
 
 Title.propTypes = {
   level: PropTypes.oneOf([1, 2, 3, 4, 5, 6]),
