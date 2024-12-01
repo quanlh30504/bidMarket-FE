@@ -31,7 +31,7 @@ export const SearchList = () => {
 
   const [pagination, setPagination] = useState({
     page: 1,
-    size: 12, // Matches `itemsPerPage` in Pagination component
+    size: 12, 
   });
 
   useEffect(() => {
@@ -108,8 +108,8 @@ export const SearchList = () => {
       return {
         ...prev,
         categoryType: isFilterSelected
-          ? prev.categoryType.filter((item) => item !== filter) // Loại bỏ
-          : [...prev.categoryType, filter], // Thêm
+          ? prev.categoryType.filter((item) => item !== filter)
+          : [...prev.categoryType, filter], 
       };
     });
   };
@@ -300,7 +300,7 @@ const FilterSection = ({
       {filters.map((filter) => (
         <div key={filter} className="flex items-center mb-2">
           <input
-            type={"checkbox"} // Sử dụng radio nếu chọn duy nhất
+            type={"checkbox"}
             id={filter}
             checked={selectedFilters.includes(filter)}
             onChange={() => onFilterToggle(filter)}

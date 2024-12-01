@@ -68,7 +68,7 @@ export const ProductCard = ({ item }) => {
             </div>
             <div>
               <Caption className="text-green">Current Bid</Caption>
-              <Title>${item.currentPrice.toFixed(2)}</Title>
+              <Title>${item.currentPrice?.toFixed(2)}</Title>
             </div>
           </div>
           <div className="w-[1px] h-10 bg-gray-300"> </div>
