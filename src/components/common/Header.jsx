@@ -9,6 +9,7 @@ import { User1 } from "../hero/Hero";
 import { menulists } from "../../utils/data";
 import { useUser } from "../../router";
 import {NotificationBell} from "../../notifications/NotificationBell";
+import { IoIosArrowDropdown } from "react-icons/io";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,6 +17,12 @@ export const Header = () => {
   const location = useLocation();
 
   const menuRef = useRef(null);
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+                const toggleDropdown = () => {
+                  setIsDropdownOpen(!isDropdownOpen);
+                };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -97,16 +104,34 @@ export const Header = () => {
                         {user.role && <NotificationBell/>}
                         {/* Other header items */}
                       </div>
-                      <button onClick={() => authService.logout()} className="border rounded-full p-2 px-4 bg-red-500">
-                        Logout
-                      </button>
-                      <CustomNavLink href="/account">
-                        <ProfileCard>
-                          <img src={User1} alt="" className="w-full h-full object-cover"/>
-                        </ProfileCard>
-                      </CustomNavLink>
-                    </div>
+                  <div className="relative">
+                  <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
+  <ProfileCard>
+    <img src={User1} alt="" className="w-full h-full object-cover" />
+    <IoIosArrowDropdown 
+      size={17} 
+      className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-md hover:bg-gray-50 transition-colors text-emeral-700" 
+    />
+  </ProfileCard>
+</button>
+                    {isDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
+                        <CustomNavLink href="/account" className="block px-4 py-2 text-black hover:bg-gray-200">
+                          Account
+                        </CustomNavLink>
+                        <CustomNavLink href="/" className="block px-4 py-2 text-black hover:bg-gray-200">
+                          Change Password
+                        </CustomNavLink>
+                        <button onClick={() => authService.logout()} className="block w-full text-left px-4 py-2 text-black hover:bg-gray-200 text-[17px] font-medium cursor-pointer list-none hover:text-green transition-all ease-in-out ">
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  </div>
+              
                 )}
+               
               </div>
               <div
                   className={`icon flex items-center justify-center gap-6 ${isScrolled || (!isHomePage && !isChatPage) ? "text-primary" : "text-white"}`}>
