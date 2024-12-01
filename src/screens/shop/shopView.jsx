@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ProductCard } from "../../components/cards/ProductCard";
 // import { productlists } from "../../utils/data";
@@ -17,6 +17,7 @@ export const ShopView = () => {
   const PAGES_PER_GROUP = 3; 
 
   const { sellerId } = useParams();
+  const navigate = useNavigate();
   const [sellerData, setSellerData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sellerProducts, setSellerProducts] = useState([]);
@@ -83,21 +84,19 @@ export const ShopView = () => {
     fetchSellerProducts(currentPage);
   }, [sellerId, currentPage]);
 
-  const calculateTimeLeft = (endTime) => {
-    const now = new Date();
-    const end = new Date(endTime);
-    const diff = end - now;
-  
-    if (diff <= 0) return "Ended";
-  
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-  
-    return `${days}d ${hours}h ${minutes}m`;
+
+  const handleChatClick = async () => {
+    try {
+      const response = await axiosClient.post('/api/chat/get-or-create-room', null, {
+        params: { otherUserId: sellerId }
+      });
+      const roomId = response.data.id;
+      navigate(`/chat?roomId=${roomId}`);
+    } catch (error) {
+      console.error('Error creating or getting chat room:', error);
+    }
   };
 
-  
   // sellerId = 'edf0a2f6-7a29-45e7-84d8-b6ca136525f5';
     const paginatedProducts = sellerProducts.slice(
       (currentPage - 1) * ITEMS_PER_PAGE,
@@ -193,7 +192,7 @@ export const ShopView = () => {
                       <button className=" ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green" onClick={handleFollow} > Follow</button>  
 
                 )}
-                    <button className=" ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1"> 
+                    <button className=" ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1" onClick={handleChatClick}> 
                       <IoChatbubbleEllipsesOutline className='ml-3'/>Chat
                     </button>                   
                     </div>                    

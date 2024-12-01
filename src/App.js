@@ -46,85 +46,85 @@ function App() {
           <NotificationProvider>
             <ScrollToTop />
             <Routes>
-            <Route
-              path="/auth/*"
-              element={
-                <Layout>
-                  <AuthRoute />
-                </Layout>
-              }
-            />
-            <Route
-              path="/"
-              element={
-                <Layout>
-                  <Home />
-                </Layout>
-              }
-            />
-            <Route
-              path="/search"
-              element={
-                <Layout>
-                  <SearchList />
-                </Layout>
-              }
-            />
-            <Route
-              path="/chat"
-              element={
-                <PrivateRoute allowedRoles={["BIDDER", "SELLER", "ADMIN"]}>
-                  <ChatLayout>
-                    <Chat />
-                  </ChatLayout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/add"
-              element={
-                <PrivateRoute allowedRoles={["SELLER", "ADMIN"]}>
+              <Route
+                path="/auth/*"
+                element={
                   <Layout>
-                    <DashboardLayout>
-                      <AddProduct />
-                    </DashboardLayout>
+                    <AuthRoute />
                   </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/admin/income"
-              element={
-                <PrivateRoute allowedRoles={["ADMIN"]}>
+                }
+              />
+              <Route
+                path="/"
+                element={
                   <Layout>
-                    <DashboardLayout>
-                      <Income />
-                    </DashboardLayout>
+                    <Home />
                   </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/product/update/:id"
-              element={
-                <PrivateRoute allowedRoles={["SELLER", "ADMIN"]}>
+                }
+              />
+              <Route
+                path="/search"
+                element={
                   <Layout>
-                    <DashboardLayout>
-                      <ProductEdit />
-                    </DashboardLayout>
+                    <SearchList />
                   </Layout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/details/:id"
-              element={
-                <Layout>
-                  <ProductsDetailsPage />
-                </Layout>
-              }
-            />
-            <Route
+                }
+              />
+              <Route
+                path="/chat"
+                element={
+                  <PrivateRoute allowedRoles={["BIDDER", "SELLER", "ADMIN"]}>
+                    <ChatLayout>
+                      <Chat />
+                    </ChatLayout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/add"
+                element={
+                  <PrivateRoute allowedRoles={["SELLER", "ADMIN"]}>
+                    <Layout>
+                      <DashboardLayout>
+                        <AddProduct />
+                      </DashboardLayout>
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/income"
+                element={
+                  <PrivateRoute allowedRoles={["ADMIN"]}>
+                    <Layout>
+                      <DashboardLayout>
+                        <Income />
+                      </DashboardLayout>
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/product/update/:id"
+                element={
+                  <PrivateRoute allowedRoles={["SELLER", "ADMIN"]}>
+                    <Layout>
+                      <DashboardLayout>
+                        <ProductEdit />
+                      </DashboardLayout>
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/details/:id"
+                element={
+                  <Layout>
+                    <ProductsDetailsPage />
+                  </Layout>
+                }
+              />
+              <Route
               path="/shop/:sellerId"
               element={
                 <Layout>
