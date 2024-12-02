@@ -1,9 +1,23 @@
-import { Title } from "../../router";
+import React, {useState} from "react";
+import { Title, Pagination} from "../../router";
 import { IoIosSearch } from "react-icons/io";
-import { MdOutlineDeleteOutline } from "react-icons/md";
-import { RiAuctionFill } from "react-icons/ri";
+import { payments } from "../../utils/data";
 
 export const Payment = () => {
+  const itemsPerPage = 5;
+  const pagesPerGroup = 3; 
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Pagination logic
+  const totalItems = payments.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = payments.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  }
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex items-center justify-between gap-4 mb-6">
@@ -15,7 +29,13 @@ export const Payment = () => {
       
       <div className="h-px bg-gray-200 my-6" />
       
-      <Table />
+      <Table items = {currentItems}/>
+      <Pagination
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        pagesPerGroup={pagesPerGroup}
+        onPageChange={handlePageChange}
+      /> 
     </div>
   );
 };
@@ -35,7 +55,7 @@ const SearchBox = () => {
   );
 }
 
-const Table = () => {
+const Table = ({items}) => {
   return (
     <>
       <div className="relative overflow-x-auto rounded-lg">
@@ -63,33 +83,23 @@ const Table = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-white border-b hover:bg-gray-50">
+            {items.map((item, index) => (
+            <tr key = {index} className="bg-white border-b hover:bg-gray-50">
             <td className="px-6 py-4">
-                <img className="w-20 h-20 rounded-md" src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg" alt="Jeseimage" />
+                <img className="w-20 h-20 rounded-md" src={item.image} alt="Item" />
             </td>
-              <td className="px-6 py-4">Couple Wedding Ring</td>
-              <td className="px-6 py-4 text-center">1234</td>
-              <td className="px-6 py-4 text-center">$500</td>
-              <td className="px-6 py-4 text-center">N/A</td>
+              <td className="px-6 py-4">{item.title}</td>
+              <td className="px-6 py-4 text-center">{item.transactionId}</td>
+              <td className="px-6 py-4 text-center">${item.amount}</td>
+              <td className="px-6 py-4 text-center">{item.status === 'Success' ? item.paymentDate : "N/A"}</td>
               <td className="px-6 py-4  text-center">
-                 <div className="inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-red-500 bg-red-500 text-center truncate">Failed</div>
+                 <div className={`inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white ${item.status === 'Success' ? 'border-green bg-green' : 'border-red-500 bg-red-500'}  text-center truncate`}>
+                  {item.status}
+                 </div>
               </td>
             </tr>
-          </tbody>
-          <tbody>
-            <tr className="bg-white border-b hover:bg-gray-50">
-            <td className="px-6 py-4">
-                <img className="w-20 h-20 rounded-md" src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg" alt="Jeseimage" />
-            </td>
-              <td className="px-6 py-4">Couple Wedding Ring</td>
-              <td className="px-6 py-4 text-center">1235</td>
-              <td className="px-6 py-4 text-center">$500</td>
-              <td className="px-6 py-4 text-center">19-May-16 20:38:03</td>
-              <td className="px-6 py-4  text-center">
-                 <div className="inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green text-center truncate">Success</div>
-              </td>
-            </tr>
-          </tbody>
+            ))}
+            </tbody>
         </table>
       </div>
     </>

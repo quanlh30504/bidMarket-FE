@@ -31,6 +31,7 @@ export const Register = () => {
     handleBecomeSellerClick,
     handleSubmit,
     errors,
+    loading,
   } = useSignup();
 
   return (
@@ -103,7 +104,7 @@ export const Register = () => {
               By clicking the signup button, you create a BidMarket account, and you agree to BidMarket <span className="text-green underline">Terms & Conditions</span> & 
               <span className="text-green underline"> Privacy Policy </span>.
             </p>
-            <PrimaryButton className="w-full rounded-none my-5">CREATE ACCOUNT</PrimaryButton>
+            <PrimaryButton className="w-full rounded-none my-5" disabled={loading}>CREATE ACCOUNT</PrimaryButton>
           </form>
         ) : (
           <div className="w-full transform translate-x-full">
