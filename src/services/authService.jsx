@@ -1,5 +1,5 @@
 import axiosClient from "./axiosClient";
-import imageUtils from "../utils/imageUtils";
+import fileUtils from "../utils/fileUtils";
 
 class AuthService {
   constructor() {
@@ -109,8 +109,8 @@ class AuthService {
     if (formData.role === 'SELLER') {
       //process images in parallel
       const [frontImageURL, backImageURL] = await Promise.all([
-          formData.frontImage && imageUtils.uploadImage(formData.frontImage, 'id-cards'),
-          formData.backImage && imageUtils.uploadImage(formData.backImage, 'id-cards'),
+          formData.frontImage && fileUtils.uploadImage(formData.frontImage, 'id-cards'),
+          formData.backImage && fileUtils.uploadImage(formData.backImage, 'id-cards'),
       ]);
 
       return {

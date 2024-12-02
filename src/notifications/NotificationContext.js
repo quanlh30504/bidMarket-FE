@@ -1,4 +1,3 @@
-// NotificationContext.js
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import { useUser } from "../context/UserContext";
 import { useWebSocket } from '../hooks/useWebSocket';

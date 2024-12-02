@@ -20,6 +20,8 @@ import { } from "react-icons/fa";
 import WebSocketService from "../../services/WebSocketService"
 import { FaEllipsisH, FaStar } from 'react-icons/fa'; // Import 3 dot icon
 import { useNotification } from "../../notifications/NotificationContext";
+import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { CiLocationOn } from "react-icons/ci";
 
 function formatTime(dateString) {
   const date = new Date(dateString);
@@ -70,6 +72,14 @@ export const ProductsDetailsPage = () => {
   const [bidAmount, setBidAmount] = useState(""); // Track the bid amount
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(null);
+
+  const defaultImageUrl = "https://via.placeholder.com/400x400?text=No+Image";
+
+  // Xử lý mảng images hoặc fallback về ảnh mặc định
+  const images = auction?.productDto?.productImages;
+  const validImages = images && images.length > 0 ? images : [{ imageUrl: defaultImageUrl }];
+
+  const selectedImage = validImages.find((image) => image.isPrimary)?.imageUrl || validImages[0].imageUrl;
 
   const { showToastNotification } = useNotification();
 
@@ -203,104 +213,6 @@ export const ProductsDetailsPage = () => {
       setIsSubmittingBid(false);
     }
   };
-
-  // const renderContentByStatus = () => {
-  //   switch (auction?.status) {
-  //     case "OPEN":
-  //       return (
-  //         <>
-  //           <Caption>Time left:</Caption>
-  //           <br />
-  //           <div className="flex gap-8 text-center">
-  //             {timeLeft ? (
-  //               <>
-  //                 {["Days", "Hours", "Minutes", "Seconds"].map((unit, i) => (
-  //                   <div key={unit} className="p-5 px-10 shadow-s1">
-  //                     <Title level={4}>
-  //                       {timeLeft[Object.keys(timeLeft)[i]]}
-  //                     </Title>
-  //                     <Caption>{unit}</Caption>
-  //                   </div>
-  //                 ))}
-  //               </>
-  //             ) : (
-  //               <div>Auction ended</div>
-  //             )}
-  //           </div>
-  //           <div className="mt-6 flex items-center gap-4">
-  //             <input
-  //               type="number"
-  //               value={bidAmount}
-  //               onChange={(e) => setBidAmount(e.target.value)}
-  //               placeholder="Enter your bid"
-  //               className={`${commonClassNameOfInput} w-1/3`} 
-  //             />
-  //             <PrimaryButton
-  //               onClick={placeBid}
-  //               disabled={isSubmittingBid}
-  //               className={`${isSubmittingBid ||
-  //                 bidAmount - auction?.currentPrice <
-  //                 auction?.minimumBidIncrement
-  //                 ? "bg-gray-300 cursor-not-allowed"
-  //                 : "bg-blue-600 hover:bg-blue-700"
-  //                 } text-white rounded-lg w-1/3`}
-  //             >
-  //               {isSubmittingBid ? "Placing..." : "Place"}
-  //             </PrimaryButton>
-  //           </div>
-  //           <br></br>
-  //         </>
-  //       );
-
-  //     case "READY":
-  //     case "PENDING":
-  //       return (
-  //         <>
-  //           <Caption>
-  //             The auction will open at: {formatTime(auction.startTime)}
-  //           </Caption>
-  //           <br></br>
-  //           <div className="flex gap-8 text-center">
-  //             {timeLeft ? (
-  //               <>
-  //                 {["Days", "Hours", "Minutes", "Seconds"].map((unit, i) => (
-  //                   <div key={unit} className="p-5 px-10 shadow-s1">
-  //                     <Title level={4}>
-  //                       {timeLeft[Object.keys(timeLeft)[i]]}
-  //                     </Title>
-  //                     <Caption>{unit}</Caption>
-  //                   </div>
-  //                 ))}
-  //               </>
-  //             ) : (
-  //               <div>Countdown complete</div>
-  //             )}
-  //           </div>
-  //           <br></br>
-  //         </>
-  //       );
-
-  //     case "CLOSED":
-  //     case "COMPLETED":
-  //       return (
-  //         <>
-  //           {auction.bidCount > 0 ? (
-  //             <Caption>
-  //               Người chiến thắng: {auction.winnerName || "Không xác định"}
-  //             </Caption>
-  //           ) : (
-  //             <Caption>Phiên đấu giá không có người chiến thắng</Caption>
-  //           )}
-  //         </>
-  //       );
-
-  //     case "CANCELLED":
-  //       return <Caption>Phiên đấu giá đã bị hủy</Caption>;
-
-  //     default:
-  //       return <Caption>Trạng thái không xác định</Caption>;
-  //   }
-  // };
 
   const renderContentByStatus = () => {
     const statusStyles = {
@@ -473,6 +385,28 @@ export const ProductsDetailsPage = () => {
                   />
                 )}
               </div>
+              <div className="flex items-center justify-center border p-3 rounded-lg shadow-md mt-8 ml-5 w-11/12 h-32">
+                <div className="flex items-center gap-3">
+                  <ProfileCard className="w-16 h-16">
+                    <img src={User2} alt="User2" />
+                  </ProfileCard>
+                  <div>
+                    <Title level={5} className="text-xl">ABC Store</Title>
+                    <div className="flex items-center gap-1 mt-3">
+                      <CiLocationOn />
+                      <Caption>Ha Noi, Vietnam</Caption>
+                    </div>
+                  </div>
+                  <div className="flex justify-center ltr mt-8 -my-5">
+                    <button className="w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green">View Shop</button>
+                    <button className="ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1">
+                      <IoChatbubbleEllipsesOutline className="ml-3" />Chat
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+
             </div>
             <div className="w-1/2">
               <Title level={2} className="capitalize">
@@ -637,7 +571,7 @@ export const ProductsDetailsPage = () => {
                     <div className="w-1/2">
                       <div className="h-[60vh] p-2 bg-green rounded-xl">
                         <img
-                          src="https://bidout-wp.b-cdn.net/wp-content/uploads/2022/10/Image-14.jpg"
+                          src={selectedImage}
                           alt=""
                           className="w-full h-full object-cover rounded-xl"
                         />
@@ -671,7 +605,7 @@ export const AuctionHistory = ({
   auctionId,
   startingPrice,
   currentUserId,
-  winnerName,
+  winnerName
 }) => {
   const [bids, setBids] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -767,7 +701,7 @@ export const AuctionHistory = ({
                   }`}
               >
                 <td className="px-6 py-4">
-                  {bid.userId === currentUserId ? "You" : bid?.userId}
+                  {bid.userId === currentUserId ? "You" : bid?.userEmail}
                 </td>
                 <td className="px-6 py-4">
                   US ${bid.bidAmount.toLocaleString()}
@@ -1104,7 +1038,7 @@ export const Comments = ({ auctionId, userId, setShowLoginModal }) => {
                 ></textarea>
                 <div className="flex gap-2">
                   <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    className="bg-green text-white px-4 py-2 rounded"
                     onClick={() => handleSaveEdit(comment.id)}
                   >
                     Save
