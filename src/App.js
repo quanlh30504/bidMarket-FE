@@ -281,11 +281,11 @@ function App() {
             <Route
               path="/profiletest"
               element={
-                <PrivateRoute allowedRoles={["BIDDER"]}>
+                // <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Account />
                   </Layout>
-                </PrivateRoute>
+                // </PrivateRoute>
               }
             />
             <Route
@@ -303,37 +303,37 @@ function App() {
             <Route
               path="/watchlist"
               element={
-                <PrivateRoute allowedRoles={["BIDDER"]}>
+                // <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
                       <Watchlist />
                     </Tab>
                   </Layout>
-                </PrivateRoute>
+                // </PrivateRoute>
               }
             />
             <Route
               path="/order"
               element={
-                <PrivateRoute allowedRoles={["BIDDER"]}>
+                // <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
                       <Order />
                     </Tab>
                   </Layout>
-                </PrivateRoute>
+                // </PrivateRoute>
               }
             />
             <Route
               path="/payment-history"
               element={
-                <PrivateRoute allowedRoles={["BIDDER"]}>
+                // <PrivateRoute allowedRoles={["BIDDER"]}>
                   <Layout>
                     <Tab>
                       <Payment />
                     </Tab>
                   </Layout>
-                </PrivateRoute>
+                // </PrivateRoute>
               }
             />
             <Route
