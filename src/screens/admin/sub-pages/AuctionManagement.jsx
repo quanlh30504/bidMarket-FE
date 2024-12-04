@@ -45,7 +45,7 @@ export const AuctionManagement = () => {
   const refreshData = async () => {
     setLoading(true);
     try {
-      const all = (await AdminService.searchAuctions({ status: '' })).data;
+      const all = (await AdminService.searchAuctions({})).data;
       const open = (await AdminService.searchAuctions({ status: 'OPEN' })).data;
       const pending = (await AdminService.searchAuctions({ status: 'PENDING' })).data;
       setData({

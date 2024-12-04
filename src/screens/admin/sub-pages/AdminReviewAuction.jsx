@@ -7,7 +7,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import AuctionService from "../../../services/auctionService";
 import ProductService from "../../../services/productService";
 import { useWarning } from "../../../router";
-import { act } from "react";
 
 export const AdminReviewAuction = () => {
   const { showWarning } = useWarning();
@@ -62,7 +61,7 @@ export const AdminReviewAuction = () => {
       setLoading(true);
       try {
         const auction = (await AuctionService.getAuctionById(auctionId)).data;
-        const product = (await ProductService.getProduct(auction.productId)).data; // api get auction không trả về product
+        const product = (await ProductService.getProduct(auction.productDto.id)).data; // api get auction không trả về product
         console.log('Auction:', auction);
         console.log('Product:', product);
         setProductDetails({
