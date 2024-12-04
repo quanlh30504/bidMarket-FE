@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Title } from "../../router";
-import { IoIosSearch } from "react-icons/io";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { RiAuctionFill } from "react-icons/ri";
 // import { watchlist } from "../../utils/data";
 import { Pagination } from "../../router";
 import axiosClient from "../../services/axiosClient";
 import { authUtils } from '../../utils/authUtils';
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Caption } from '../../router';
 
 
 export const Watchlist = () => {
@@ -166,13 +166,20 @@ const Table = ({ items, handleAuctionClick, handleRemoveFromWatchlist }) => {
               <td className="px-6 py-4 text-center">{item.currentPrice}</td>
               <td className="px-6 py-4 text-center">{item.bidAmount ? item.bidAmount : "Chưa Tham Gia"}</td>
               <td className="px-6 py-4 text-center">
-                <div
-                  className={`inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-center truncate rounded-full ${
-                    item.status === "Winning" ? "text-green border-emerald-500" : "text-red-500 border-red-500"
-                  }`}
-                >
-                  {item.status}
-                </div>
+              <Caption
+              className={`px-3 py-1 text-sm rounded-full ${{
+                  PENDING: "text-gray-700 bg-yellow-400",
+                  READY: "text-blue-700 bg-blue-200",
+                  OPEN: "text-white bg-green",
+                  CLOSED: "text-gray-700 bg-gray-200",
+                  CANCELED: "text-red-700 bg-red-200",
+                  COMPLETED: "text-blue-500 bg-slate-200",
+                  EXTENDED: "text-orange-700 bg-orange-200",
+                }[item.status] || "text-black bg-white" // Mặc định nếu status không khớp
+                }`}
+            >
+              {item.status}
+            </Caption>
               </td>
               <td className="px-6 py-4 text-center text-red-500"> {timeLeftData[index] || "Calculating..."}</td>
               <td className="px-6 py-4 text-center flex items-center gap-3 mt-5">

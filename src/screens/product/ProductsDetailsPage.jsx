@@ -501,9 +501,14 @@ export const ProductsDetailsPage = () => {
                   </div>
                   <div className="flex justify-center ltr mt-8 -my-5">
                     <button className="w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green" onClick={handleViewShopClick}>View Shop</button>
-                    <button className="ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1" onClick={handleChatClick}>
+                    {(sellerId !== userId) && (
+                      <>
+                      <button className="ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1" onClick={handleChatClick}>
                       <IoChatbubbleEllipsesOutline className="ml-3" />Chat
                     </button>
+                      </>
+                    )}
+                    
                   </div>
                 </div>
               </div>

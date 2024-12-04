@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import { Title, Pagination } from "../../router";
 import axiosClient from "../../services/axiosClient";
 import { authUtils } from '../../utils/authUtils';
+import { Caption } from '../../router';
 
 export const Order = () => {
   const itemsPerPage = 5;
@@ -41,7 +42,7 @@ export const Order = () => {
 
   const handlePayment = async (orderId) => {
     try {
-      const response = await axiosClient.post('/submitOrder', null, {
+      const response = await axiosClient.post('/api/VNPay/submitOrder', null, {
         params: {
           orderInfo: orderId,
         },
@@ -116,9 +117,18 @@ const Table = ({items, handlePayment}) => {
               <td className="px-6 py-4 text-center">${item.totalAmount}</td>
               <td className="px-6 py-4 text-center text-red-500">{item.paymentDueDate}</td>
               <td className="px-6 py-4  text-center">
-              <div className={`inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white ${ item.status === 'PAID' ? 'border-emerald-600 bg-emerald-600' : 'border-red-500 bg-red-500'} text-center truncate`}>
-                    {item.status}
-              </div>
+              <Caption
+              className={`px-3 py-1 text-sm rounded-full ${{
+                  PENDING: "text-gray-700 bg-yellow-400",
+                  PAID: "text-white bg-green",
+                  CANCELED: "text-red-700 bg-red-200",
+                  COMPLETED: "text-blue-500 bg-slate-200",
+                  SHIPPING: "text-orange-700 bg-orange-200",
+                }[item.status] || "text-black bg-white" // Mặc định nếu status không khớp
+                }`}
+            >
+              {item.status}
+            </Caption>
               </td>
               <td className="px-6 py-4  text-center">
                 {item.status === "PENDING" && (

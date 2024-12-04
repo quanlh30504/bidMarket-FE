@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../router/index.js';
+import { authUtils } from '../utils/authUtils.js';
+
 
 const UserContext = createContext();
 
@@ -10,6 +12,7 @@ export const UserProvider = ({ children }) => {
     // -> role === null: user is not
   });
   const [loading, setLoading] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState("https://cdn-icons-png.flaticon.com/128/6997/6997662.png");
 
   const RoleHandler = {
     setRole: (role) => {
@@ -20,6 +23,8 @@ export const UserProvider = ({ children }) => {
     },
   };
 
+
+
   useEffect(() => {
     authService.setRoleHandler(RoleHandler);
     const fetchAccessToken = async () => {
@@ -27,6 +32,8 @@ export const UserProvider = ({ children }) => {
       // try to get new access token, if success means user is logged in (refreshToken is valid)
       try {
         await authService.refreshToken();
+        const userInfo = await authUtils.getCurrentUserId();
+        setAvatarUrl(userInfo.avatarUrl || "https://cdn-icons-png.flaticon.com/128/6997/6997662.png");
       } catch (error) {
         if (localStorage.getItem(authService.tokenKey) !== null) {
           authService.logout();
@@ -42,7 +49,7 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading }}>
+    <UserContext.Provider value={{ user, loading, avatarUrl, setAvatarUrl }}>
       {children}
     </UserContext.Provider>
   );

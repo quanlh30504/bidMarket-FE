@@ -5,16 +5,19 @@ import { useLocation } from "react-router-dom";
 import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai";
 import { IoSearchOutline } from "react-icons/io5";
 import { authService, Container, CustomNavLink, CustomNavLinkList, ProfileCard } from "../../router";
-import { User1 } from "../hero/Hero";
 import { menulists } from "../../utils/data";
 import { useUser } from "../../router";
 import { NotificationBell } from "../../notifications/NotificationBell";
 import { IoIosArrowDropdown } from "react-icons/io";
+import axiosClient from "../../services/axiosClient";
+import { authUtils } from "../../utils/authUtils";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const userId = authUtils.getCurrentUserId();
+  const { avatarUrl, setAvatarUrl } = useUser();
 
   const menuRef = useRef(null);
 
@@ -37,6 +40,19 @@ export const Header = () => {
     setIsScrolled(window.scrollY > 0);
   };
 
+  const fetchAccountInfo = async () => {
+    try {
+      const response = await axiosClient.get(`/api/users/${userId}/accountInfo`);
+      setAvatarUrl(response.data.avatarImageUrl);
+    } catch (error) {
+      console.error("Error fetching account info:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccountInfo();
+  }, [userId]);
+
   useEffect(() => {
     document.addEventListener("mousedown", closeMenuOutside);
     window.addEventListener("scroll", handleScroll);
@@ -48,11 +64,11 @@ export const Header = () => {
   }, []);
 
   const isHomePage = location.pathname === "/";
-
   const isChatPage = location.pathname === "/chat";
 
   const { user } = useUser();
   const role = user.role;
+  
   return (
     <>
       <header className={(isHomePage ? `header py-1 bg-primary ${isScrolled ? "scrolled" : ""}` : (isChatPage ? "header py-1 bg-primary" : `header bg-white shadow-s1 ${isScrolled ? "scrolled" : ""}`))}>
@@ -104,7 +120,7 @@ export const Header = () => {
                     <div className="relative">
                       <button onClick={toggleDropdown} className="flex items-center focus:outline-none">
                         <ProfileCard>
-                          <img src={User1} alt="" className="w-full h-full object-cover" />
+                          <img src={avatarUrl} alt="" className="w-10 h-10 rounded-full" />
                           <IoIosArrowDropdown
                             size={17}
                             className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-md hover:bg-gray-50 transition-colors text-emeral-700"

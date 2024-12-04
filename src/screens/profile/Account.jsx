@@ -6,11 +6,10 @@ import { useState, useRef, useEffect } from "react";
 import axiosClient from "../../services/axiosClient";
 import { authUtils } from "../../utils/authUtils";
 import fileUtils from "../../utils/fileUtils";
+import { useUser } from "../../router";
 
 export const Account = () => {
-  const [avatarUrl, setAvatarUrl] = useState(
-    "https://cdn-icons-png.flaticon.com/128/6997/6997662.png"
-  );
+  const { avatarUrl, setAvatarUrl } = useUser();
   const fileInputRef = useRef(null);
   const [accountInfo, setAccountInfo] = useState(null);
   const userId = authUtils.getCurrentUserId();
@@ -27,17 +26,20 @@ export const Account = () => {
     fileInputRef.current.click();
   };
 
-  const handleFileChange = async (event) => {
+   const handleFileChange = async (event, callback) => {
     const file = event.target.files[0];
     if (file) {
       try {
-        // Upload image and get the URL
         const imageUrl = await fileUtils.uploadImage(file, `avatars/${userId}`);
         setAvatarUrl(imageUrl);
-        // Update avatar on the server
+
         await axiosClient.put(`/api/users/avatar/${userId}`, null, {
-          params: {imageUrl: imageUrl }
+          params: { imageUrl: imageUrl }
         });
+
+        if (callback) {
+          callback();
+        }
       } catch (error) {
         console.error("Error updating avatar:", error);
       }
@@ -55,7 +57,6 @@ export const Account = () => {
   };
   
   useEffect(() => {
-    
     fetchAccountInfo();
   }, [userId]);
   
@@ -66,7 +67,6 @@ export const Account = () => {
 
   const handleEditClick = (field) => {
     if (editingField && editingField !== field) {
-      // Hủy chỉnh sửa trường trước đó nếu đang chỉnh sửa
       setProfileData({
         ...accountInfo,
       });
@@ -88,6 +88,25 @@ export const Account = () => {
       setEditingField(null);
     } catch (error) {
       console.error("Error updating profile:", error);
+    }
+  };
+
+  const handleSaveAddress = async () => {
+    try {
+      const response = await axiosClient.post(`/api/addresses/updateOrCreate/${userId}`, {
+        streetAddress: profileData.streetAddress,
+        city: profileData.city,
+        country: profileData.country,
+      });
+      setAccountInfo((prevInfo) => ({
+        ...prevInfo,
+        streetAddress: response.data.streetAddress,
+        city: response.data.city,
+        country: response.data.country,
+      }));
+      setEditingField(null);
+    } catch (error) {
+      console.error("Error updating address:", error);
     }
   };
 
@@ -126,7 +145,7 @@ export const Account = () => {
               ref={fileInputRef}
               className="hidden"
               accept="image/*"
-              onChange={handleFileChange}
+              onChange={(event) => handleFileChange(event, fetchAccountInfo)}
             />
           </div>
         </div>
@@ -305,7 +324,7 @@ export const Account = () => {
         <div className="flex justify-end">
           <button
             className="font-medium text-green-500"
-            onClick={() => handleSaveClick("address")}
+            onClick={() => handleSaveAddress()}
           >
             <CiCircleCheck size={25} />
           </button>

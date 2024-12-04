@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import { Title, Pagination} from "../../router";
 import axiosClient from "../../services/axiosClient";
 import { authUtils } from '../../utils/authUtils';
+import { Caption } from '../../router';
 
 export const Payment = () => {
   const itemsPerPage = 5;
@@ -97,9 +98,16 @@ const Table = ({items}) => {
               <td className="px-6 py-4 text-center">${item.amount}</td>
               <td className="px-6 py-4 text-center">{item.paymentDate  ? item.paymentDate : "N/A"}</td>
               <td className="px-6 py-4  text-center">
-                 <div className={`inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white ${item.status === 'SUCCESS' ? 'border-green bg-green' : 'border-red-500 bg-red-500'}  text-center truncate`}>
-                  {item.status}
-                 </div>
+              <Caption
+              className={`px-3 py-1 text-sm rounded-full ${{
+                  PENDING: "text-gray-700 bg-yellow-400",
+                  SUCCESS: "text-white bg-green",
+                  FAILED: "text-red-700 bg-red-200",
+                }[item.status] || "text-black bg-white" // Mặc định nếu status không khớp
+                }`}
+            >
+              {item.status}
+            </Caption>
               </td>
             </tr>
             ))}
