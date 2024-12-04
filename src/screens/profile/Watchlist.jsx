@@ -164,7 +164,7 @@ const Table = ({ items, handleAuctionClick, handleRemoveFromWatchlist }) => {
               </td>
               <td className="px-6 py-4">{item.auctionTitle}</td>
               <td className="px-6 py-4 text-center">{item.currentPrice}</td>
-              <td className="px-6 py-4 text-center">{item.bidAmount ? item.bidAmount :0}</td>
+              <td className="px-6 py-4 text-center">{item.bidAmount ? item.bidAmount : "Chưa Tham Gia"}</td>
               <td className="px-6 py-4 text-center">
                 <div
                   className={`inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-center truncate rounded-full ${

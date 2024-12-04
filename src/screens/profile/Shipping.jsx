@@ -1,17 +1,22 @@
-import { Title } from "../../router";
-import { IoIosSearch } from "react-icons/io";
-import { MdOutlineDeleteOutline } from "react-icons/md";
-import { RiAuctionFill } from "react-icons/ri";
-import { useState } from "react";
+import React, {useState, useEffect} from "react";
+import { Title, Pagination } from "../../router";
+import axiosClient from "../../services/axiosClient";
+import { authUtils } from '../../utils/authUtils';
 
 export const Shipping = () => {
+  // const itemsPerPage = 5;
+  // const pagesPerGroup = 3; 
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [shippings, setShippings] = useState([]);
+  // const [totalItems, setTotalItems] = useState(0);
+  // const userId = authUtils.getCurrentUserId();
+  
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex items-center justify-between gap-4 mb-6">
         <Title level={4} className="">
           Shipping Information
         </Title>
-        <SearchBox />
       </div>
       
       <div className="h-px bg-gray-200 my-6" />
@@ -21,20 +26,6 @@ export const Shipping = () => {
   );
 };
 
-const SearchBox = () => {
-  return (
-    <div className="relative w-full max-w-xs">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <IoIosSearch className="text-gray-500" size={16} />
-      </div>
-      <input 
-        type="search" 
-        className="w-full pl-9 pr-4 py-2 text-sm text-gray-900 rounded-lg bg-gray-50 border border-gray-200 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-        placeholder="Search..."
-      />
-    </div>
-  );
-}
 
 const Table = () => {
   return (

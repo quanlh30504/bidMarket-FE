@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { ProductCard } from "../../components/cards/ProductCard";
 // import { productlists } from "../../utils/data";
-import { Container, Heading, PrimaryButton, CustomNavLink, Pagination, Title, Caption, ProfileCard} from "../../router";
+import { Container, Pagination, Title, Caption, ProfileCard} from "../../router";
 import { User2 } from "../../components/hero/Hero";
 import { CiShop, CiStar, CiLocationOn } from "react-icons/ci";
-import { LuPackageCheck } from "react-icons/lu";
 import { GoPeople } from "react-icons/go";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import axiosClient from "../../services/axiosClient";
@@ -66,7 +64,7 @@ export const ShopView = () => {
       });
       const followersCountResponse = await axiosClient.get(`/api/follows/${sellerId}/followersCount`);
 
-      setIsFollowing(isFollowingResponse.data.isFollowing);
+      setIsFollowing(isFollowingResponse.data);
       setFollowersCount(followersCountResponse.data);
 
     } catch (error) {
@@ -75,7 +73,6 @@ export const ShopView = () => {
   };
 
   useEffect(() => {
-
     fetchSellerData();
     fetchIsFollowing();
   }, [sellerId]);
@@ -83,6 +80,7 @@ export const ShopView = () => {
    useEffect(() => {
     fetchSellerProducts(currentPage);
   }, [sellerId, currentPage]);
+
 
 
   const handleChatClick = async () => {
@@ -131,7 +129,10 @@ export const ShopView = () => {
   if (!sellerData) {
     return <div>Loading...</div>;
   }
-  // console.log(sellerProducts);
+  
+  if (totalProducts === 0) {
+    return <div>No auctions</div>;
+  }
 
 
   
@@ -184,8 +185,9 @@ export const ShopView = () => {
                    <Caption>{followersCount} followers</Caption>
                    </div>
                     </div>
-
-                    <div className='w-96 flex justitfy-center ltr'>
+                      {(sellerId !== userId) && (
+                        <>
+                        <div className='w-96 flex justitfy-center ltr'>
                     {isFollowing ? (
                       <button className=" ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green" onClick={handleUnfollow} > UnFollow</button>  
                       ) : (
@@ -195,7 +197,9 @@ export const ShopView = () => {
                     <button className=" ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1" onClick={handleChatClick}> 
                       <IoChatbubbleEllipsesOutline className='ml-3'/>Chat
                     </button>                   
-                    </div>                    
+                    </div> 
+                        </>)}
+                                       
                   </div>                  
                 </div>
         </div>

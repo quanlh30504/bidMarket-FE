@@ -1,19 +1,38 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import { Title, Pagination} from "../../router";
-import { IoIosSearch } from "react-icons/io";
-import { payments } from "../../utils/data";
+import axiosClient from "../../services/axiosClient";
+import { authUtils } from '../../utils/authUtils';
 
 export const Payment = () => {
   const itemsPerPage = 5;
   const pagesPerGroup = 3; 
   const [currentPage, setCurrentPage] = useState(1);
+  const [payments, setPayments] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const userId = authUtils.getCurrentUserId();
+
+  const fetchPayments = async (page) => {
+    try {
+      const response = await axiosClient.get(`/api/payments/user/${userId}`, {
+        params: {
+          page: page - 1,
+          size: itemsPerPage,
+          sortBy: 'createdAt',
+          sortDirection: 'DESC'
+        }
+      });
+      setPayments(response.data.content);
+      setTotalItems(response.data.totalElements);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
+
   
-  // Pagination logic
-  const totalItems = payments.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = payments.slice(startIndex, startIndex + itemsPerPage);
+  useEffect(() => {
+    fetchPayments(currentPage);
+  }, [currentPage]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -24,12 +43,11 @@ export const Payment = () => {
         <Title level={4} className="">
           Payment History
         </Title>
-        <SearchBox />
       </div>
       
       <div className="h-px bg-gray-200 my-6" />
       
-      <Table items = {currentItems}/>
+      <Table items = {payments}/>
       <Pagination
         totalItems={totalItems}
         itemsPerPage={itemsPerPage}
@@ -40,20 +58,6 @@ export const Payment = () => {
   );
 };
 
-const SearchBox = () => {
-  return (
-    <div className="relative w-full max-w-xs">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <IoIosSearch className="text-gray-500" size={16} />
-      </div>
-      <input 
-        type="search" 
-        className="w-full pl-9 pr-4 py-2 text-sm text-gray-900 rounded-lg bg-gray-50 border border-gray-200 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-        placeholder="Search payment..."
-      />
-    </div>
-  );
-}
 
 const Table = ({items}) => {
   return (
@@ -86,14 +90,14 @@ const Table = ({items}) => {
             {items.map((item, index) => (
             <tr key = {index} className="bg-white border-b hover:bg-gray-50">
             <td className="px-6 py-4">
-                <img className="w-20 h-20 rounded-md" src={item.image} alt="Item" />
+                <img className="w-20 h-20 rounded-md" src={item.productImageUrl} alt="Item" />
             </td>
               <td className="px-6 py-4">{item.title}</td>
               <td className="px-6 py-4 text-center">{item.transactionId}</td>
               <td className="px-6 py-4 text-center">${item.amount}</td>
-              <td className="px-6 py-4 text-center">{item.status === 'Success' ? item.paymentDate : "N/A"}</td>
+              <td className="px-6 py-4 text-center">{item.paymentDate  ? item.paymentDate : "N/A"}</td>
               <td className="px-6 py-4  text-center">
-                 <div className={`inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white ${item.status === 'Success' ? 'border-green bg-green' : 'border-red-500 bg-red-500'}  text-center truncate`}>
+                 <div className={`inline-block w-24 px-2 py-1 text-sm border-2 rounded-full text-white ${item.status === 'SUCCESS' ? 'border-green bg-green' : 'border-red-500 bg-red-500'}  text-center truncate`}>
                   {item.status}
                  </div>
               </td>

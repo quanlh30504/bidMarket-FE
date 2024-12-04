@@ -1,8 +1,19 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Container } from "../../router";
+import { useEffect } from "react";
+import { useUser } from "../../router";
 
 export const Tab = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const {user} = useUser();
+  const userRole = user.role;
+
+  useEffect(() => {
+    if ((userRole === 'SELLER' || userRole === "ADMIN") && location.pathname !== '/account') {
+      navigate('/account');
+    }
+  }, [userRole, location, navigate]);
 
   // Function to check if the link is active
   const getLinkClass = (path) => {
@@ -19,21 +30,25 @@ export const Tab = ({ children }) => {
             <NavLink to="/account" className={getLinkClass("/account")}>
               Account
             </NavLink>
-            <NavLink to="/watchlist" className={getLinkClass("/watchlist")}>
-              Watchlist
-            </NavLink>
-            <NavLink to="/order" className={getLinkClass("/order")}>
-              Order
-            </NavLink>
-            <NavLink
-              to="/payment-history"
-              className={getLinkClass("/payment-history")}
-            >
-              Payment History
-            </NavLink>
-            <NavLink to="/shipping" className={getLinkClass("/shipping")}>
-              Shipping
-            </NavLink>
+            {(userRole !== 'SELLER' && userRole !== 'ADMIN') && (
+              <>
+                <NavLink to="/watchlist" className={getLinkClass("/watchlist")}>
+                  Watchlist
+                </NavLink>
+                <NavLink to="/order" className={getLinkClass("/order")}>
+                  Order
+                </NavLink>
+                <NavLink
+                  to="/payment-history"
+                  className={getLinkClass("/payment-history")}
+                >
+                  Payment History
+                </NavLink>
+                <NavLink to="/shipping" className={getLinkClass("/shipping")}>
+                  Shipping
+                </NavLink>
+              </>
+            )}
           </div>
 
           <div className="tab-content mt-8">{children}</div>

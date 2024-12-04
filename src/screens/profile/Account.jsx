@@ -5,6 +5,7 @@ import { CiEdit } from "react-icons/ci";
 import { useState, useRef, useEffect } from "react";
 import axiosClient from "../../services/axiosClient";
 import { authUtils } from "../../utils/authUtils";
+import fileUtils from "../../utils/fileUtils";
 
 export const Account = () => {
   const [avatarUrl, setAvatarUrl] = useState(
@@ -29,19 +30,14 @@ export const Account = () => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const tempUrl = URL.createObjectURL(file);
-
-      setAvatarUrl(tempUrl);
-
       try {
-        const response = await axiosClient.put(
-          `/api/users/avatar/${userId}`,
-          null,
-          {
-            params: { imageUrl: tempUrl },
-          }
-        );
-        console.log(response.data);
+        // Upload image and get the URL
+        const imageUrl = await fileUtils.uploadImage(file, `avatars/${userId}`);
+        setAvatarUrl(imageUrl);
+        // Update avatar on the server
+        await axiosClient.put(`/api/users/avatar/${userId}`, null, {
+          params: {imageUrl: imageUrl }
+        });
       } catch (error) {
         console.error("Error updating avatar:", error);
       }
@@ -52,13 +48,14 @@ export const Account = () => {
     try {
       const response = await axiosClient.get(`/api/users/${userId}/accountInfo`);
       setAccountInfo(response.data);
-      console.log(response.data);
+      setAvatarUrl(response.data.avatarImageUrl);
     } catch (error) {
       console.error("Error fetching account info:", error);
     }
   };
   
   useEffect(() => {
+    
     fetchAccountInfo();
   }, [userId]);
   
@@ -75,7 +72,6 @@ export const Account = () => {
       });
     }
     setEditingField(field);
-    console.log(accountInfo);
     setProfileData({
       fullName: accountInfo.fullName,
       phoneNumber: accountInfo.phoneNumber,
