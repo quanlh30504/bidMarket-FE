@@ -5,15 +5,18 @@ import Messages from './Messages';
 import { chatService } from "../../services/chatService";
 import { authUtils } from "../../utils/authUtils";
 import { useWebSocket } from "../../hooks/useWebSocket";
-
+import { useSearchParams } from 'react-router-dom';
+   
 export const Chat = () => {
     const [selectedRoom, setSelectedRoom] = useState(null);
+    const [searchParams] = useSearchParams();
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(false);
     const [messages, setMessages] = useState([]);
     const currentUserId = authUtils.getCurrentUserId();
     const stompClientRef = useRef(null);
     const messagesEndRef = useRef(null);
+
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -87,6 +90,16 @@ export const Chat = () => {
         });
     }, [selectedRoom, scrollToBottom, fetchRooms]);
 
+    useEffect(() => {
+        const roomId = searchParams.get('roomId');
+        if (roomId && rooms.length > 0) {
+            const room = rooms.find(r => r.id === roomId);
+            if (room) {
+                setSelectedRoom(room);
+            }
+        }
+    }, [searchParams, rooms]);
+    
     useEffect(() => {
         if (!selectedRoom || !stompClientRef.current) return;
 
