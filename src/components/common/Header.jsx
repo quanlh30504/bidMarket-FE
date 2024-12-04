@@ -47,7 +47,6 @@ export const Header = () => {
     };
   }, []);
 
-  // Check if it's the home page
   const isHomePage = location.pathname === "/";
 
   const isChatPage = location.pathname === "/chat";
@@ -139,7 +138,6 @@ export const Header = () => {
               </div>
             </div>
 
-            {/* Responsive Menu if below 768px */}
             <div ref={menuRef} className={`lg:flex lg:items-center lg:w-auto w-full p-5 absolute right-0 top-full menu-container ${isOpen ? "open" : "closed"}`}>
               {menulists.map((list) => (
                 (list.id !== 7 || role === "SELLER") && (

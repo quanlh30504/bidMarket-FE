@@ -40,7 +40,6 @@ export const NotificationBell = () => {
 
     const userId = user?.id || authUtils.getCurrentUserId();
 
-    // Initial data fetch
     useEffect(() => {
         const fetchInitialData = async () => {
             if (!userId || hasInitialFetchRef.current || loading) return;
