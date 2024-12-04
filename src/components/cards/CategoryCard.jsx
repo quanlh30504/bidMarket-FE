@@ -4,7 +4,7 @@ import { Title } from "../common/Design";
 export const CategoryCard = ({ item }) => {
   const handleSearch = (e) => {
     e.preventDefault();
-    window.location.href = `/search?categoryType=${encodeURIComponent(item.value)}`
+    window.location.href = `/search?categoryType=${encodeURIComponent(item.value)}&status=OPEN`
   };
   return (
     <>

@@ -11,6 +11,7 @@ import { categoryMapping, statusMapping, sortByMapping } from "./filterMapping";
 export const SearchList = () => {
   const [searchParams] = useSearchParams();
   const title = searchParams.get("title") || ""; // Lấy title từ URL
+  const statusParam = searchParams.get("status") || null;
 
   const categoryType = searchParams.get("categoryType")?.split(',').map(cate => cate.trim()) || [];
 
@@ -19,7 +20,7 @@ export const SearchList = () => {
   const [filters, setFilters] = useState({
     title: title,
     categoryType: categoryType,
-    status: null,
+    status: statusParam,
     minPrice: null,
     maxPrice: null,
     sortField: "currentPrice",

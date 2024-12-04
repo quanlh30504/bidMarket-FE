@@ -1,6 +1,5 @@
 import { Body, Caption, Container, Title, ProfileCard } from "../../router";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
-import { commonClassNameOfInput } from "../../components/common/Design";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -9,62 +8,33 @@ import {
   MdFavorite,
 } from "react-icons/md";
 import { PrimaryButton } from "../../components/common/Design";
-import { FaCheckCircle } from "react-icons/fa";
 import axiosClient from "../../services/axiosClient";
 import ProductImages from "./ProductImages";
 import { authUtils } from "../../utils/authUtils";
 import { LoginRequire } from "../../components/common/LoginRequire";
-import { Pagination } from "../../components/pagination";
 import { User2 } from "../../components/hero/Hero";
-import { } from "react-icons/fa";
-import WebSocketService from "../../services/WebSocketService"
-import { FaEllipsisH, FaStar } from 'react-icons/fa'; // Import 3 dot icon
 import { useNotification } from "../../notifications/NotificationContext";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { CiLocationOn } from "react-icons/ci";
+import { RelatedAuctions } from "./RelatedAuctions";
+import { Comments } from "./Comments";
+import { formatTime } from "../../utils/DateFormatter";
+import { AuctionHistory } from "./AuctionHistory";
+import WebSocketService from "../../services/WebSocketService";
 
-function formatTime(dateString) {
-  const date = new Date(dateString);
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  // Lấy các thành phần của ngày giờ
-  const month = months[date.getMonth()]; // Lấy tên tháng
-  const day = date.getDate(); // Lấy ngày
-  const year = date.getFullYear(); // Lấy năm
-
-  // Lấy giờ và định dạng am/pm
-  let hours = date.getHours();
-  const minutes = date.getMinutes().toString().padStart(2, "0"); // Lấy phút (thêm 0 nếu cần)
-  const ampm = hours >= 12 ? "pm" : "am"; // Xác định am/pm
-  hours = hours % 12 || 12; // Đổi giờ về dạng 12 giờ (1-12)
-
-  return `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
-}
 
 export const ProductsDetailsPage = () => {
-  const { id } = useParams(); // Lấy id từ URL
+  const { id } = useParams();
 
   const userId = authUtils.getCurrentUserId();
   const isAuth = authUtils.isAuthenticated()
 
   const [activeTab, setActiveTab] = useState("description");
-  const [auction, setAuction] = useState(null); // Trạng thái lưu thông tin sản phẩm
+  const [auction, setAuction] = useState(null);
+  const [relatedAuctions, setRelatedAuctions] = useState(null)
   const [timeLeft, setTimeLeft] = useState(null);
-  const [loading, setLoading] = useState(true); // Trạng thái loading
-  const [error, setError] = useState(null); // Trạng thái lỗi
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [watchlistId, setWatchlistId] = useState("");
   const [isHovered, setIsHovered] = useState(false); // Trạng thái hover
@@ -72,6 +42,8 @@ export const ProductsDetailsPage = () => {
   const [bidAmount, setBidAmount] = useState(""); // Track the bid amount
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(null);
+  const [bids, setBids] = useState([])
+  const [comments, setComments] = useState([])
   const [sellerId, setSellerId] = useState(null);
 
   const navigate = useNavigate();
@@ -86,6 +58,8 @@ export const ProductsDetailsPage = () => {
   const selectedImage = validImages.find((image) => image.isPrimary)?.imageUrl || validImages[0].imageUrl;
 
   const { showToastNotification } = useNotification();
+
+  const webSocketService = new WebSocketService();
 
   const fetchProductDetails = useCallback(async () => {
     try {
@@ -127,10 +101,100 @@ export const ProductsDetailsPage = () => {
   };
 
 
+  const fetchRelatedAuction = useCallback(async () => {
+    try {
+      console.log("Start load related auction")
+      setLoading(true);
+      const { data } = await axiosClient.get(`/api/auctions/search`, {
+        params: {
+          // categoryType: auction.productDto.categories.join(","),
+          hasNotId: auction?.id,
+          status: "OPEN",
+          page: 0,
+          size: 15
+        }
+      });
+      setRelatedAuctions(data.content);
+      console.log(relatedAuctions)
+    } catch (err) {
+      setError("Failed to fetch related auctions.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
   useEffect(() => {
     fetchProductDetails();
     fetchWatchlistStatus();
-  }, [fetchProductDetails, fetchWatchlistStatus]);
+    fetchRelatedAuction();
+
+    webSocketService.connect(
+      () => {
+        console.log('Connected to WebSocket');
+        // Subscribe to the first topic
+        const commentSubscription = webSocketService.subscribe(
+          `/topic/auction-comments/${id}`,
+          handleCommentWebSocketEvent
+        );
+
+        // Subscribe to the second topic
+        const bidSubscription = webSocketService.subscribe(
+          `/topic/auction-bids/auctionId/${id}`,
+          handleBidWebSocketEvent // Bạn cần thêm logic xử lý khác nếu cần
+        );
+
+        return () => {
+          webSocketService.unsubscribe(commentSubscription);
+          webSocketService.unsubscribe(bidSubscription);
+          webSocketService.disconnect();
+        };
+      },
+      (error) => console.error('WebSocket connection error:', error)
+    );
+
+  }, [fetchProductDetails, fetchWatchlistStatus, fetchRelatedAuction]);
+
+  const handleBidWebSocketEvent = async (event) => {
+    console.log("event bid: " + JSON.stringify(event))
+    switch (event.action) {
+      case "create":
+        if (event.data.status === "VALID") {
+          setBids((prev) => [event.data, ...prev]);
+          await showToastNotification(`Your bid is successful`);
+          setCurrentPrice(event.data.bidAmount);
+          setBidAmount("");
+        } else if (event.data.status === "INVALID") {
+          showToastNotification("The bid is invalid or has been canceled.", "error");
+        } else {
+          console.warn("Unhandled event status:", event.status);
+        }
+        break;
+
+      default:
+        console.warn("Unknown event action:", event.action);
+        break;
+    }
+  };
+
+  const handleCommentWebSocketEvent = async (event) => {
+    switch (event.action) {
+      case 'create':
+        console.log("create event" + JSON.stringify(event.data))
+        setComments((prev) => [event.data, ...prev]);
+        console.log(comments)
+        break;
+      case 'update':
+        setComments((prev) =>
+          prev.map((c) => (c.id === event.data.id ? event.data : c))
+        );
+        break;
+      case 'delete':
+        setComments((prev) => prev.filter((c) => c.id !== event.data.id));
+        break;
+      default:
+        console.warn('Unknown event type:', event.type);
+    }
+  };
 
   useEffect(() => {
 
@@ -238,9 +302,7 @@ export const ProductsDetailsPage = () => {
         auctionId: auction.id,
         bidAmount,
       });
-      await showToastNotification(`Your bid is being processed`);
-      setCurrentPrice(bidAmount);
-      setBidAmount("");
+
 
     } catch (error) {
       console.error("Error placing bid:", error);
@@ -445,7 +507,7 @@ export const ProductsDetailsPage = () => {
                   </div>
                 </div>
               </div>
-              
+
 
             </div>
             <div className="w-1/2">
@@ -496,6 +558,9 @@ export const ProductsDetailsPage = () => {
               </Title>
             </div>
           </div>
+          {/* Danh sách sản phẩm liên quan */}
+          <RelatedAuctions relatedAuctions={relatedAuctions} />
+
           <div className="details mt-8">
             <div className="flex items-center gap-5">
               <button
@@ -522,15 +587,6 @@ export const ProductsDetailsPage = () => {
                 onClick={() => handleTabClick("comments")}
               >
                 Comments
-              </button>
-              <button
-                className={`rounded-md px-10 py-4 text-black shadow-s3 ${activeTab === "moreProducts"
-                  ? "bg-green text-white"
-                  : "bg-white"
-                  }`}
-                onClick={() => handleTabClick("moreProducts")}
-              >
-                More Products
               </button>
             </div>
 
@@ -625,15 +681,13 @@ export const ProductsDetailsPage = () => {
                   auctionId={auction.id}
                   startingPrice={auction.startingPrice}
                   currentUserId={authUtils.getCurrentUserId()}
-                  winnerName={""}
+                  winnerName={auction.winner}
+                  bids={bids}
+                  setBids={setBids}
                 />
               )}
-              {activeTab === "comments" && <Comments auctionId={id} userId={userId} setShowLoginModal={setShowLoginModal} />}
-              {activeTab === "moreProducts" && (
-                <div className="more-products-tab shadow-s3 p-8 rounded-md">
-                  <h1>More Products</h1>
-                </div>
-              )}
+              {activeTab === "comments" && <Comments auctionId={id} userId={userId} setShowLoginModal={setShowLoginModal} comments={comments} setComments={setComments}/>}
+
             </div>
           </div>
         </Container>
