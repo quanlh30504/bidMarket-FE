@@ -42,12 +42,15 @@ export const ProductsDetailsPage = () => {
   const [bidAmount, setBidAmount] = useState(""); // Track the bid amount
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(null);
+<<<<<<< HEAD
   const [sellerId, setSellerId] = useState(null);
 
   const navigate = useNavigate();
   const [sellerData, setSellerData] = useState(null);
+=======
   const [bids, setBids] = useState([])
   const [comments, setComments] = useState([])
+>>>>>>> quan_dev_api
 
   const defaultImageUrl = "https://via.placeholder.com/400x400?text=No+Image";
 
@@ -91,6 +94,7 @@ export const ProductsDetailsPage = () => {
     }
   }, [isAuth, id]);
 
+<<<<<<< HEAD
   const fetchSellerData = async () => {
     try {
       const sellerResponse = await axiosClient.get(`/api/users/${sellerId}/accountInfo`);
@@ -100,6 +104,7 @@ export const ProductsDetailsPage = () => {
     }
   };
 
+=======
   const fetchRelatedAuction = useCallback(async () => {
     try {
       console.log("Start load related auction")
@@ -121,6 +126,7 @@ export const ProductsDetailsPage = () => {
       setLoading(false);
     }
   }, [id]);
+>>>>>>> quan_dev_api
 
   useEffect(() => {
     fetchProductDetails();

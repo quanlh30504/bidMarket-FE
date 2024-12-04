@@ -2,8 +2,8 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 class WebSocketService {
-  constructor(webSocketUrl) {
-    this.webSocketUrl = webSocketUrl;
+  constructor() {
+    this.webSocketUrl = process.env.REACT_APP_WS_URL;
     this.stompClient = null;
   }
 

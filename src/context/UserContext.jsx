@@ -9,6 +9,7 @@ export const UserProvider = ({ children }) => {
     // -> role !== null: user is logged in ('BIDDER', 'SELLER', 'ADMIN')
     // -> role === null: user is not
   });
+  const [loading, setLoading] = useState(true);
 
   const RoleHandler = {
     setRole: (role) => {
@@ -32,14 +33,16 @@ export const UserProvider = ({ children }) => {
         } else {
           setUser({ role: null });
         }
-      };
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchAccessToken();
   }, []);
 
   return (
-    <UserContext.Provider value={{ user }}>
+    <UserContext.Provider value={{ user, loading }}>
       {children}
     </UserContext.Provider>
   );
