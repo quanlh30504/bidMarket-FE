@@ -1,6 +1,5 @@
 import { Body, Caption, Container, Title, ProfileCard } from "../../router";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
-import { commonClassNameOfInput } from "../../components/common/Design";
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -9,62 +8,33 @@ import {
   MdFavorite,
 } from "react-icons/md";
 import { PrimaryButton } from "../../components/common/Design";
-import { FaCheckCircle } from "react-icons/fa";
 import axiosClient from "../../services/axiosClient";
 import ProductImages from "./ProductImages";
 import { authUtils } from "../../utils/authUtils";
 import { LoginRequire } from "../../components/common/LoginRequire";
-import { Pagination } from "../../components/pagination";
 import { User2 } from "../../components/hero/Hero";
-import { } from "react-icons/fa";
-import WebSocketService from "../../services/WebSocketService"
-import { FaEllipsisH, FaStar } from 'react-icons/fa'; // Import 3 dot icon
 import { useNotification } from "../../notifications/NotificationContext";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { CiLocationOn } from "react-icons/ci";
+import { RelatedAuctions } from "./RelatedAuctions";
+import { Comments } from "./Comments";
+import { formatTime } from "../../utils/DateFormatter";
+import { AuctionHistory } from "./AuctionHistory";
+import WebSocketService from "../../services/WebSocketService";
 
-function formatTime(dateString) {
-  const date = new Date(dateString);
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  // Lấy các thành phần của ngày giờ
-  const month = months[date.getMonth()]; // Lấy tên tháng
-  const day = date.getDate(); // Lấy ngày
-  const year = date.getFullYear(); // Lấy năm
-
-  // Lấy giờ và định dạng am/pm
-  let hours = date.getHours();
-  const minutes = date.getMinutes().toString().padStart(2, "0"); // Lấy phút (thêm 0 nếu cần)
-  const ampm = hours >= 12 ? "pm" : "am"; // Xác định am/pm
-  hours = hours % 12 || 12; // Đổi giờ về dạng 12 giờ (1-12)
-
-  return `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
-}
 
 export const ProductsDetailsPage = () => {
-  const { id } = useParams(); // Lấy id từ URL
+  const { id } = useParams();
 
   const userId = authUtils.getCurrentUserId();
   const isAuth = authUtils.isAuthenticated()
 
   const [activeTab, setActiveTab] = useState("description");
-  const [auction, setAuction] = useState(null); // Trạng thái lưu thông tin sản phẩm
+  const [auction, setAuction] = useState(null);
+  const [relatedAuctions, setRelatedAuctions] = useState(null)
   const [timeLeft, setTimeLeft] = useState(null);
-  const [loading, setLoading] = useState(true); // Trạng thái loading
-  const [error, setError] = useState(null); // Trạng thái lỗi
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [watchlistId, setWatchlistId] = useState("");
   const [isHovered, setIsHovered] = useState(false); // Trạng thái hover
@@ -72,6 +42,8 @@ export const ProductsDetailsPage = () => {
   const [bidAmount, setBidAmount] = useState(""); // Track the bid amount
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(null);
+  const [bids, setBids] = useState([])
+  const [comments, setComments] = useState([])
 
   const defaultImageUrl = "https://via.placeholder.com/400x400?text=No+Image";
 
@@ -82,6 +54,8 @@ export const ProductsDetailsPage = () => {
   const selectedImage = validImages.find((image) => image.isPrimary)?.imageUrl || validImages[0].imageUrl;
 
   const { showToastNotification } = useNotification();
+
+  const webSocketService = new WebSocketService();
 
   const fetchProductDetails = useCallback(async () => {
     try {
@@ -112,10 +86,100 @@ export const ProductsDetailsPage = () => {
     }
   }, [isAuth, id]);
 
+  const fetchRelatedAuction = useCallback(async () => {
+    try {
+      console.log("Start load related auction")
+      setLoading(true);
+      const { data } = await axiosClient.get(`/api/auctions/search`, {
+        params: {
+          // categoryType: auction.productDto.categories.join(","),
+          hasNotId: auction?.id,
+          status: "OPEN",
+          page: 0,
+          size: 15
+        }
+      });
+      setRelatedAuctions(data.content);
+      console.log(relatedAuctions)
+    } catch (err) {
+      setError("Failed to fetch related auctions.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
   useEffect(() => {
     fetchProductDetails();
     fetchWatchlistStatus();
-  }, [fetchProductDetails, fetchWatchlistStatus]);
+    fetchRelatedAuction();
+
+    webSocketService.connect(
+      () => {
+        console.log('Connected to WebSocket');
+        // Subscribe to the first topic
+        const commentSubscription = webSocketService.subscribe(
+          `/topic/auction-comments/${id}`,
+          handleCommentWebSocketEvent
+        );
+
+        // Subscribe to the second topic
+        const bidSubscription = webSocketService.subscribe(
+          `/topic/auction-bids/auctionId/${id}`,
+          handleBidWebSocketEvent // Bạn cần thêm logic xử lý khác nếu cần
+        );
+
+        return () => {
+          webSocketService.unsubscribe(commentSubscription);
+          webSocketService.unsubscribe(bidSubscription);
+          webSocketService.disconnect();
+        };
+      },
+      (error) => console.error('WebSocket connection error:', error)
+    );
+
+  }, [fetchProductDetails, fetchWatchlistStatus, fetchRelatedAuction]);
+
+  const handleBidWebSocketEvent = async (event) => {
+    console.log("event bid: " + JSON.stringify(event))
+    switch (event.action) {
+      case "create":
+        if (event.data.status === "VALID") {
+          setBids((prev) => [event.data, ...prev]);
+          await showToastNotification(`Your bid is successful`);
+          setCurrentPrice(event.data.bidAmount);
+          setBidAmount("");
+        } else if (event.data.status === "INVALID") {
+          showToastNotification("The bid is invalid or has been canceled.", "error");
+        } else {
+          console.warn("Unhandled event status:", event.status);
+        }
+        break;
+
+      default:
+        console.warn("Unknown event action:", event.action);
+        break;
+    }
+  };
+
+  const handleCommentWebSocketEvent = async (event) => {
+    switch (event.action) {
+      case 'create':
+        console.log("create event" + JSON.stringify(event.data))
+        setComments((prev) => [event.data, ...prev]);
+        console.log(comments)
+        break;
+      case 'update':
+        setComments((prev) =>
+          prev.map((c) => (c.id === event.data.id ? event.data : c))
+        );
+        break;
+      case 'delete':
+        setComments((prev) => prev.filter((c) => c.id !== event.data.id));
+        break;
+      default:
+        console.warn('Unknown event type:', event.type);
+    }
+  };
 
   useEffect(() => {
     if (auction?.endTime) {
@@ -202,9 +266,7 @@ export const ProductsDetailsPage = () => {
         auctionId: auction.id,
         bidAmount,
       });
-      await showToastNotification(`Your bid is being processed`);
-      setCurrentPrice(bidAmount);
-      setBidAmount("");
+
 
     } catch (error) {
       console.error("Error placing bid:", error);
@@ -405,7 +467,7 @@ export const ProductsDetailsPage = () => {
                   </div>
                 </div>
               </div>
-              
+
 
             </div>
             <div className="w-1/2">
@@ -456,6 +518,9 @@ export const ProductsDetailsPage = () => {
               </Title>
             </div>
           </div>
+          {/* Danh sách sản phẩm liên quan */}
+          <RelatedAuctions relatedAuctions={relatedAuctions} />
+
           <div className="details mt-8">
             <div className="flex items-center gap-5">
               <button
@@ -482,15 +547,6 @@ export const ProductsDetailsPage = () => {
                 onClick={() => handleTabClick("comments")}
               >
                 Comments
-              </button>
-              <button
-                className={`rounded-md px-10 py-4 text-black shadow-s3 ${activeTab === "moreProducts"
-                  ? "bg-green text-white"
-                  : "bg-white"
-                  }`}
-                onClick={() => handleTabClick("moreProducts")}
-              >
-                More Products
               </button>
             </div>
 
@@ -585,15 +641,13 @@ export const ProductsDetailsPage = () => {
                   auctionId={auction.id}
                   startingPrice={auction.startingPrice}
                   currentUserId={authUtils.getCurrentUserId()}
-                  winnerName={""}
+                  winnerName={auction.winner}
+                  bids={bids}
+                  setBids={setBids}
                 />
               )}
-              {activeTab === "comments" && <Comments auctionId={id} userId={userId} setShowLoginModal={setShowLoginModal} />}
-              {activeTab === "moreProducts" && (
-                <div className="more-products-tab shadow-s3 p-8 rounded-md">
-                  <h1>More Products</h1>
-                </div>
-              )}
+              {activeTab === "comments" && <Comments auctionId={id} userId={userId} setShowLoginModal={setShowLoginModal} comments={comments} setComments={setComments}/>}
+
             </div>
           </div>
         </Container>
@@ -601,137 +655,7 @@ export const ProductsDetailsPage = () => {
     </>
   );
 };
-export const AuctionHistory = ({
-  auctionId,
-  startingPrice,
-  currentUserId,
-  winnerName
-}) => {
-  const [bids, setBids] = useState([]);
-  const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10; // Số lượng item mỗi trang
-  const pagesPerGroup = 5; // Số lượng trang mỗi nhóm
-  const websocketUrl = 'http://localhost:8080/ws'; // WebSocket URL from environment variables
-  const webSocketService = new WebSocketService(websocketUrl);
 
-  const fetchBids = async (page) => {
-    try {
-      const response = await axiosClient.get(`/api/bids/auction/${auctionId}`, {
-        params: {
-          page: page - 1, // API nhận page từ 0
-          size: itemsPerPage,
-          status: "VALID",
-          sortField: "bidTime",
-          direction: "DESC",
-        },
-      });
-      const data = response.data;
-      setBids(data.content);
-      setTotalItems(data.totalElements);
-    } catch (error) {
-      console.error("Error fetching auction bids:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchBids(1); // Gọi dữ liệu trang đầu tiên
-
-    webSocketService.connect(
-      () => {
-        console.log('Connected to WebSocket');
-        const subscription = webSocketService.subscribe(
-          `/topic/bids/auctionId/${auctionId}`,
-          handleWebSocketEvent
-        );
-
-        return () => {
-          webSocketService.unsubscribe(subscription);
-          webSocketService.disconnect();
-        };
-      },
-      (error) => console.error('WebSocket connection error:', error)
-    );
-  }, [auctionId]);
-
-  const handleWebSocketEvent = (event) => {
-    switch (event.action) {
-      case "create":
-        setBids((prev) => [event.data, ...prev]);
-        break;
-      default:
-        console.warn('Unknown event type:', event.type);
-    }
-  }
-
-  return (
-    <div className="shadow-s1 p-8 rounded-lg bg-white">
-      <h5 className="text-lg font-normal">Auction History</h5>
-      {winnerName && (
-        <div className="flex items-center mt-4 text-green-600">
-          <FaCheckCircle className="mr-2" size={25} />
-          <span className="text-sm">
-            Congratulations {winnerName}, you are the winner!
-          </span>
-        </div>
-      )}
-      <hr className="my-5" />
-
-      <div className="relative overflow-x-auto rounded-lg">
-        <table className="w-full text-sm text-left text-gray-500">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-100">
-            <tr>
-              <th scope="col" className="px-6 py-5">
-                Bidder
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Bid Amount
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Bid Time
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {bids.map((bid, index) => (
-              <tr
-                key={index}
-                className={`bg-white border-b hover:bg-gray-50 ${bid.userId === currentUserId
-                  ? "text-blue-500 font-medium"
-                  : ""
-                  }`}
-              >
-                <td className="px-6 py-4">
-                  {bid.userId === currentUserId ? "You" : bid?.userEmail}
-                </td>
-                <td className="px-6 py-4">
-                  US ${bid.bidAmount.toLocaleString()}
-                </td>
-                <td className="px-6 py-4">
-                  {new Date(bid.bidTime).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-            <tr>
-              <td className="px-6 py-4">Startting price</td>
-              <td className="px-6 py-4">US ${startingPrice}</td>
-              <td className="px-6 py-4"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <Pagination
-        totalItems={totalItems}
-        itemsPerPage={itemsPerPage}
-        pagesPerGroup={pagesPerGroup}
-        onPageChange={fetchBids}
-        className="mt-4"
-        buttonClassName="bg-blue-500 text-white hover:bg-blue-700"
-      />
-    </div>
-  );
-};
 
 // const StarRating = ({ maxStars = 5, onRate }) => {
 //   const [rating, setRating] = useState(0);
@@ -826,245 +750,3 @@ export const AuctionHistory = ({
 //   )
 // })
 
-export const Comments = ({ auctionId, userId, setShowLoginModal }) => {
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [showOptions, setShowOptions] = useState(null);
-  const websocketUrl = 'http://localhost:8080/ws'; // WebSocket URL from environment variables
-  const webSocketService = new WebSocketService(websocketUrl);
-  const [editingCommentId, setEditingCommentId] = useState(null);
-  const [editedContent, setEditedContent] = useState('');
-
-  const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10; // Số lượng item mỗi trang
-  const pagesPerGroup = 5; // Số lượng trang mỗi nhóm
-
-
-  const getAllComments = async (page) => {
-    axiosClient
-      .get(`/api/comments/auction/${auctionId}`, {
-        params: {
-          page: page - 1, // API nhận page từ 0
-          size: itemsPerPage,
-          sortField: "createdAt",
-          direction: "DESC",
-        },
-      })
-      .then((response) => {
-        setComments(response.data.content);
-        setTotalItems(response.data.totalElements)
-      })
-      .catch((err) => console.error('Error fetching comments:', err));
-  }
-
-  useEffect(() => {
-
-    getAllComments(1);
-
-    webSocketService.connect(
-      () => {
-        console.log('Connected to WebSocket');
-        const subscription = webSocketService.subscribe(
-          `/topic/auction-comments/${auctionId}`,
-          handleWebSocketEvent
-        );
-
-        return () => {
-          webSocketService.unsubscribe(subscription);
-          webSocketService.disconnect();
-        };
-      },
-      (error) => console.error('WebSocket connection error:', error)
-    );
-  }, [auctionId]);
-
-  const handleWebSocketEvent = (event) => {
-    // console.log("event: "+ JSON.stringify(event))
-    // console.log("event action: " + event.action)
-    switch (event.action) {
-      case 'create':
-        console.log("create event" + JSON.stringify(event.data))
-        setComments((prev) => [event.data, ...prev]);
-        console.log(comments)
-        break;
-      case 'update':
-        setComments((prev) =>
-          prev.map((c) => (c.id === event.data.id ? event.data : c))
-        );
-        break;
-      case 'delete':
-        setComments((prev) => prev.filter((c) => c.id !== event.data.id));
-        break;
-      default:
-        console.warn('Unknown event type:', event.type);
-    }
-  };
-
-  const handleNewComment = () => {
-    if (!authUtils.isAuthenticated()) {
-      setShowLoginModal(true);
-      return;
-    }
-    if (!newComment.trim()) return;
-
-    axiosClient
-      .post('/api/comments', { userId: userId, auctionId: auctionId, content: newComment })
-      .then(() => {
-        setNewComment('');
-      })
-      .catch((err) => console.error('Error posting comment:', err));
-  };
-
-  const handleDeleteComment = (commentId) => {
-    axiosClient
-      .delete(`/api/comments/${commentId}`)
-      .then(() => {
-        setComments((prev) => prev.filter((c) => c.id !== commentId));
-      })
-      .catch((err) => console.error('Error deleting comment:', err));
-  };
-
-  const handleEdit = (commentId, currentContent) => {
-    setShowOptions(false)
-    setEditingCommentId(commentId);
-    setEditedContent(currentContent); // Điền nội dung hiện tại vào textarea
-  };
-
-  const handleCancelEdit = () => {
-    setEditingCommentId(null);
-    setEditedContent('');
-  };
-
-  const handleSaveEdit = (commentId) => {
-    if (!editedContent.trim()) return;
-
-    axiosClient
-      .put(`/api/comments/${commentId}`, { content: editedContent })
-      .then(() => {
-        setComments((prev) =>
-          prev.map((c) =>
-            c.id === commentId ? { ...c, content: editedContent } : c
-          )
-        );
-        setEditingCommentId(null); // Kết thúc chỉnh sửa
-        setEditedContent('');
-      })
-      .catch((err) => console.error('Error updating comment:', err));
-  };
-
-  const handleToggleOptions = (commentId) => {
-    setShowOptions(showOptions === commentId ? null : commentId); // Toggle visibility
-  };
-
-  return (
-    <div className="reviews-tab shadow-s3 p-8 rounded-md">
-      <div className="flex items-center gap-5">
-        <Title level={4}>Comments ({totalItems})</Title>
-      </div>
-      <hr className="my-5" />
-      <div className="shadow-s3 border p-8 mb-5 gap-5 flex-col rounded-xl">
-        <div>
-          <Title level={6} className="font-semibold text-left mb-5">Your comment</Title>
-          <textarea name="description" className={`${commonClassNameOfInput}`} cols="30" rows="5" value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}></textarea>
-          <PrimaryButton
-            type="button"
-            className="rounded-none my-5 flex items-center justify-center"
-            onClick={handleNewComment}
-          >
-            SEND
-          </PrimaryButton>
-        </div>
-      </div>
-
-      {comments.map((comment) => (
-        <div
-          key={comment.id}
-          className="shadow-s3 border p-8 mb-5 gap-5 flex-col rounded-xl"
-        >
-          <div className="flex items-center">
-            <ProfileCard>
-              <img src={User2} alt={User2} />
-            </ProfileCard>
-            <Title level={6} className="font-normal p-3">{comment.userEmail}</Title>
-
-            {comment.userId === userId && (
-              <div className="relative ml-auto">
-                <button
-                  className="text-gray-600 hover:text-gray-900"
-                  onClick={() => handleToggleOptions(comment.id)} // Toggle options when clicked
-                >
-                  <FaEllipsisH />
-                </button>
-
-                {showOptions === comment.id && (
-                  <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-md">
-                    <button
-                      onClick={() => handleEdit(comment.id, comment.content)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteComment(comment.id)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-4 ml-12 ps-3">
-            <div className="flex items-center">
-              {Array.from({ length: 5 }, (_, i) => (
-                <FaStar
-                  key={i}
-                  className={i < comment.rating ? 'text-yellow-300' : 'text-gray-300'}
-                />
-              ))}
-            </div>
-            <div className="text-gray-500">{comment.updatedAt && comment.createdAt !== comment.updatedAt ? `Updated at: ${formatTime(comment.updatedAt)}` : formatTime(comment.createdAt)}</div>
-          </div>
-          <div className="ml-12 ps-3">
-            {editingCommentId === comment.id ? (
-              // Hiển thị textarea khi chỉnh sửa
-              <div className="flex flex-col gap-2">
-                <textarea
-                  className="w-full p-2 border rounded"
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                ></textarea>
-                <div className="flex gap-2">
-                  <button
-                    className="bg-green text-white px-4 py-2 rounded"
-                    onClick={() => handleSaveEdit(comment.id)}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
-                    onClick={handleCancelEdit}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (<Caption className="leading-7">{comment.content}</Caption>)}
-
-          </div>
-
-        </div>
-      ))}
-      <Pagination
-        totalItems={totalItems}
-        itemsPerPage={itemsPerPage}
-        pagesPerGroup={pagesPerGroup}
-        onPageChange={getAllComments}
-        className="mt-4"
-        buttonClassName="bg-blue-500 text-white hover:bg-blue-700"
-      />
-    </div>
-  );
-};
