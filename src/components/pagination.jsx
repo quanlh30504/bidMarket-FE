@@ -1,7 +1,7 @@
 // Pagination.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-export const Pagination = ({ totalItems, itemsPerPage, pagesPerGroup, onPageChange }) => {
+export const Pagination = ({ totalItems, itemsPerPage, pagesPerGroup, onPageChange, currentPageByParent=null }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -29,6 +29,12 @@ export const Pagination = ({ totalItems, itemsPerPage, pagesPerGroup, onPageChan
       onPageChange(newPage);
     }
   };
+
+  useEffect(() => {
+    if (currentPageByParent !== null) {
+      setCurrentPage(currentPageByParent);
+    }
+  }, [currentPageByParent]);
 
   return (
     <div className="flex justify-center mt-4">

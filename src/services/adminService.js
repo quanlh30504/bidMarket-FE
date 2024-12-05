@@ -27,7 +27,7 @@ class AdminService {
   }
 
   // Tìm kiếm đấu giá theo các tiêu chí với phân trang
-  static searchAuctions({sellerId = '', title = '', categoryType = [], status = '', minPrice = '', maxPrice = '', startTime = '', endTime = '', page = 0, size = 10, sortField = 'currentPrice', sortDirection = 'ASC'}) {
+  static searchAuctions({sellerId = null, title = null, categoryType = [], status = null, minPrice = null, maxPrice = null, startTime = null, endTime = null, page = 0, size = 10, sortField = 'currentPrice', sortDirection = 'ASC'}) {
     return axiosClient.get('/api/auctions/search', {
       params: {
         sellerId,

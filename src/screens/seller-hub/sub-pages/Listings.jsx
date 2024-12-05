@@ -1,27 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FilterBar } from '../components/FilterBar';
 import { Table } from '../components/Table';
 import { Sidebar } from '../components/Sidebar';
 import AuctionService from '../../../services/auctionService';
 import ProductService from '../../../services/productService';
-import { useUser, ProductStatus, CategoryType, AuctionStatus } from '../../../router';
+import { useUser, ProductStatus, CategoryType, AuctionStatus, Pagination } from '../../../router';
 import { useNavigate } from 'react-router-dom';
 
-
 export const Listings = () => {
+  const { user } = useUser();
+  const navigate = useNavigate();
+
+  const [activeMenuItem, setActiveMenuItem] = useState('Auction');
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState({
     auctions: [],
     products: [],
   });
-  const { user } = useUser();
-  const navigate = useNavigate();
+  const [auctionFilters, setAuctionFilters] = useState({
+    sellerId: user.UUID,
+    title: null,
+    categoryType: [],
+    status: null,
+    minPrice: null,
+    maxPrice: null,
+    startTime: null,
+    endTime: null,
+    page: 0,
+    size: 10,
+    sortField: 'currentPrice',
+    sortDirection: 'ASC',
+  });
+  const [productFilters, setProductFilters] = useState({
+    sellerId: user.UUID,
+    name: null,
+    categoryType: null,
+    status: null,
+    page: 0,
+    size: 10,
+    sortField: 'createdAt',
+    sortDirection: 'ASC',
+  });
+  const [auctionTotalItems, setAuctionTotalItems] = useState(0);
+  const [productTotalItems, setProductTotalItems] = useState(0);
+
   const menuItems = [
     'Auction',
     'Product'
   ];
-  const [activeMenuItem, setActiveMenuItem] = useState('Auction');
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
+
   const sortOptions = [
     { value: 'newest', label: 'Newest first' },
     { value: 'oldest', label: 'Oldest first' },
@@ -40,7 +68,7 @@ export const Listings = () => {
         status: ProductStatus[product.productStatus] || product.productStatus,
       };
     });
-  }
+  };
 
   const formatAuctionData = (response) => {
     return response.content.map(auction => {
@@ -54,28 +82,57 @@ export const Listings = () => {
         status: AuctionStatus[auction.status] || auction.status,
       };
     });
-  }
-
-  const handleChangeMenuItems = async (activeMenuItem) => {
+  };
+  
+  const handlePageChange = async (newPage) => {
     if (activeMenuItem === 'Auction') {
-      setItems(data.auctions);
+      setAuctionFilters({
+        ...auctionFilters,
+        page: newPage - 1, // API page starts from 0
+      });
     } else if (activeMenuItem === 'Product') {
-      setItems(data.products);
+      setProductFilters({
+        ...productFilters,
+        page: newPage - 1,
+      });
     }
-  }
+  };
+
+  const fetchAuctions = useCallback(async () => {
+    try {
+      const response = await AuctionService.searchAuctions(auctionFilters);
+      setData((prevData) => ({
+        ...prevData,
+        auctions: formatAuctionData(response.data),
+      })); 
+      setAuctionTotalItems(response.data.totalElements);
+    } catch (error) {
+        console.error('Error fetching auctions:', error);
+    }
+  }, [auctionFilters]);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await ProductService.searchProducts(productFilters);
+      setData((prevData) => ({
+        ...prevData,
+        products: formatProductData(response.data),
+      }));
+      setProductTotalItems(response.data.totalElements);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  }, [productFilters]);
 
   const refreshData = async () => {
+    console.log('refreshing data');
     setLoading(true);
     try {
-      const auctionResponse = await AuctionService.searchAuctions({ sellerId: user.UUID });
-      const productResponse = await ProductService.searchProducts({ sellerId: user.UUID });
-      console.log('Auction response:', formatAuctionData(auctionResponse.data));
-      console.log('Product response:', formatProductData(productResponse.data));
-      setData({
-        auctions: formatAuctionData(auctionResponse.data),
-        products: formatProductData(productResponse.data),
-      });
-      console.log('Data fetched:', data);
+      if (activeMenuItem === 'Auction') {
+        await fetchAuctions();
+      } else if (activeMenuItem === 'Product') {
+        await fetchProducts();
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -86,7 +143,7 @@ export const Listings = () => {
   const sortListings = (sortBy) => {  // có thể là 2 sort function riêng cho Auction và Products
     window.alert(`Sorting by ${sortBy}`);
     // some sorting logic return ordered items (use setItems) (later)
-  }
+  };
 
   const header = (activeMenuItems) => {
     switch (activeMenuItems) {
@@ -97,16 +154,31 @@ export const Listings = () => {
       default:
         return 'Manage auctions';
     }
-  
-  }
-  useEffect(() => {
-    refreshData();
-  }, []);
+  };
   
   useEffect(() => {
-    handleChangeMenuItems(activeMenuItem);
+    const handleChangeMenuItems = async () => {
+      console.log('set items for:', activeMenuItem);
+      if (activeMenuItem === 'Auction') {
+        setItems(data.auctions);
+      } else if (activeMenuItem === 'Product') {
+        setItems(data.products);
+      }
+    };
+    handleChangeMenuItems();
   }, [activeMenuItem, data]);
 
+  useEffect(() => {
+    console.log('fetch auction')
+    setLoading(true);
+    fetchAuctions().finally(() => setLoading(false));
+  }, [fetchAuctions]);
+
+  useEffect(() => {
+    console.log('fetch product')
+    setLoading(true);
+    fetchProducts().finally(() => setLoading(false));
+  }, [fetchProducts]);
 
   return (
     <div className="flex">
@@ -127,6 +199,13 @@ export const Listings = () => {
           <>
             <FilterBar />
             <Table items={items} sortOptions={sortOptions} sortFunction={sortListings} />
+            <Pagination 
+              totalItems={activeMenuItem === 'Auction' ? auctionTotalItems : productTotalItems}
+              itemsPerPage={activeMenuItem === 'Auction' ? auctionFilters.size : productFilters.size}
+              pagesPerGroup={3}
+              onPageChange={handlePageChange}
+              currentPageByParent={activeMenuItem === 'Auction' ? auctionFilters.page + 1 : productFilters.page + 1}
+            />
           </>
         )}
       </div>

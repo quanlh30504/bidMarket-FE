@@ -37,14 +37,14 @@ class AuctionService {
 
   // Tìm kiếm phiên đấu giá với các tham số tùy chọn
   static searchAuctions({
-    sellerId = '',
-    title = '',
+    sellerId = null,
+    title = null,
     categoryType = [],
-    status = '',
-    minPrice = '',
-    maxPrice = '',
-    startTime = '',
-    endTime = '',
+    status = null,
+    minPrice = null,
+    maxPrice = null,
+    startTime = null,
+    endTime = null,
     page = 0,
     size = 10,
     sortField = 'currentPrice',
