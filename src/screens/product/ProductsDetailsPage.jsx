@@ -1,7 +1,7 @@
 import { Body, Caption, Container, Title, ProfileCard } from "../../router";
 import { IoIosStar, IoIosStarHalf, IoIosStarOutline } from "react-icons/io";
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   MdOutlineFavorite,
   MdFavoriteBorder,
@@ -44,6 +44,10 @@ export const ProductsDetailsPage = () => {
   const [currentPrice, setCurrentPrice] = useState(null);
   const [bids, setBids] = useState([])
   const [comments, setComments] = useState([])
+  const [sellerId, setSellerId] = useState(null);
+
+  const navigate = useNavigate();
+  const [sellerData, setSellerData] = useState(null);
 
   const defaultImageUrl = "https://via.placeholder.com/400x400?text=No+Image";
 
@@ -62,7 +66,8 @@ export const ProductsDetailsPage = () => {
       setLoading(true);
       const { data } = await axiosClient.get(`/api/auctions/${id}`);
       setAuction(data);
-      setCurrentPrice(data.currentPrice)
+      setCurrentPrice(data.currentPrice);
+      setSellerId(data.productDto.sellerId);
     } catch (err) {
       setError("Failed to fetch auction details.");
     } finally {
@@ -85,6 +90,16 @@ export const ProductsDetailsPage = () => {
       console.error("Error fetching watchlist status:", err);
     }
   }, [isAuth, id]);
+
+  const fetchSellerData = async () => {
+    try {
+      const sellerResponse = await axiosClient.get(`/api/users/${sellerId}/accountInfo`);
+      setSellerData(sellerResponse.data);
+    } catch (error) {
+      console.error('Error fetching seller data:', error);
+    }
+  };
+
 
   const fetchRelatedAuction = useCallback(async () => {
     try {
@@ -182,6 +197,11 @@ export const ProductsDetailsPage = () => {
   };
 
   useEffect(() => {
+
+    fetchSellerData();
+  }, [sellerId]);
+
+  useEffect(() => {
     if (auction?.endTime) {
       const interval = setInterval(() => {
         const difference = new Date(auction.endTime) - new Date();
@@ -241,6 +261,22 @@ export const ProductsDetailsPage = () => {
       removeFromWatchlist();
     } else {
       addToWatchlist();
+    }
+  };
+  
+  const handleViewShopClick = () => {
+    navigate(`/shop/${sellerId}`);
+  }
+  
+  const handleChatClick = async () => {
+    try {
+      const response = await axiosClient.post('/api/chat/get-or-create-room', null, {
+        params: { otherUserId: sellerId }
+      });
+      const roomId = response.data.id;
+      navigate(`/chat?roomId=${roomId}`);
+    } catch (error) {
+      console.error('Error creating or getting chat room:', error);
     }
   };
 
@@ -398,6 +434,8 @@ export const ProductsDetailsPage = () => {
     }
   };
 
+  
+
   return (
     <>
       <section className="pt-24 px-8">
@@ -453,17 +491,24 @@ export const ProductsDetailsPage = () => {
                     <img src={User2} alt="User2" />
                   </ProfileCard>
                   <div>
-                    <Title level={5} className="text-xl">ABC Store</Title>
+                    <Title level={5} className="text-xl">{sellerData?.fullName || "Unknown Store"}</Title>
                     <div className="flex items-center gap-1 mt-3">
                       <CiLocationOn />
-                      <Caption>Ha Noi, Vietnam</Caption>
+                      <Caption>{`${sellerData?.streetAddress || ""}, ${sellerData?.city || ""}, ${
+                    sellerData?.country || ""
+                  }`}{" "}</Caption>
                     </div>
                   </div>
                   <div className="flex justify-center ltr mt-8 -my-5">
-                    <button className="w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green">View Shop</button>
-                    <button className="ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1">
+                    <button className="w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green" onClick={handleViewShopClick}>View Shop</button>
+                    {(sellerId !== userId) && (
+                      <>
+                      <button className="ms-8 w-24 px-2 py-1 text-sm border-2 rounded-full text-white border-green bg-green flex items-center gap-1" onClick={handleChatClick}>
                       <IoChatbubbleEllipsesOutline className="ml-3" />Chat
                     </button>
+                      </>
+                    )}
+                    
                   </div>
                 </div>
               </div>
