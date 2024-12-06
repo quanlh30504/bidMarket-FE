@@ -84,13 +84,16 @@ export const Header = () => {
               </div>
               <div className="hidden lg:flex items-center justify-between gap-8">
                 {menulists.map((list) => (
-                  (list.id !== 7 || role === "SELLER") && (
+                  (list.id !== 7 || role === "SELLER") && 
+                  (list.id !== 8 || role === "ADMIN") &&
+                  (
                     <li key={list.id} className="capitalize list-none">
                       <CustomNavLinkList href={list.path} isActive={location.pathname === list.path} className={`${isScrolled || (!isHomePage && !isChatPage) ? "text-black" : "text-white"}`}>
                         {list.link}
                       </CustomNavLinkList>
                     </li>
                   )
+                  
                 ))}
               </div>
             </div>

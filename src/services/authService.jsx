@@ -1,6 +1,7 @@
 import axiosClient from "./axiosClient";
 import fileUtils from "../utils/fileUtils";
 
+
 class AuthService {
   constructor() {
     this.tokenKey = 'accessToken';
@@ -22,7 +23,7 @@ class AuthService {
       }
       throw new Error('Invalid response from server');
     } catch (error) {
-      throw this.handleError(error);
+      throw error;
     }
   }
 

@@ -20,6 +20,7 @@ export const useSignup = () => {
   const [errors, setErrors] = useState({});
   const [isSuccess, setIsSuccess] = useState(false);  
   const { showToastNotification } = useNotification();
+  const [loading, setLoading] = useState(false);
 
   const validateInput = (name, value) => {
     let error = "";
@@ -104,30 +105,40 @@ export const useSignup = () => {
     e.preventDefault();
 
     let formIsValid = true;
+    console.log('Current errors:', errors);
     Object.keys(formData).forEach((key) => {
       validateInput(key, formData[key]);
       if (errors[key]) {
         formIsValid = false;
       }
     });
+    setErrors({});  // clear errors
 
     console.log(errors)
     if (!formIsValid) {
-      window.alert('Please fix the errors in the form');
+      // window.alert('Please fix the errors in the form');
+      showToastNotification('Please fix the errors in the form', 'error');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      window.alert('Password and confirm password do not match!');
+      // window.alert('Password and confirm password do not match!');
+      showToastNotification('Password and confirm password do not match!', 'error');
       return;
     }
 
+    setLoading(true);
     try {
       await authService.signup(formData);
-      await showToastNotification(`You've successfully sign up, please insert OTP from your email`);
+      await showToastNotification(`Register successful. Please check your email for the OTP code.`, 'success');
       setIsSuccess(true);
     } catch (error) {
-      console.error(error);
+      if (error?.response?.data?.code === 1009) {  // email already exists
+        await showToastNotification(`Email already exists. Please login instead.`, 'error');
+      }
+      console.error('Signup failed:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -138,5 +149,6 @@ export const useSignup = () => {
     handleChange,
     handleBecomeSellerClick,
     handleSubmit,
+    loading
   };
 };

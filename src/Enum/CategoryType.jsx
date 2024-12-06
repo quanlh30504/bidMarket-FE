@@ -1,6 +1,4 @@
 export const CategoryType = {
-    COINS: 'Coins',
-    METALWARE: 'Metalware',
     ELECTRONICS: 'Electronics',        // Điện tử
     FASHION: 'Fashion',                // Thời trang
     COLLECTIBLES: 'Collectibles',      // Đồ sưu tầm

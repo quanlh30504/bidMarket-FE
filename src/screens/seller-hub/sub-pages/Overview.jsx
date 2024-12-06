@@ -1,6 +1,52 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import AuctionService from '../../../services/auctionService';
+import OrderService from '../../../services/orderService';
+import { useUser } from '../../../router/index';
 
 export const Overview = () => {
+  const { user } = useUser();
+  const [orders, setOrders] = React.useState({
+    allOrders: null,
+    awaitingPayment: null,
+    awaitingShipment: null,
+    paidAndShipped: null,
+    cancellations: null,
+  });
+
+  const [listing, setListing] = React.useState({
+    auction: [],
+    auctionOpen: [],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const allOrders = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID })).data.totalElements;
+        const awaitingPayment = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID, status: 'PENDING' })).data.totalElements;
+        const awaitingShipment = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID, status: 'SHIPPING' })).data.totalElements;
+        const paidAndShipped = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID, status: 'COMPLETED' })).data.totalElements;
+        const cancellations = (await OrderService.searchOrdersBySeller({ sellerId: user.UUID, status: 'CANCELED' })).data.totalElements;
+        setOrders({
+          allOrders,
+          awaitingPayment,
+          awaitingShipment,
+          paidAndShipped,
+          cancellations,
+        });
+
+        const auction = (await AuctionService.searchAuctions({ sellerId: user.UUID })).data.totalElements;
+        const auctionOpen = await (await AuctionService.searchAuctions({ sellerId: user.UUID, status: 'OPEN' })).data.totalElements;
+        setListing({
+          auction,
+          auctionOpen
+        });
+      } catch (error) {
+        console.error('Error in fetchData:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <div className="overview grid grid-cols-12 gap-4">
       {/* Upper section with statistics */}
@@ -31,12 +77,11 @@ export const Overview = () => {
       <div className="col-span-6 bg-white p-4 border rounded-md">
         <h2 className="font-bold text-xl mb-4">Orders</h2>
         <div className="flex flex-col space-y-2">
-          <button className="bg-gray-100 p-2 text-left">All orders 0</button>
-          <button className="bg-gray-100 p-2 text-left">Awaiting payment 0</button>
-          <button className="bg-gray-100 p-2 text-left">Awaiting shipment 0</button>
-          <button className="bg-gray-100 p-2 text-left">Paid and shipped 0</button>
-          <button className="bg-gray-100 p-2 text-left">Archived 0</button>
-          <button className="bg-gray-100 p-2 text-left">Cancellations 0</button>
+          <button className="bg-gray-100 p-2 text-left">All orders {orders.allOrders}</button>
+          <button className="bg-gray-100 p-2 text-left">Awaiting payment {orders.awaitingPayment}</button>
+          <button className="bg-gray-100 p-2 text-left">Awaiting shipment {orders.awaitingShipment}</button>
+          <button className="bg-gray-100 p-2 text-left">Paid and shipped {orders.paidAndShipped}</button>
+          <button className="bg-gray-100 p-2 text-left">Cancellations {orders.cancellations}</button>
         </div>
       </div>
 
@@ -54,8 +99,8 @@ export const Overview = () => {
       {/* Listings section */}
       <div className="col-span-6 bg-white p-4 border rounded-md">
         <h2 className="font-bold text-xl mb-4">Listings</h2>
-        <button className="bg-gray-100 p-2 text-left w-full">Auction 0</button>
-        <button className="bg-gray-100 p-2 text-left w-full">Auction open 0</button>
+        <button className="bg-gray-100 p-2 text-left w-full">Auction {listing.auction}</button>
+        <button className="bg-gray-100 p-2 text-left w-full">Auction Open {listing.auctionOpen}</button>
       </div>
 
       {/* Add Listings button */}

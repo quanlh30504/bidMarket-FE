@@ -4,14 +4,14 @@ export const AuctionStatus = {
     CLOSED: 'Closed',
     CANCELED: 'Canceled',
     COMPLETED: 'Completed',
-    EXTENDED: 'Extended'
+    // EXTENDED: 'Extended'
 }
 
 export const ProductStatus = {
     ACTIVE: 'Active',
     INACTIVE: 'Inactive',
     SOLD: 'Sold',
-    REMOVED: 'Removed'
+    // REMOVED: 'Removed'
 }
 
 export const OrderStatus = {

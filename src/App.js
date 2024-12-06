@@ -33,6 +33,8 @@ import {
     Payment,
     SellerHubRoute,
     ShopView
+  AdminRoute,
+  WarningProvider,
 } from "./router/index.js";
 import { NotificationProvider } from "./notifications/NotificationContext";
 import { ToastContainer } from 'react-toastify';
@@ -41,8 +43,9 @@ import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
     <>
-      <BrowserRouter>
-        <UserProvider>
+          <BrowserRouter>
+          <UserProvider>
+          <WarningProvider>
           <NotificationProvider>
             <ScrollToTop />
             <Routes>
@@ -263,6 +266,16 @@ function App() {
               }
             />
             <Route
+              path="/admin/*"
+              element={
+                <PrivateRoute allowedRoles={["ADMIN"]}>
+                  <Layout>
+                    <AdminRoute />
+                  </Layout>
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/*"
               element={
                 <Layout>
@@ -362,8 +375,9 @@ function App() {
                     theme="light"
                     style={{ zIndex: 9999 }}
                 />
-            </NotificationProvider>
-      </UserProvider>
+          </NotificationProvider>
+          </WarningProvider>
+          </UserProvider>
           </BrowserRouter>
     </>
 );

@@ -2,21 +2,14 @@ import React from "react";
 import { AuctionStatus, ProductStatus, OrderStatus } from "../../../router/index";
 import { ActionButton, AuctionButtonTypes } from "./ActionButton";
 
-
-
 const StatusBadge = ({ item }) => {
   const { status } = item;
   const statusColor = {
-    [OrderStatus.PENDING]: "bg-red-500 text-red-100",
-    [OrderStatus.SHIPPING]: "bg-gray-200 text-red-500",
     [AuctionStatus.OPEN]: "bg-green text-white",
     [AuctionStatus.PENDING]: "bg-yellow-500 text-yellow-100",
     [AuctionStatus.CANCELED]: "bg-red-800 text-red-100",
     [AuctionStatus.CLOSED]: "bg-gray-500 text-gray-100",
     [AuctionStatus.COMPLETED]: "bg-blue-500 text-blue-100",
-    [ProductStatus.ACTIVE]: "bg-green text-white",
-    [ProductStatus.INACTIVE]: "bg-red-800 text-red-100",
-    [ProductStatus.SOLD]: "bg-yellow-500 text-yellow-100",
   };
   return (
     <div className={`min-h-[70px] flex flex-col items-center justify-center`}>
@@ -24,30 +17,14 @@ const StatusBadge = ({ item }) => {
         {status}
       </span>
       <div className="flex flex-col items-center justify-center">
-        {status === AuctionStatus.CANCELED && (
-          <ActionButton type={AuctionButtonTypes.REOPEN} item={item} />
-        )}
         {status === AuctionStatus.PENDING && (
           <div className="flex mt-1 justify-center">
-            <ActionButton type={AuctionButtonTypes.EDIT} item={item} />
-            <ActionButton type={AuctionButtonTypes.DELETE} item={item} />
+            <ActionButton type={AuctionButtonTypes.REVIEW_AUCTION} item={item} />
           </div>
         )}
-        {status === AuctionStatus.COMPLETED && (
+        {status === AuctionStatus.OPEN && (
           <div className="flex mt-1 justify-center">
-            <ActionButton type={AuctionButtonTypes.DELETE} item={item} />
-          </div>
-        )}
-        {status === ProductStatus.INACTIVE && (
-          <div className="flex mt-1 justify-center">
-            <ActionButton type={AuctionButtonTypes.EDIT} item={item} />
-            <ActionButton type={AuctionButtonTypes.DELETE} item={item} />
-            <ActionButton type={AuctionButtonTypes.CREATE_AUCTION} item={item} />
-          </div>
-        )}
-        {status === ProductStatus.SOLD && (
-          <div className="flex mt-1 justify-center">
-            <ActionButton type={AuctionButtonTypes.DELETE} item={item} />
+            <ActionButton type={AuctionButtonTypes.CANCEL_AUCTION} item={item} />
           </div>
         )}
       </div>

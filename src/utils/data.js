@@ -33,6 +33,11 @@ export const menulists = [
     id: 7,
     path: "/seller-hub",
     link: "Seller Hub",
+  },
+  {
+    id: 8,
+    path : "/admin",
+    link : "Admin",
   }
 ];
 
