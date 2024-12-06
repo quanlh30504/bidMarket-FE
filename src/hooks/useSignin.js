@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { authService } from "../services/authService";
 import {useNotification} from "../notifications/NotificationContext";
-import {toast} from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export const useSignin = () => {
   const [email, setEmail] = useState("");
@@ -9,6 +9,7 @@ export const useSignin = () => {
   const [error, setError] = useState("");
   const [needVerification, setNeedVerification] = useState(false);
   const { showToastNotification } = useNotification();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,11 +22,8 @@ export const useSignin = () => {
       console.log('Login successful:', response);
 
       showToastNotification('Login successful!', 'info');
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // setTimeout(() => {
-      //   window.location.href = '/';
-      // }, 2000);
+      navigate('/');
+      
     } catch (error) {
       if (error.response && error.response.data) {
         const errorCode = error.response.data.code;

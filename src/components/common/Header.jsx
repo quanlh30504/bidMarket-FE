@@ -9,16 +9,12 @@ import { menulists } from "../../utils/data";
 import { useUser } from "../../router";
 import { NotificationBell } from "../../notifications/NotificationBell";
 import { IoIosArrowDropdown } from "react-icons/io";
-import axiosClient from "../../services/axiosClient";
-import { authUtils } from "../../utils/authUtils";
-import { set } from "lodash";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const userId = authUtils.getCurrentUserId();
-  const { avatarUrl, setAvatarUrl } = useUser();
+  const { avatarUrl, user } = useUser();
 
   const menuRef = useRef(null);
 
@@ -42,18 +38,19 @@ export const Header = () => {
     setIsScrolled(window.scrollY > 0);
   };
 
-  const fetchAccountInfo = async () => {
-    try {
-      const response = await axiosClient.get(`/api/users/${userId}/accountInfo`);
-      setAvatarUrl(response.data.avatarImageUrl);
-    } catch (error) {
-      console.error("Error fetching account info:", error);
-    }
-  };
+  // const fetchAccountInfo = async () => {
+  //   if (!user.UUID) return;
+  //   try {
+  //     const response = await axiosClient.get(`/api/users/${user.UUID}/accountInfo`);
+  //     setAvatarUrl(response.data.avatarImageUrl);
+  //   } catch (error) {
+  //     console.error("Error fetching account info:", error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchAccountInfo();
-  }, [userId]);
+  // useEffect(() => {
+  //   fetchAccountInfo();
+  // }, [user.UUID]);
 
   useEffect(() => {
     document.addEventListener("mousedown", closeMenuOutside);
@@ -68,7 +65,6 @@ export const Header = () => {
   const isHomePage = location.pathname === "/";
   const isChatPage = location.pathname === "/chat";
 
-  const { user } = useUser();
   const role = user.role;
   
   return (
@@ -107,6 +103,7 @@ export const Header = () => {
                     Become a Seller
                   </CustomNavLink>
                 )}
+
                 {role === null ? (
                   <div className="flex items-center gap-8">
                     <CustomNavLink href="/auth/login" className={`${isScrolled || !isHomePage ? "text-black" : "text-white"}`}>
@@ -117,7 +114,6 @@ export const Header = () => {
                     </CustomNavLink>
                   </div>
                 ) : (
-
                   <div className="flex items-center gap-8">
                     <div className="flex items-center gap-4">
                       {user.role && <NotificationBell />}

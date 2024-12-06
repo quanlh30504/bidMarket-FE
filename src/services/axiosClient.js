@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { authService } from './authService';
+import { authService } from '../router/index.js';
 
 const getAccessToken = () => localStorage.getItem(authService.tokenKey);
 
@@ -36,7 +36,7 @@ axiosClient.interceptors.response.use((response) => {
     } catch (refreshError) {
       console.error('Failed to refresh token:', refreshError);
       if (refreshError.response === "Invalid refresh token") {
-        this.logout();
+        authService.logout();
       }
       return Promise.reject(refreshError);
     }

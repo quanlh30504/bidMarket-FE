@@ -1,40 +1,50 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../router/index.js';
-import { authUtils } from '../utils/authUtils.js';
-
+import { axiosClient } from '../router/index.js';
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState({
-    role: null, // null, 'BIDDER', 'SELLER', 'ADMIN'
-    // -> role !== null: user is logged in ('BIDDER', 'SELLER', 'ADMIN')
-    // -> role === null: user is not
-    UUID: "5eeea7fb-9adc-11ef-a43a-00155df1c39f" // Dummy UUID
+    role: null,
+    UUID: null,
   });
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState("https://cdn-icons-png.flaticon.com/128/6997/6997662.png");
 
-  const RoleHandler = {
+  const UserHandler = {
     setRole: (role) => {
       setUser(prevUser => ({ ...prevUser, role }));
     },
     deleteRole: () => {
       setUser(prevUser => ({ ...prevUser, role: null }));
     },
+    setUUID: (UUID) => {
+      setUser(prevUser => ({ ...prevUser, UUID }));
+    },
+    deleteUUID: () => {
+      setUser(prevUser => ({ ...prevUser, UUID: null }));
+    },
   };
 
-
-
   useEffect(() => {
-    authService.setRoleHandler(RoleHandler);
+    authService.setUserHandler(UserHandler);
     const fetchAccessToken = async () => {
       console.log('fetchAccessToken');
       // try to get new access token, if success means user is logged in (refreshToken is valid)
       try {
         await authService.refreshToken();
-        const userInfo = await authUtils.getCurrentUserId();
-        setAvatarUrl(userInfo.avatarUrl || "https://cdn-icons-png.flaticon.com/128/6997/6997662.png");
+        // setAvatarUrl("https://cdn-icons-png.flaticon.com/128/6997/6997662.png");
+        if (user.UUID) {
+          try {
+            const response = await axiosClient.get(`/api/users/${user.UUID}/accountInfo`);
+            if (response?.data?.avatarImageUrl) {
+              setAvatarUrl(response.data.avatarImageUrl);
+            }
+          } catch (error) {
+            console.error("Error fetching account info:", error);
+          }
+        }
       } catch (error) {
         if (localStorage.getItem(authService.tokenKey) !== null) {
           authService.logout();
@@ -48,6 +58,10 @@ export const UserProvider = ({ children }) => {
 
     fetchAccessToken();
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Giao diện chờ
+  }
 
   return (
     <UserContext.Provider value={{ user, loading, avatarUrl, setAvatarUrl }}>

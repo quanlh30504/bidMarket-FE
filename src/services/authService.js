@@ -1,15 +1,15 @@
 import axiosClient from "./axiosClient";
 import fileUtils from "../utils/fileUtils";
-
+import { authUtils } from "../utils/authUtils";
 
 class AuthService {
   constructor() {
     this.tokenKey = 'accessToken';
-    this.roleHandler = null;
+    this.userHandler = null;
   }
 
-  setRoleHandler(handler) {
-    this.roleHandler = handler;
+  setUserHandler(handler) {
+    this.userHandler = handler;
   }
 
   async signup(formData) {
@@ -34,8 +34,9 @@ class AuthService {
 
       if (response.data?.accessToken) {
         this.handleAuthSuccess(response.data);
-        if (this.roleHandler) {
-          this.roleHandler.setRole(this.getRoleFromToken(response.data.accessToken));
+        if (this.userHandler) {
+          this.userHandler.setRole(this.getRoleFromToken(response.data.accessToken));
+          this.userHandler.setUUID(authUtils.getCurrentUserId());
         } else {
           throw new Error('Role handler is not set');
         }
@@ -50,18 +51,20 @@ class AuthService {
 
   async logout() {
     try {
-      const response = await axiosClient.post('/api/users/logout');
-      console.log('response:', response);
+      const response = await axiosClient.post('/api/users/logout');  // clear token in httpOnly cookie
       localStorage.removeItem(this.tokenKey);
-      if (this.roleHandler) {
-        this.roleHandler.deleteRole();
+      if (this.userHandler) {
+        this.userHandler.deleteRole();
+        this.userHandler.deleteUUID();
       } else {
         throw new Error('Role handler is not set');
       }
-      window.alert(response.data || 'Logout success');
+      window.alert('Logout success');
       window.location.href = '/';
+      return response;
     } catch (error) {
       console.error('Failed to logout:', error);
+      throw error;
     }
   }
   
@@ -86,8 +89,9 @@ class AuthService {
       const response = await axiosClient.post('/api/users/refresh-token');
       const { accessToken } = response.data;
       localStorage.setItem(this.tokenKey, accessToken);
-      if (this.roleHandler) {
-        this.roleHandler.setRole(this.getRoleFromToken(accessToken));
+      if (this.userHandler) {
+        this.userHandler.setRole(this.getRoleFromToken(accessToken));
+        this.userHandler.setUUID(authUtils.getCurrentUserId());
       } else {
         throw new Error('Role handler is not set');
       }

@@ -12,9 +12,5 @@ export const PrivateRoute = ({ children, allowedRoles }) => {
     }
   }, [user, loading, allowedRoles, navigate]);
 
-  if (loading) {
-    return <div>Loading...</div>; // Giao diện chờ
-  }
-
   return <div>{children}</div>;
 };

@@ -13,7 +13,7 @@ export const NotificationProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const { user } = useUser();
 
-    const userId = authUtils.getCurrentUserId();
+    const userId = user.UUID;
     const showToastNotification = useCallback((message, type = 'info') => {
         toast(message, {
             position: "top-right",

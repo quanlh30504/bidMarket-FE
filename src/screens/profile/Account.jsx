@@ -31,7 +31,7 @@ export const Account = () => {
     if (file) {
       try {
         const imageUrl = await fileUtils.uploadImage(file, `avatars/${userId}`);
-        setAvatarUrl(imageUrl);
+        // setAvatarUrl(imageUrl);  // (Toàn recommend) không nên làm như thế này
 
         await axiosClient.put(`/api/users/avatar/${userId}`, null, {
           params: { imageUrl: imageUrl }
@@ -56,9 +56,9 @@ export const Account = () => {
     }
   };
   
-  useEffect(() => {
-    fetchAccountInfo();
-  }, [userId]);
+  // useEffect(() => {
+  //   fetchAccountInfo();
+  // }, [userId]);
   
 
   if (!accountInfo) {
