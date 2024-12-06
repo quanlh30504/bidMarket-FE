@@ -40,7 +40,7 @@ class AuctionService {
     sellerId = '',
     title = '',
     categoryType = [],
-    status = '',
+    status = null,
     minPrice = '',
     maxPrice = '',
     startTime = '',

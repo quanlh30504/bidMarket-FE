@@ -1,5 +1,5 @@
 import axiosClient from './axiosClient';
-import imageUtils from '../utils/imageUtils';
+import fileUtils from '../utils/fileUtils';
 
 class ProductService {
   
@@ -65,7 +65,7 @@ class ProductService {
   // Tải lên nhiều hình ảnh và trả về một mảng URL
   static async getUploadedImageUrls(files) {
     try {
-      const uploadPromises = files.map((file) => imageUtils.uploadImage(file, 'products'));
+      const uploadPromises = files.map((file) => fileUtils.uploadImage(file, 'products'));
       const urls = await Promise.all(uploadPromises);
       return urls;
     } catch (error) {

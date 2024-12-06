@@ -11,6 +11,7 @@ import { NotificationBell } from "../../notifications/NotificationBell";
 import { IoIosArrowDropdown } from "react-icons/io";
 import axiosClient from "../../services/axiosClient";
 import { authUtils } from "../../utils/authUtils";
+import { set } from "lodash";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +25,7 @@ export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const toggleDropdown = () => {
+    console.log("toggleDropdown");
     setIsDropdownOpen(!isDropdownOpen);
   };
 
@@ -132,12 +134,16 @@ export const Header = () => {
                       </button>
                       {isDropdownOpen && (
                         <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
-                          <CustomNavLink href="/account" className="block px-4 py-2 text-black hover:bg-gray-200">
-                            Account
-                          </CustomNavLink>
-                          <CustomNavLink href="/" className="block px-4 py-2 text-black hover:bg-gray-200">
-                            Change Password
-                          </CustomNavLink>
+                          <div onClick={(e) => {setIsDropdownOpen(false);}}>
+                            <CustomNavLink href="/account" className="block px-4 py-2 text-black hover:bg-gray-200">
+                              Account
+                            </CustomNavLink>
+                          </div>
+                          <div onClick={(e) => {setIsDropdownOpen(false);}}>
+                            <CustomNavLink href="/auth/change-password" className="block px-4 py-2 text-black hover:bg-gray-200">
+                              Change Password
+                            </CustomNavLink>
+                          </div>
                           <button onClick={() => authService.logout()} className="block w-full text-left px-4 py-2 text-black hover:bg-gray-200 text-[17px] font-medium cursor-pointer list-none hover:text-green transition-all ease-in-out ">
                             Logout
                           </button>
