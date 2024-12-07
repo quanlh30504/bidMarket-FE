@@ -9,16 +9,16 @@ import { menulists } from "../../utils/data";
 import { useUser } from "../../router";
 import { NotificationBell } from "../../notifications/NotificationBell";
 import { IoIosArrowDropdown } from "react-icons/io";
+import { useWarning } from "../../router";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { avatarUrl, user } = useUser();
-
   const menuRef = useRef(null);
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { showWarning } = useWarning();
 
   const toggleDropdown = () => {
     console.log("toggleDropdown");
@@ -38,19 +38,15 @@ export const Header = () => {
     setIsScrolled(window.scrollY > 0);
   };
 
-  // const fetchAccountInfo = async () => {
-  //   if (!user.UUID) return;
-  //   try {
-  //     const response = await axiosClient.get(`/api/users/${user.UUID}/accountInfo`);
-  //     setAvatarUrl(response.data.avatarImageUrl);
-  //   } catch (error) {
-  //     console.error("Error fetching account info:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchAccountInfo();
-  // }, [user.UUID]);
+  const handleLogout = () => {
+    showWarning(
+      <h1 className="text-red-500 text-2xl font-semibold text-center pb-8">
+        Are you sure you want to logout?
+      </h1>,
+      async () => {
+        await authService.logout();
+    });
+  };
 
   useEffect(() => {
     document.addEventListener("mousedown", closeMenuOutside);
@@ -140,7 +136,7 @@ export const Header = () => {
                               Change Password
                             </CustomNavLink>
                           </div>
-                          <button onClick={() => authService.logout()} className="block w-full text-left px-4 py-2 text-black hover:bg-gray-200 text-[17px] font-medium cursor-pointer list-none hover:text-green transition-all ease-in-out ">
+                          <button onClick={() => handleLogout()} className="block w-full text-left px-4 py-2 text-black hover:bg-gray-200 text-[17px] font-medium cursor-pointer list-none hover:text-green transition-all ease-in-out ">
                             Logout
                           </button>
                         </div>

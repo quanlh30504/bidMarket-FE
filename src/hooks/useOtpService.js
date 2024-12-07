@@ -14,7 +14,7 @@ export const useOtpService = () => {
             const result = await otpService.sendOtp(email);
             return result;
         } catch (error) {
-            setError(error.message);
+            setError(error?.response?.data?.message || "An error occurred")
             throw error;
         } finally {
             setLoading(false);
@@ -28,7 +28,7 @@ export const useOtpService = () => {
             const result = await otpService.verifyOtp(otp, email);
             return result;
         } catch (error) {
-            setError(error.message);
+            setError(error?.response?.data?.message || "An error occurred")
             throw error;
         } finally {
             setLoading(false);
@@ -42,7 +42,7 @@ export const useOtpService = () => {
             const result = await otpService.verifyOtpForgotPassword(otp, email);
             return result;
         } catch (error) {
-            setError(error.message);
+            setError(error?.response?.data?.message || "An error occurred")
             throw error;
         } finally {
             setLoading(false);
@@ -61,7 +61,7 @@ export const useOtpService = () => {
             const result = await otpService.sendOtp(email);
             return result;
         } catch (error) {
-            setError(error.message);
+            setError(error?.response?.data?.message || "An error occurred")
             throw error;
         } finally {
             setLoading(false);

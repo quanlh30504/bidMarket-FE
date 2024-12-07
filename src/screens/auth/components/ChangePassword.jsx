@@ -1,6 +1,8 @@
 import { Container, Title, PrimaryButton, Caption, authService } from "../../../router";
 import { commonClassNameOfInput } from "../../../components/common/Design";
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useNotification } from "../../../notifications/NotificationContext";
 
 export const ChangePassword = ({ email, setEmail }) => {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -9,6 +11,8 @@ export const ChangePassword = ({ email, setEmail }) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const isEmailProvided = useRef(!!email).current;
+  const navigate = useNavigate();
+  const { showToastNotification } = useNotification();
 
   const handleCurrentPasswordChange = (e) => {
     setCurrentPassword(e.target.value);
@@ -34,6 +38,9 @@ export const ChangePassword = ({ email, setEmail }) => {
   // api
   const handleChangePassword = async (e) => {
     e.preventDefault();
+    setSuccessMessage(null);
+    setErrorMessage(null);
+    
     if (newPassword !== confirmPassword) {
       setErrorMessage("New passwords do not match.");
       return;
@@ -41,9 +48,14 @@ export const ChangePassword = ({ email, setEmail }) => {
 
     try {
         await authService.changePassword(email, currentPassword, newPassword);
-        setSuccessMessage("Password has been changed successfully.");
+        // setSuccessMessage("Password has been changed successfully.");
+        showToastNotification("Password has been changed successfully.", "info");
+        navigate("/account");
     } catch (error) {
-      setErrorMessage(error.message || "An error occurred");
+        if (error?.response?.data) {
+          setErrorMessage(error.response.data.message || "An error occurred");
+        }
+        console.log(error);
     }
   };
 

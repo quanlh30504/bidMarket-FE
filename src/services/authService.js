@@ -59,7 +59,6 @@ class AuthService {
       } else {
         throw new Error('Role handler is not set');
       }
-      window.alert('Logout success');
       window.location.href = '/';
       return response;
     } catch (error) {
@@ -137,7 +136,7 @@ class AuthService {
   }
 
   handleError(error) {
-    const message = error.response?.data?.message || error.message || 'Authentication Failed';
+    const message = error.response?.data?.message || 'Authentication Failed';
     console.error('Auth error:', error);
     throw new Error(message);
   }

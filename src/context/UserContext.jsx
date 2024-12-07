@@ -34,7 +34,6 @@ export const UserProvider = ({ children }) => {
       // try to get new access token, if success means user is logged in (refreshToken is valid)
       try {
         await authService.refreshToken();
-        // setAvatarUrl("https://cdn-icons-png.flaticon.com/128/6997/6997662.png");
         if (user.UUID) {
           try {
             const response = await axiosClient.get(`/api/users/${user.UUID}/accountInfo`);
@@ -46,11 +45,7 @@ export const UserProvider = ({ children }) => {
           }
         }
       } catch (error) {
-        if (localStorage.getItem(authService.tokenKey) !== null) {
-          authService.logout();
-        } else {
-          setUser({ role: null });
-        }
+        console.error('Initial fetch access token error:', error); 
       } finally {
         setLoading(false);
       }

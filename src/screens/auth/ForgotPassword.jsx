@@ -3,10 +3,10 @@ import { Container, Title } from "../../components/common/Design";
 import { useState } from "react";
 
 export const ForgotPassword = () => {
-    const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("");
 
-    return (
-        <section className="register pt-16 relative">
+  return (
+    <section className="register pt-16 relative">
       <div className="bg-green w-96 h-96 rounded-full opacity-20 blur-3xl absolute top-2/3"></div>
       <div className="bg-[#241C37] pt-8 h-[40vh] relative content">
         <Container>
@@ -31,7 +31,7 @@ export const ForgotPassword = () => {
                 Forgot your password? <br/> Enter your email here and verify OTP to reset your password.
             </Title>
         </div>
-            <OTPVerification email={email} setEmail={setEmail} isForgotPassword={true}/>   
+            <OTPVerification email={email} setEmail={setEmail} isForgotPassword={true} needFirstSend={false} />
     </section>
-    );
+  );
 }

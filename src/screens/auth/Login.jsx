@@ -1,9 +1,23 @@
-import { Caption, Container, CustomNavLink, PrimaryButton, Title, useSignin } from "../../router";
+import { Caption, Container, CustomNavLink, PrimaryButton, Title, useSignin, useUser } from "../../router";
 import { commonClassNameOfInput } from "../../components/common/Design";
 import { OTPVerification } from "./components/OtpVerification";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useNotification } from "../../notifications/NotificationContext";
 
 export const Login = () => {
+  const { user } = useUser();
+  const { showToastNotification } = useNotification();
+  const nevigate = useNavigate();
   const { email, setEmail, setPassword, handleSubmit, error, needVerification, setNeedVerification } = useSignin();
+
+  useEffect(() => {
+    if (user.role) {
+      console.log("User is already logged in.");
+      showToastNotification("You are already logged in.", "info");
+      nevigate("/"); // Redirect to home page if user is already logged in
+    }
+  }, []);
 
   return (
     <section className="register pt-16 relative">
@@ -38,7 +52,7 @@ export const Login = () => {
                 Your account has been created but not verified yet. You need to verify your email address before you can login.
               </Title>
             </div>
-            <OTPVerification email={email}/>
+            <OTPVerification email={email} setNeedVerification={setNeedVerification} />
           </div>
         ) : (
           <div className="bg-white shadow-s3 w-1/3 m-auto my-16 p-8 rounded-xl">

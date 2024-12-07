@@ -5,10 +5,14 @@ import {
   PrimaryButton,
   Title,
   useSignup,
+  useUser,
 } from "../../router";
 import { commonClassNameOfInput } from "../../components/common/Design";
 import { OTPVerification } from "./components/OtpVerification";
 import { useState } from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useNotification } from "../../notifications/NotificationContext";
 
 const formConfig = [
   { name: 'fullName', label: 'Fullname *', type: 'text', placeholder: 'Full Name', required: true },
@@ -23,6 +27,9 @@ const formConfig = [
 ];
 
 export const Register = () => {
+  const { user } = useUser();
+  const { showToastNotification } = useNotification();
+  const nevigate = useNavigate();
   const [email, setEmail] = useState("");
   const {
     formData,
@@ -33,6 +40,14 @@ export const Register = () => {
     errors,
     loading,
   } = useSignup();
+  
+  useEffect(() => {
+    if (user.role) {
+      console.log("User is already logged in.");
+      showToastNotification("You are already logged in.", "info");
+      nevigate("/"); // Redirect to home page if user is already logged in
+    }
+  }, []);
 
   return (
     <section className="register pt-16 relative">
@@ -113,7 +128,7 @@ export const Register = () => {
                 Your account has been created successfully. But before you can start using it, we need to verify your email address!
               </Title>
             </div>
-            <OTPVerification email={email}/>
+            <OTPVerification email={email} needFirstSend={false} />
           </div>
         )}
       </div>

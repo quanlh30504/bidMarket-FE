@@ -22,18 +22,18 @@ export const WarningProvider = ({ children }) => {
       {children}
       {warning.isVisible && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
+          <div className="bg-white rounded-lg shadow-lg p-3 w-1/3">
             <div className="mb-4">{warning.content}</div>
             <div className="flex justify-end space-x-4">
               <button
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-1 px-4 rounded-full"
                 onClick={hideWarning}
               >
                 Cancel
               </button>
               {warning.onConfirm && (
                 <button
-                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-4 rounded-full"
                   onClick={async () => {
                     try {
                       await warning.onConfirm(); // Chờ onConfirm hoàn thành

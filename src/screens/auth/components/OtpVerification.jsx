@@ -1,11 +1,12 @@
-import { Container, Title, PrimaryButton, Caption } from "../../../router";
+import { Container, Title, PrimaryButton, Caption, authService } from "../../../router";
 import { commonClassNameOfInput } from "../../../components/common/Design";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useOtpService } from "../../../router";
 import { useNotification } from "../../../notifications/NotificationContext";
 import { useNavigate } from "react-router-dom";
+import { otpService } from "../../../services/otpService";
 
-export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) => { 
+export const OTPVerification = ({ email, setEmail, isForgotPassword = false , setNeedVerification = null, needFirstSend = true }) => {
   const [otp, setOtp] = useState(""); // OTP input
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -53,7 +54,12 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
       } else {
         // setSuccessMessage("OTP has been verified successfully. You can now login.");
         showToastNotification("OTP has been verified successfully. You can now login.", "info");
-        navigate("/auth/login");
+        // navigate("/auth/login");
+        if (setNeedVerification) { // đang ở trang login nên không nevigate được
+          setNeedVerification(false);
+        } else {
+          navigate("/auth/login"); // đang ở trang register
+        }
       }
     } catch {
       // setErrorMessage("Failed to verify OTP. Please try again.");
@@ -104,6 +110,12 @@ export const OTPVerification = ({ email, setEmail, isForgotPassword = false }) =
   
     return `${maskedUsername}@${domain}`;
   }
+  
+  useEffect(() => {
+    if (needFirstSend && email) {
+      otpService.sendOtp(email);
+    }
+  }, []);
 
   return (
     <Container>

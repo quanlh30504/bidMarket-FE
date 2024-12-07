@@ -35,7 +35,7 @@ axiosClient.interceptors.response.use((response) => {
       return axiosClient(originalRequest);
     } catch (refreshError) {
       console.error('Failed to refresh token:', refreshError);
-      if (refreshError.response === "Invalid refresh token") {
+      if (refreshError?.response?.data === "Invalid refresh token") {
         authService.logout();
       }
       return Promise.reject(refreshError);
