@@ -1,9 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Container, Title, CustomNavLinkList } from "../../components/common/Design";
+import { authService } from "../../router";
 
 export const SellerHub = () => {
   const location = useLocation(); // Lấy thông tin URL hiện tại
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        console.log("Checking auth...");
+        await authService.refreshToken();  // sync role from server
+      } catch (error) {
+        console.error("Error refreshing token:", error);
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <Container>

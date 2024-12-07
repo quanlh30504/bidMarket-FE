@@ -1,9 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Container, Title, CustomNavLinkList } from "../../components/common/Design";
+import { authService } from "../../router";
 
 export const Admin = () => {
   const location = useLocation();
+
+  // Run 1 time when load Admin page, sync role from server to get real role
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        console.log("Checking auth...");
+        await authService.refreshToken();
+      } catch (error) {
+        console.error("Error refreshing token:", error);
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <Container>

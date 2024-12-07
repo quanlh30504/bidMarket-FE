@@ -4,7 +4,7 @@ export const DeleteWarning = ({ item, type }) => {
   if (!item) return null;
 
   return (
-    <div className='p-4 border-b border-gray-200'>
+    <div>
       <h2 className="text-xl font-semibold text-red-600 text-center mb-4">
         Are you sure you want to delete this {type}?
       </h2>

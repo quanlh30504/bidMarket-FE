@@ -23,7 +23,7 @@ export const useWebSocket = (userId, onMessageReceived, onChatMessageReceived) =
                 return;
             }
 
-            const socket = new SockJS('http://localhost:8080/ws');
+            const socket = new SockJS(process.env.REACT_APP_WS_URL);
             const client = new Client({
                 webSocketFactory: () => socket,
                 connectHeaders: {
