@@ -21,6 +21,7 @@ import { Comments } from "./Comments";
 import { formatTime } from "../../utils/DateFormatter";
 import { AuctionHistory } from "./AuctionHistory";
 import WebSocketService from "../../services/WebSocketService";
+import { useUser } from "../../router";
 
 
 export const ProductsDetailsPage = () => {
@@ -28,6 +29,7 @@ export const ProductsDetailsPage = () => {
 
   const userId = authUtils.getCurrentUserId();
   const isAuth = authUtils.isAuthenticated()
+  const {user} = useUser();
 
   const [activeTab, setActiveTab] = useState("description");
   const [auction, setAuction] = useState(null);
@@ -66,6 +68,7 @@ export const ProductsDetailsPage = () => {
       setLoading(true);
       const { data } = await axiosClient.get(`/api/auctions/${id}`);
       setAuction(data);
+      console.log(auction)
       setCurrentPrice(data.currentPrice);
       setSellerId(data.productDto.sellerId);
     } catch (err) {
@@ -344,6 +347,7 @@ export const ProductsDetailsPage = () => {
 
     switch (auction?.status) {
       case "OPEN":
+      if (user?.role === "BIDDER") {
         return (
           <div
             className={`${statusStyles.OPEN} p-6 rounded-md border flex flex-col items-center text-center`}
@@ -363,18 +367,31 @@ export const ProductsDetailsPage = () => {
               <PrimaryButton
                 onClick={placeBid}
                 disabled={isSubmittingBid}
-                className={`${isSubmittingBid ||
+                className={`${
+                  isSubmittingBid ||
                   bidAmount - auction?.currentPrice <
-                  auction?.minimumBidIncrement
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-                  } text-white rounded-lg w-1/3`}
+                    auction?.minimumBidIncrement
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                } text-white rounded-lg w-1/3`}
               >
                 {isSubmittingBid ? "Placing..." : "Place"}
               </PrimaryButton>
             </div>
           </div>
         );
+      } else {
+        return (
+          <div
+            className={`${statusStyles.OPEN} p-6 rounded-md border flex flex-col items-center text-center`}
+          >
+            <Caption className="font-semibold text-lg text-red-500">
+              You can't participate in this auction.
+            </Caption>
+            <div className="mt-4">{renderCountdown()}</div>
+          </div>
+        );
+      }
 
       case "READY":
       case "PENDING":
