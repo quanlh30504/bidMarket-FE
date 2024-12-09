@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FilterBar } from '../components/FilterBar';
-import { Table } from '../components/Table';
-import { Sidebar } from '../components/Sidebar';
+import { FilterBar } from '../../seller-hub/components/FilterBar';
+import { Table } from '../../seller-hub/components/Table';
+import { Sidebar } from '../../seller-hub/components/Sidebar';
 import AdminService from '../../../services/adminService';
 import { Role, Pagination } from '../../../router/index';
 

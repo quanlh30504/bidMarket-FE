@@ -4,6 +4,7 @@ export const AuctionStatus = {
     CLOSED: 'Closed',
     CANCELED: 'Canceled',
     COMPLETED: 'Completed',
+    READY: 'Ready',
     // EXTENDED: 'Extended'
 }
 
