@@ -7,6 +7,9 @@ import axiosClient from "../../services/axiosClient";
 import { authUtils } from "../../utils/authUtils";
 import fileUtils from "../../utils/fileUtils";
 import { useUser } from "../../router";
+import { FaHome, FaBriefcase, FaEllipsisH } from "react-icons/fa";
+import { FaMapMarkerAlt, FaCity, FaGlobe, FaTag } from "react-icons/fa";
+
 
 export const Account = () => {
   const { avatarUrl, setAvatarUrl } = useUser();
@@ -20,13 +23,14 @@ export const Account = () => {
     streetAddress: "",
     city: "",
     country: "",
+    addressType: "HOME",
   });
 
   const handleAvatarClick = () => {
     fileInputRef.current.click();
   };
 
-   const handleFileChange = async (event, callback) => {
+  const handleFileChange = async (event, callback) => {
     const file = event.target.files[0];
     if (file) {
       try {
@@ -55,11 +59,11 @@ export const Account = () => {
       console.error("Error fetching account info:", error);
     }
   };
-  
-  // useEffect(() => {
-  //   fetchAccountInfo();
-  // }, [userId]);
-  
+
+  useEffect(() => {
+    fetchAccountInfo();
+  }, [userId]);
+
 
   if (!accountInfo) {
     return <div>Loading...</div>;
@@ -75,7 +79,7 @@ export const Account = () => {
     setProfileData({
       fullName: accountInfo.fullName,
       phoneNumber: accountInfo.phoneNumber,
-      streetAddress: accountInfo.streetAddress  ,
+      streetAddress: accountInfo.streetAddress,
       city: accountInfo.city,
       country: accountInfo.country,
     });
@@ -92,17 +96,26 @@ export const Account = () => {
   };
 
   const handleSaveAddress = async () => {
+    // Kiểm tra xem streetAddress có được điền hay không
+    if (!profileData.streetAddress.trim()) {
+      alert("Street Address không được để trống!");
+      return;
+    }
+
     try {
       const response = await axiosClient.post(`/api/addresses/updateOrCreate/${userId}`, {
+        userId: userId,
         streetAddress: profileData.streetAddress,
         city: profileData.city,
         country: profileData.country,
+        addressType: profileData.addressType, // Gửi addressType
       });
       setAccountInfo((prevInfo) => ({
         ...prevInfo,
         streetAddress: response.data.streetAddress,
         city: response.data.city,
         country: response.data.country,
+        addressType: response.data.addressType,
       }));
       setEditingField(null);
     } catch (error) {
@@ -211,7 +224,7 @@ export const Account = () => {
                   </div>
                   <Caption> {accountInfo.email} </Caption>
                 </div>
-                
+
                 <div className="flex justify-between py-3">
                   <Title>Phone Number </Title>
                 </div>
@@ -245,115 +258,143 @@ export const Account = () => {
                 )}
               </div>
             </div>
-            {/* <div className="flex justify-between border-b py-3">
-              <Title>Personal Info</Title>
+            <div className="flex justify-between border-b py-3">
+              <Title>Address</Title>
               <div className="w-1/2">
-                <div className="">
-                  <div className="flex justify-between py-3">
-                    <Title>Address </Title>
-                    <div className="text-center flex items-center gap-3 mt-1">
-                      <NavLink
-                        to=""
-                        type="button"
-                        className="font-medium text-indigo-500"
+                {editingField === "address" ? (
+                  <div className="flex flex-col">
+
+                    {/* Address Type */}
+                    <div className="flex flex-col gap-3 py-4">
+                      <label htmlFor="addressType" className="font-medium text-gray-700 flex items-center gap-2">
+                        Address Type
+                      </label>
+                      <div className="relative">
+                        <select
+                          id="addressType"
+                          name="addressType"
+                          value={profileData.addressType || "HOME"}
+                          onChange={handleChange}
+                          className="border border-gray-300 rounded-lg pl-10 pr-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+                        >
+                          <option value="HOME">
+                            Home
+                          </option>
+                          <option value="WORK">
+                            Work
+                          </option>
+                          <option value="OTHERS">
+                            Others
+                          </option>
+                        </select>
+                        {/* Icon dynamically changes based on selection */}
+                        <div className="absolute top-1/2 left-3 transform -translate-y-1/2 text-blue-500">
+                          {profileData.addressType === "HOME" && <FaHome />}
+                          {profileData.addressType === "WORK" && <FaBriefcase />}
+                          {profileData.addressType === "OTHERS" && <FaEllipsisH />}
+                        </div>
+                      </div>
+                    </div>
+
+
+
+                    {/* Street Address */}
+                    <div className="flex justify-between py-3">
+                      <label htmlFor="streetAddress" className="font-medium">
+                        Street Address
+                      </label>
+                      <input
+                        type="text"
+                        id="streetAddress"
+                        name="streetAddress"
+                        value={profileData.streetAddress}
+                        onChange={handleChange}
+                        className="border rounded px-2 py-1 w-2/3"
+                      />
+                    </div>
+
+                    {/* City */}
+                    <div className="flex justify-between py-3">
+                      <label htmlFor="city" className="font-medium">
+                        City
+                      </label>
+                      <input
+                        type="text"
+                        id="city"
+                        name="city"
+                        value={profileData.city}
+                        onChange={handleChange}
+                        className="border rounded px-2 py-1 w-2/3"
+                      />
+                    </div>
+
+                    {/* Country */}
+                    <div className="flex justify-between py-3">
+                      <label htmlFor="country" className="font-medium">
+                        Country
+                      </label>
+                      <input
+                        type="text"
+                        id="country"
+                        name="country"
+                        value={profileData.country}
+                        onChange={handleChange}
+                        className="border rounded px-2 py-1 w-2/3"
+                      />
+                    </div>
+
+                    {/* Save Button */}
+                    <div className="flex justify-end">
+                      <button
+                        className="font-medium text-green-500"
+                        onClick={() => handleSaveAddress()}
                       >
-                        <CiEdit size={25} />
-                      </NavLink>
+                        <CiCircleCheck size={25} />
+                      </button>
                     </div>
                   </div>
-                  <Caption>
-            {[accountInfo?.streetAddress, accountInfo?.city, accountInfo?.country]
-              .filter((val) => val) // Lọc các giá trị rỗng
-              .join(", ")}
-          </Caption>
+                ) : (
+                  <div className="flex justify-between py-3">
 
-                </div>      
+                    {/* Address Info */}
+                    <div className="space-y-2 py-4">
+                      {/* Street Address */}
+                      <div className="flex items-center gap-3 text-gray-700">
+                        <FaMapMarkerAlt className="text-blue-500" />
+                        <span>{accountInfo?.streetAddress || "N/A"}</span>
+                      </div>
+
+                      {/* City */}
+                      <div className="flex items-center gap-3 text-gray-700">
+                        <FaCity className="text-blue-500" />
+                        <span>{accountInfo?.city || "N/A"}</span>
+                      </div>
+
+                      {/* Country */}
+                      <div className="flex items-center gap-3 text-gray-700">
+                        <FaGlobe className="text-blue-500" />
+                        <span>{accountInfo?.country || "N/A"}</span>
+                      </div>
+
+                      {/* Address Type */}
+                      <div className="flex items-center gap-3 text-gray-700">
+                        <FaTag className="text-blue-500" />
+                        <span>{accountInfo?.addressType || "N/A"}</span>
+                      </div>
+                    </div>
+
+                    <NavLink
+                      to=""
+                      type="button"
+                      className="font-medium text-indigo-500"
+                      onClick={() => handleEditClick("address")}
+                    >
+                      <CiEdit size={25} />
+                    </NavLink>
+                  </div>
+                )}
               </div>
-            </div> */}
-            <div className="flex justify-between border-b py-3">
-  <Title>Address</Title>
-  <div className="w-1/2">
-    {editingField === "address" ? (
-      <div className="flex flex-col">
-        {/* Street Address */}
-        <div className="flex justify-between py-3">
-          <label htmlFor="streetAddress" className="font-medium">
-            Street Address
-          </label>
-          <input
-            type="text"
-            id="streetAddress"
-            name="streetAddress"
-            value={profileData.streetAddress}
-            onChange={handleChange}
-            className="border rounded px-2 py-1 w-2/3"
-          />
-        </div>
-
-        {/* City */}
-        <div className="flex justify-between py-3">
-          <label htmlFor="city" className="font-medium">
-            City
-          </label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            value={profileData.city}
-            onChange={handleChange}
-            className="border rounded px-2 py-1 w-2/3"
-          />
-        </div>
-
-        {/* Country */}
-        <div className="flex justify-between py-3">
-          <label htmlFor="country" className="font-medium">
-            Country
-          </label>
-          <input
-            type="text"
-            id="country"
-            name="country"
-            value={profileData.country}
-            onChange={handleChange}
-            className="border rounded px-2 py-1 w-2/3"
-          />
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <button
-            className="font-medium text-green-500"
-            onClick={() => handleSaveAddress()}
-          >
-            <CiCircleCheck size={25} />
-          </button>
-        </div>
-      </div>
-    ) : (
-      <div className="flex justify-between py-3">
-        <p>
-          {[
-            accountInfo?.streetAddress,
-            accountInfo?.city,
-            accountInfo?.country,
-          ]
-            .filter((val) => val) // Lọc các giá trị rỗng
-            .join(", ") || "N/A"}
-        </p>
-        <NavLink
-          to=""
-          type="button"
-          className="font-medium text-indigo-500"
-          onClick={() => handleEditClick("address")}
-        >
-        <CiEdit size={25} />
-          
-        </NavLink>
-      </div>
-    )}
-  </div>
-</div>
+            </div>;
 
           </div>
         </div>
