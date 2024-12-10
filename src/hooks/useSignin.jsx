@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { authService } from "../services/authService";
 import {useNotification} from "../notifications/NotificationContext";
-import {toast} from "react-toastify";
 
 export const useSignin = () => {
   const [email, setEmail] = useState("");
@@ -32,6 +31,8 @@ export const useSignin = () => {
         if (errorCode === 1011) {  // USER_IS_NOT_VERIFIED
           setNeedVerification(true);
           alert("Email is not verified. Redirecting to OTP verification.");
+        } else if (errorCode === 1012) {  // USER_IS_BANNED
+          showToastNotification('Your account has been banned. Please contact support for more information.', 'error');
         }
       }
       setError(error.message || "An error occurred");

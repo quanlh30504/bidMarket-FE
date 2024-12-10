@@ -1,6 +1,6 @@
 import React from "react";
-import { AuctionStatus, ProductStatus, OrderStatus } from "../../../router/index";
-import { ActionButton, AuctionButtonTypes, ActionButtonAdmin, AuctionButtonTypesAdmin } from "./ActionButton";
+import { AuctionStatus, ProductStatus, OrderStatus, AccountStatus } from "../../../router/index";
+import { ActionButton, ActionButtonTypes, ActionButtonAdmin, ActionButtonTypesAdmin } from "./ActionButton";
 
 const StatusBadge = ({ item }) => {
   const { status } = item;
@@ -24,29 +24,29 @@ const StatusBadge = ({ item }) => {
       </span>
       <div className="flex flex-col items-center justify-center">
         {status === AuctionStatus.CANCELED && (
-          <ActionButton type={AuctionButtonTypes.REOPEN} item={item} />
+          <ActionButton type={ActionButtonTypes.REOPEN} item={item} />
         )}
         {status === AuctionStatus.PENDING && (
           <div className="flex mt-1 justify-center">
-            <ActionButton type={AuctionButtonTypes.EDIT} item={item} />
-            <ActionButton type={AuctionButtonTypes.DELETE} item={item} />
+            <ActionButton type={ActionButtonTypes.EDIT} item={item} />
+            <ActionButton type={ActionButtonTypes.DELETE} item={item} />
           </div>
         )}
         {status === AuctionStatus.COMPLETED && (
           <div className="flex mt-1 justify-center">
-            <ActionButton type={AuctionButtonTypes.DELETE} item={item} />
+            <ActionButton type={ActionButtonTypes.DELETE} item={item} />
           </div>
         )}
         {status === ProductStatus.INACTIVE && (
           <div className="flex mt-1 justify-center">
-            <ActionButton type={AuctionButtonTypes.EDIT} item={item} />
-            <ActionButton type={AuctionButtonTypes.DELETE} item={item} />
-            <ActionButton type={AuctionButtonTypes.CREATE_AUCTION} item={item} />
+            <ActionButton type={ActionButtonTypes.EDIT} item={item} />
+            <ActionButton type={ActionButtonTypes.DELETE} item={item} />
+            <ActionButton type={ActionButtonTypes.CREATE_AUCTION} item={item} />
           </div>
         )}
         {status === ProductStatus.SOLD && (
           <div className="flex mt-1 justify-center">
-            <ActionButton type={AuctionButtonTypes.DELETE} item={item} />
+            <ActionButton type={ActionButtonTypes.DELETE} item={item} />
           </div>
         )}
       </div>
@@ -75,6 +75,9 @@ const StatusBadgeAdmin = ({ item }) => {
     [AuctionStatus.CLOSED]: "bg-gray-500 text-gray-100",
     [AuctionStatus.COMPLETED]: "bg-blue-500 text-blue-100",
     [AuctionStatus.READY]: "bg-green text-white",
+    [AccountStatus.VERIFIED]: "bg-green text-white",
+    [AccountStatus.UNVERIFIED]: "bg-yellow-500 text-yellow-100",
+    [AccountStatus.BANNED]: "bg-red-800 text-red-100",
   };
   return (
     <div className={`min-h-[70px] flex flex-col items-center justify-center`}>
@@ -84,12 +87,22 @@ const StatusBadgeAdmin = ({ item }) => {
       <div className="flex flex-col items-center justify-center">
         {status === AuctionStatus.PENDING && (
           <div className="flex mt-1 justify-center">
-            <ActionButtonAdmin type={AuctionButtonTypesAdmin.REVIEW_AUCTION} item={item} />
+            <ActionButtonAdmin type={ActionButtonTypesAdmin.REVIEW_AUCTION} item={item} />
           </div>
         )}
         {(status === AuctionStatus.OPEN || status === AuctionStatus.READY) && (
           <div className="flex mt-1 justify-center">
-            <ActionButtonAdmin type={AuctionButtonTypesAdmin.CANCEL_AUCTION} item={item} />
+            <ActionButtonAdmin type={ActionButtonTypesAdmin.CANCEL_AUCTION} item={item} />
+          </div>
+        )}
+        {(status === AccountStatus.UNVERIFIED || status === AccountStatus.VERIFIED) && (
+          <div className="flex mt-1 justify-center">
+            <ActionButtonAdmin type={ActionButtonTypesAdmin.BAN_USER} item={item} />
+          </div>
+        )}
+        {status === AccountStatus.BANNED && (
+          <div className="flex mt-1 justify-center">
+            <ActionButtonAdmin type={ActionButtonTypesAdmin.UNBAN_USER} item={item} />
           </div>
         )}
       </div>

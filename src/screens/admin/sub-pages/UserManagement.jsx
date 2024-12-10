@@ -3,7 +3,7 @@ import { FilterBar } from '../../seller-hub/components/FilterBar';
 import { Table } from '../../seller-hub/components/Table';
 import { Sidebar } from '../../seller-hub/components/Sidebar';
 import AdminService from '../../../services/adminService';
-import { Role, Pagination } from '../../../router/index';
+import { Role, Pagination, AccountStatus } from '../../../router/index';
 
 export const UserManagement = () => {
   const [items, setItems] = useState([]);
@@ -87,11 +87,11 @@ export const UserManagement = () => {
   const formatUserData = (response) => {
     return response.content.map(user => {
       return {
+        hidden_id: user.id,
         username: user.profile && user.profile.fullName ? user.profile.fullName : 'Unknown',
         email: user.email,
         role: Role[user.role],
-        "Is verified": user.verified ? 'Yes' : 'No',
-        "Is banned": user.banned ? 'Yes' : 'No',
+        status: user.banned ? AccountStatus.BANNED : user.verified ? AccountStatus.VERIFIED : AccountStatus.UNVERIFIED,
       };
     });
   }

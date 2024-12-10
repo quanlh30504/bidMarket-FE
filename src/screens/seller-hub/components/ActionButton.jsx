@@ -3,6 +3,7 @@ import { useWarning } from '../../../router';
 import { DeleteWarning } from './DeleteWarning';
 import ProductService from '../../../services/productService';
 import AuctionService from '../../../services/auctionService';
+import AdminService from '../../../services/adminService';
 
 // FOR SELLER
 export const ActionButton = ({ type, item }) => {
@@ -12,7 +13,7 @@ export const ActionButton = ({ type, item }) => {
     return (
       <>
         {/* RE-OPEN */}
-        {type === AuctionButtonTypes.REOPEN && (
+        {type === ActionButtonTypes.REOPEN && (
           <button className="mt-1 px-2 py-1 bg-white text-black border rounded-full inline-block w-[100px]"
           onClick={() => {
             showWarning(
@@ -36,7 +37,7 @@ export const ActionButton = ({ type, item }) => {
         )}
   
         {/* EDIT */}
-        {type === AuctionButtonTypes.EDIT && (
+        {type === ActionButtonTypes.EDIT && (
           <button className="px-1"
           onClick={() => {
             if (item.product) {
@@ -53,7 +54,7 @@ export const ActionButton = ({ type, item }) => {
         )}
   
         {/* DELETE */}
-        {type === AuctionButtonTypes.DELETE && (
+        {type === ActionButtonTypes.DELETE && (
           <button className="px-1"
           onClick={() => {
             if (item.product) {
@@ -87,7 +88,7 @@ export const ActionButton = ({ type, item }) => {
         )}
 
         {/* CREATE AUCTION FROM PRODUCT */}
-        {type === AuctionButtonTypes.CREATE_AUCTION && (
+        {type === ActionButtonTypes.CREATE_AUCTION && (
           <button className="px-1"
           title="Create new auction with this product"
           onClick={() => {
@@ -122,7 +123,7 @@ export const ActionButton = ({ type, item }) => {
 };
 
 
-export const AuctionButtonTypes = {
+export const ActionButtonTypes = {
     REOPEN: 'Reopen',
     EDIT: 'Edit',
     DELETE: 'Delete',
@@ -139,7 +140,7 @@ export const ActionButtonAdmin = ({ type, item }) => {
   return (
     <>
       {/* CANCEL AUCTION */}
-      {type === AuctionButtonTypesAdmin.CANCEL_AUCTION && (
+      {type === ActionButtonTypesAdmin.CANCEL_AUCTION && (
         <button className="px-1"
         title='Cancel this auction'
         onClick={() => {
@@ -164,7 +165,7 @@ export const ActionButtonAdmin = ({ type, item }) => {
       )}
 
       {/* REVIEW AUCTION */}
-      {type === AuctionButtonTypesAdmin.REVIEW_AUCTION && (
+      {type === ActionButtonTypesAdmin.REVIEW_AUCTION && (
         <button className="px-1"
         title='Review this auction'
         onClick={() => {
@@ -174,12 +175,64 @@ export const ActionButtonAdmin = ({ type, item }) => {
           <svg width={20} height={20} fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g fillRule="evenodd"> <path fillRule="nonzero" d="M0 53v1813.33h1386.67v-320H1280v213.34H106.667V159.667H1280V373h106.67V53z"></path> <path d="M1226.67 1439.67c113.33 0 217.48-39.28 299.6-104.96l302.37 302.65c20.82 20.84 54.59 20.85 75.42.04 20.84-20.82 20.86-54.59.04-75.43l-302.41-302.68c65.7-82.12 104.98-186.29 104.98-299.623 0-265.097-214.91-480-480-480-265.1 0-480.003 214.903-480.003 480 0 265.093 214.903 480.003 480.003 480.003Zm0-106.67c206.18 0 373.33-167.15 373.33-373.333 0-206.187-167.15-373.334-373.33-373.334-206.19 0-373.337 167.147-373.337 373.334 0 206.183 167.147 373.333 373.337 373.333Z"></path> </g> </g></svg>
         </button>
       )}
+
+      {/* BAN USER */}
+      {type === ActionButtonTypesAdmin.BAN_USER && (
+        <button className="mt-1 px-2 py-1 bg-red-500 text-black border rounded-full inline-block w-fit"
+        title='Ban this user'
+        onClick={() => {
+          showWarning(
+            <div className="text-center text-xl mb-4">
+              <p className="text-gray-700">Are you sure you want to ban this user?</p>
+              <p className="text-green text-center">{item.username}</p>
+              <p className="text-gray-700">ID: <span className="font-medium">{item.hidden_id}</span></p>
+            </div>,
+            async () => {
+              try {
+                await AdminService.banUser(item.hidden_id);
+                window.alert('User banned successfully');
+              } catch (error) {
+                console.error('Error banning user:', error);
+              }
+            });
+        }}
+        >
+          Ban
+        </button>
+      )}
+
+      {/* UNBAN USER */}
+      {type === ActionButtonTypesAdmin.UNBAN_USER && (
+        <button className="mt-1 px-2 py-1 bg-green text-black border rounded-full inline-block w-fit"
+        title='Unban this user'
+        onClick={() => {
+          showWarning(
+            <div className="text-center text-xl mb-4">
+              <p className="text-gray-700">Are you sure you want to unban this user?</p>
+              <p className="text-green text-center">{item.username}</p>
+              <p className="text-gray-700">ID: <span className="font-medium">{item.hidden_id}</span></p>
+            </div>,
+            async () => {
+              try {
+                await AdminService.unBanUser(item.hidden_id);
+                window.alert('User unbanned successfully');
+              } catch (error) {
+                console.error('Error unbanning user:', error);
+              }
+            });
+        }}
+        >
+          Unban
+        </button>
+      )}
     </>
   );
 };
 
 
-export const AuctionButtonTypesAdmin = {
+export const ActionButtonTypesAdmin = {
   CANCEL_AUCTION: 'CancelAuction',
   REVIEW_AUCTION: 'ReviewAuction',
+  BAN_USER: 'BanUser',
+  UNBAN_USER: 'UnbanUser',
 };

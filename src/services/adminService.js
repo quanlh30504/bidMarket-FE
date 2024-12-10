@@ -45,6 +45,16 @@ class AdminService {
       },
     });
   }
+
+  // ban user
+  static banUser(userId) {
+    return axiosClient.put(`/api/users/banUser/${userId}`);
+  }
+
+  // unban user
+  static unBanUser(userId) {
+    return axiosClient.put(`/api/users/unBanUser/${userId}`);
+  }
 }
 
 
