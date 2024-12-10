@@ -86,15 +86,15 @@ export const Listings = () => {
   
   const handlePageChange = async (newPage) => {
     if (activeMenuItem === 'Auction') {
-      setAuctionFilters({
-        ...auctionFilters,
-        page: newPage - 1, // API page starts from 0
-      });
-    } else if (activeMenuItem === 'Product') {
-      setProductFilters({
-        ...productFilters,
+      setAuctionFilters((prevFilters) => ({
+        ...prevFilters,
         page: newPage - 1,
-      });
+      }));
+    } else if (activeMenuItem === 'Product') {
+      setProductFilters((prevFilters) => ({
+        ...prevFilters,
+        page: newPage - 1,
+      }));
     }
   };
 

@@ -98,19 +98,19 @@ export const UserManagement = () => {
 
   const handlePageChange = async (newPage) => {
     if (activeMenuItem === 'All users') {
-      setUserFilters_all({ ...userFilters_all, page: newPage - 1 });
+      setUserFilters_all((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
     }
     if (activeMenuItem === 'Sellers') {
-      setUserFilters_sellers({ ...userFilters_sellers, page: newPage - 1 });
+      setUserFilters_sellers((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
     }
     if (activeMenuItem === 'Bidders') {
-      setUserFilters_bidders({ ...userFilters_bidders, page: newPage - 1 });
+      setUserFilters_bidders((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
     }
     if (activeMenuItem === 'Inactive') {
-      setUserFilters_inactive({ ...userFilters_inactive, page: newPage - 1 });
+      setUserFilters_inactive((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
     }
     if (activeMenuItem === 'Banned') {
-      setUserFilters_banned({ ...userFilters_banned, page: newPage - 1 });
+      setUserFilters_banned((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
     }
   };
 
@@ -189,6 +189,26 @@ export const UserManagement = () => {
   }
 
   useEffect(() => {
+    fetchUsersAll();
+  }, [fetchUsersAll]);
+
+  useEffect(() => {
+    fetchUsersSellers();
+  }, [fetchUsersSellers]);
+
+  useEffect(() => {
+    fetchUsersBidders();
+  }, [fetchUsersBidders]);
+
+  useEffect(() => {
+    fetchUsersInactive();
+  }, [fetchUsersInactive]);
+
+  useEffect(() => {
+    fetchUsersBanned();
+  }, [fetchUsersBanned]);
+
+  useEffect(() => {
     const handleChangeActiveMenuItem = async () => {
       switch (activeMenuItem) {
         case 'Sellers':
@@ -210,26 +230,6 @@ export const UserManagement = () => {
     };
     handleChangeActiveMenuItem();
   }, [activeMenuItem, data]);
-
-  useEffect(() => {
-    fetchUsersAll();
-  }, [fetchUsersAll]);
-
-  useEffect(() => {
-    fetchUsersSellers();
-  }, [fetchUsersSellers]);
-
-  useEffect(() => {
-    fetchUsersBidders();
-  }, [fetchUsersBidders]);
-
-  useEffect(() => {
-    fetchUsersInactive();
-  }, [fetchUsersInactive]);
-
-  useEffect(() => {
-    fetchUsersBanned();
-  }, [fetchUsersBanned]);
 
   return (
     <div className="flex">
