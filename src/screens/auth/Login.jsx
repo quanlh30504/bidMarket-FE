@@ -55,7 +55,7 @@ export const Login = () => {
                 </div>
               )}
               <div className="py-5 mt-8">
-                <Caption className="mb-2">Enter Your Email *</Caption>
+                <Caption className="mb-2">Enter Your Email  <span className="text-red-500">*</span></Caption>
                 <input
                   type="email"
                   name="email"
@@ -66,7 +66,7 @@ export const Login = () => {
                 />
               </div>
               <div>
-                <Caption className="mb-2">Password *</Caption>
+                <Caption className="mb-2">Password  <span className="text-red-500">*</span></Caption>
                 <input
                   type="password"
                   name="password"

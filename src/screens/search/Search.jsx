@@ -305,7 +305,7 @@ const FilterSection = ({
             id={filter}
             checked={selectedFilters.includes(filter)}
             onChange={() => onFilterToggle(filter)}
-          />
+          className="accent-emerald-500 w-4 h-4 rounded border-green-500 cursor-pointer"/>
           <label
             htmlFor={filter}
             className={`ml-2 text-[15px] font-[500] text-gray_100 cursor-pointer ${

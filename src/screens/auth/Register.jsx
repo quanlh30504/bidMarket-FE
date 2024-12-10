@@ -11,15 +11,15 @@ import { OTPVerification } from "./components/OtpVerification";
 import { useState } from "react";
 
 const formConfig = [
-  { name: 'fullName', label: 'Fullname *', type: 'text', placeholder: 'Full Name', required: true },
-  { name: 'email', label: 'Enter Your Email *', type: 'email', placeholder: 'Enter Your Email', required: true },
-  { name: 'password', label: 'Password *', type: 'password', placeholder: 'Enter Your Password', required: true },
-  { name: 'confirmPassword', label: 'Confirm Password *', type: 'password', placeholder: 'Confirm password', required: true },
-  { name: 'idCard', label: 'ID card number *', type: 'text', placeholder: 'ID card number', required: true, condition: (formData) => formData.role === 'SELLER' },
-  { name: 'frontImage', label: 'Front ID card image *', type: 'file', required: true, condition: (formData) => formData.role === 'SELLER' },
-  { name: 'backImage', label: 'Back ID card image *', type: 'file', required: true, condition: (formData) => formData.role === 'SELLER' },
-  { name: 'issuedDate', label: 'Issued date *', type: 'date', required: true, condition: (formData) => formData.role === 'SELLER' },
-  { name: 'expirationDate', label: 'Expiration date *', type: 'date', required: true, condition: (formData) => formData.role === 'SELLER' }
+  { name: 'fullName', label: 'Fullname', type: 'text', placeholder: 'Full Name', required: true },
+  { name: 'email', label: 'Enter Your Email', type: 'email', placeholder: 'Enter Your Email', required: true },
+  { name: 'password', label: 'Password', type: 'password', placeholder: 'Enter Your Password', required: true },
+  { name: 'confirmPassword', label: 'Confirm Password', type: 'password', placeholder: 'Confirm password', required: true },
+  { name: 'idCard', label: 'ID card number', type: 'text', placeholder: 'ID card number', required: true, condition: (formData) => formData.role === 'SELLER' },
+  { name: 'frontImage', label: 'Front ID card image', type: 'file', required: true, condition: (formData) => formData.role === 'SELLER' },
+  { name: 'backImage', label: 'Back ID card image', type: 'file', required: true, condition: (formData) => formData.role === 'SELLER' },
+  { name: 'issuedDate', label: 'Issued date', type: 'date', required: true, condition: (formData) => formData.role === 'SELLER' },
+  { name: 'expirationDate', label: 'Expiration date', type: 'date', required: true, condition: (formData) => formData.role === 'SELLER' }
 ];
 
 export const Register = () => {
@@ -74,7 +74,7 @@ export const Register = () => {
               if (condition && !condition(formData)) return null;
               return (
                 <div key={name} className="py-5">
-                  <Caption className="mb-2">{label}</Caption>
+                  <Caption className="mb-2">{label} <span className="text-red-500">*</span></Caption>
                   <input
                     type={type}
                     name={name}
@@ -92,11 +92,11 @@ export const Register = () => {
               );
             })}
             <div className="flex items-center gap-2 py-4">
-              <input onClick={handleBecomeSellerClick} type="checkbox" />
+              <input onClick={handleBecomeSellerClick} type="checkbox" className="accent-emerald-500 w-4 h-4 rounded border-green-500 focus:ring-green-500 cursor-pointer"/>
               <Caption>Become a Seller</Caption>
             </div>
             <div className="flex items-center gap-2 py-4">
-              <input type="checkbox" required />
+              <input type="checkbox" required className="accent-emerald-500 w-4 h-4 rounded border-green-500 focus:ring-green-500 cursor-pointer"/>
               <Caption>I agree to the Terms & Policy</Caption>
             </div>
             <p className="text-center mt-5">
