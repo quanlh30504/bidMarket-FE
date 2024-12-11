@@ -1,25 +1,53 @@
-// NotificationBell.js
 import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { useNotification } from './NotificationContext';
 import { useUser } from '../context/UserContext';
 import { notificationApi } from '../services/api';
 import { authUtils } from '../utils/authUtils';
+import { useNavigate } from 'react-router-dom';
 
-const NotificationItem = memo(({ notification, onMarkAsRead }) => (
-    <div
-        onClick={() => !notification.read && onMarkAsRead(notification.id)}
-        className={`p-4 hover:bg-gray-50 cursor-pointer ${
-            !notification.read ? 'bg-blue-50' : ''
-        }`}
-    >
-        <p className={`text-sm ${!notification.read ? 'font-semibold' : ''}`}>
-            {notification.message}
-        </p>
-        <p className="text-xs text-gray-500 mt-1">
-            {new Date(notification.createdAt).toLocaleString()}
-        </p>
-    </div>
-));
+const NotificationItem = memo(({ notification, onMarkAsRead }) => {
+    const navigate = useNavigate();
+
+    const handleClick = async () => {
+        try {
+            if (!notification.read) {
+                await onMarkAsRead(notification.id);
+            }
+
+            if (notification.metadata) {
+                const metadata = JSON.parse(notification.metadata);
+                console.log("Notification metadata:", metadata);
+
+                if (metadata.auctionId) {
+                    console.log(`Navigating to auction with ID: ${metadata.auctionId}`);
+                    navigate(`/details/${metadata.auctionId}`);
+                } else {
+                    console.log("No auctionId found.");
+                }
+            } else {
+                console.log("metadata is missing or invalid.");
+            }
+        } catch (error) {
+            console.error('Error handling notification click:', error);
+        }
+    };
+
+    return (
+        <div
+            onClick={handleClick}
+            className={`p-4 hover:bg-gray-50 cursor-pointer ${
+                !notification.read ? 'bg-blue-50' : ''
+            }`}
+        >
+            <p className={`text-sm ${!notification.read ? 'font-semibold' : ''}`}>
+                {notification.message}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+                {new Date(notification.createdAt).toLocaleString()}
+            </p>
+        </div>
+    );
+});
 
 export const NotificationBell = () => {
     const [isOpen, setIsOpen] = useState(false);
