@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { PhotoUpload } from "../components/PhotoUpload";
-import { ProductDetails } from "../components/ProductDetails";
-import { ItemSpecifics } from "../components/ItemSpecifics";
-import { AuctionSettings } from "../components/AuctionSettings";
+import { PhotoUpload } from "../../seller-hub/components/PhotoUpload";
+import { ProductDetails } from "../../seller-hub/components/ProductDetails";
+import { ItemSpecifics } from "../../seller-hub/components/ItemSpecifics";
+import { AuctionSettings } from "../../seller-hub/components/AuctionSettings";
 import { useNavigate, useParams } from "react-router-dom";
 import AuctionService from "../../../services/auctionService";
 import ProductService from "../../../services/productService";

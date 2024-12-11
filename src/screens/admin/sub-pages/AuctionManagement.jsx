@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { FilterBar } from '../components/FilterBar';
-import { Table } from '../components/Table';
-import { Sidebar } from '../components/Sidebar';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FilterBar } from '../../seller-hub/components/FilterBar';
+import { Table } from '../../seller-hub/components/Table';
+import { Sidebar } from '../../seller-hub/components/Sidebar';
 import AdminService from '../../../services/adminService';
-import { AuctionStatus } from '../../../router';
+import { AuctionStatus, Pagination } from '../../../router';
 
 export const AuctionManagement = () => {
   const [activeMenuItem, setActiveMenuItem] = useState('All auctions');
@@ -14,6 +14,34 @@ export const AuctionManagement = () => {
     open: [],
     pending: [],
   });
+  const [auctionFilters_all, setAuctionFilters_all] = useState({
+    sellerId: null,
+    title: null,
+    categoryType: [],
+    status: null,
+    minPrice: null,
+    maxPrice: null,
+    startTime: null,
+    endTime: null,
+    page: 0,
+    size: 10,
+    sortField: 'currentPrice',
+    sortDirection: 'ASC',
+  });
+
+  const [auctionFilters_open, setAuctionFilters_open] = useState({
+    ...auctionFilters_all,
+    status: 'OPEN',  
+  });
+
+  const [auctionFilters_pending, setAuctionFilters_pending] = useState({
+    ...auctionFilters_all,
+    status: 'PENDING',  
+  });
+
+  const [auctionTotalItems_all, setAuctionTotalItems_all] = useState(0);
+  const [auctionTotalItems_open, setAuctionTotalItems_open] = useState(0);
+  const [auctionTotalItems_pending, setAuctionTotalItems_pending] = useState(0);
 
   const menuItems = [
     'All auctions',
@@ -42,43 +70,68 @@ export const AuctionManagement = () => {
     });
   };
 
+  const handlePageChange = async (newPage) => {
+    if (activeMenuItem === 'All auctions') {
+      setAuctionFilters_all((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    } else if (activeMenuItem === 'Open') {
+      setAuctionFilters_open((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    } else if (activeMenuItem === 'Pending') {
+      setAuctionFilters_pending((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    }
+  };
+
+  const fetchAuctionsAll = useCallback(async () => {
+    try {
+      const response = await AdminService.searchAuctions(auctionFilters_all);
+      setData((prevData) => ({ ...prevData, all: formatAuctionData(response.data) }));
+      setAuctionTotalItems_all(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [auctionFilters_all]);
+
+  const fetchAuctionsOpen = useCallback(async () => {
+    try {
+      const response = await AdminService.searchAuctions(auctionFilters_open);
+      setData((prevData) => ({ ...prevData, open: formatAuctionData(response.data) }));
+      setAuctionTotalItems_open(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [auctionFilters_open]);
+
+  const fetchAuctionsPending = useCallback(async () => {
+    try {
+      const response = await AdminService.searchAuctions(auctionFilters_pending);
+      setData((prevData) => ({ ...prevData, pending: formatAuctionData(response.data) }));
+      setAuctionTotalItems_pending(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [auctionFilters_pending]);
+
   const refreshData = async () => {
     setLoading(true);
-    try {
-      const all = (await AdminService.searchAuctions({})).data;
-      const open = (await AdminService.searchAuctions({ status: 'OPEN' })).data;
-      const pending = (await AdminService.searchAuctions({ status: 'PENDING' })).data;
-      setData({
-        all: formatAuctionData(all),
-        open: formatAuctionData(open),
-        pending: formatAuctionData(pending),
-      });
-      console.log('Data fetched:', data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const handleChangeActiveMenuItem = async (activeMenuItem) => {
     switch (activeMenuItem) {
+      case 'All auctions':
+        fetchAuctionsAll();
+        break;
       case 'Open':
-        setItems(data.open);
-        return;
+        fetchAuctionsOpen();
+        break;
       case 'Pending':
-        setItems(data.pending);
-        return;
+        fetchAuctionsPending();
+        break;
       default:
-        setItems(data.all);
-        return;
+        break;
     }
-  }
+    setLoading(false);
+  };
 
   const sortOrders = (sortBy) => {
     window.alert(`Sorting by ${sortBy}`);
     // some sorting logic return ordered items (use setItems) (later)
-  }
+  };
 
   const header = (activeMenuItems) => {
     switch (activeMenuItems) {
@@ -91,15 +144,36 @@ export const AuctionManagement = () => {
         default:
             return 'All auctions';
     }
-  }
+  };
 
   useEffect(() => {
+    fetchAuctionsAll();
+  }, [fetchAuctionsAll]);
+
+  useEffect(() => {
+    fetchAuctionsOpen();
+  }, [fetchAuctionsOpen]);
+
+  useEffect(() => {
+    fetchAuctionsPending();
+  }, [fetchAuctionsPending]);
+
+  useEffect(() => {
+    const handleChangeActiveMenuItem = async (activeMenuItem) => {
+      switch (activeMenuItem) {
+        case 'Open':
+          setItems(data.open);
+          return;
+        case 'Pending':
+          setItems(data.pending);
+          return;
+        default:
+          setItems(data.all);
+          return;
+      }
+    };
     handleChangeActiveMenuItem(activeMenuItem);
   }, [activeMenuItem, data]);
-
-  useEffect(() => {
-    refreshData();
-  }, []);
 
   return (
     <div className="flex">
@@ -115,6 +189,13 @@ export const AuctionManagement = () => {
           <>
             <FilterBar />
             <Table items={items} sortOptions={sortOptions} sortFunction={sortOrders} />
+            <Pagination
+              totalItems={activeMenuItem === 'All auctions' ? auctionTotalItems_all : activeMenuItem === 'Open' ? auctionTotalItems_open : auctionTotalItems_pending}
+              itemsPerPage={activeMenuItem === 'All auctions' ? auctionFilters_all.size : activeMenuItem === 'Open' ? auctionFilters_open.size : auctionFilters_pending.size}
+              pagesPerGroup={3}
+              onPageChange={handlePageChange}
+              currentPageByParent={activeMenuItem === 'All auctions' ? auctionFilters_all.page + 1 : activeMenuItem === 'Open' ? auctionFilters_open.page + 1 : auctionFilters_pending.page + 1}
+            />
           </>
         )}
       </div>

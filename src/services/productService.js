@@ -15,10 +15,10 @@ class ProductService {
 
   // Tìm kiếm sản phẩm với phân trang và các tham số tùy chọn
   static searchProducts({
-    sellerId = '',
-    name = '',
-    categoryType = '',
-    status = '',
+    sellerId = null,
+    name = null,
+    categoryType = null,
+    status = null,
     page = 0,
     size = 10,
     sortField = 'createdAt',

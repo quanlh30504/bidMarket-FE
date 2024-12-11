@@ -1,7 +1,10 @@
 import React from "react";
 import { TableItem } from "./TableItem";
+import { useUser } from "../../../router";
 
 export const Table = ({ items, sortOptions, sortFuntion }) => {
+  const { user } = useUser();
+
   if (items.length === 0) return null;
 
   // get all fields from the first item
@@ -40,7 +43,7 @@ export const Table = ({ items, sortOptions, sortFuntion }) => {
         </thead>
         <tbody>
           {items.map((item, index) => (
-            <TableItem key={index} item={item}/>
+            <TableItem key={index} item={item} isAdmin={user.role === 'ADMIN'} />
           ))}
         </tbody>
       </table>

@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+// Pagination.js
+import React, { useState, useEffect } from "react";
 
 export const Pagination = ({
   totalItems,
   itemsPerPage,
   pagesPerGroup,
   onPageChange,
+  currentPageByParent=null,
   className = "", 
   buttonClassName = "", // Thêm props để tùy chỉnh class của các button
 }) => {
@@ -76,6 +78,12 @@ export const Pagination = ({
       </button>
     );
   }
+
+  useEffect(() => {
+    if (currentPageByParent !== null) {
+      setCurrentPage(currentPageByParent);
+    }
+  }, [currentPageByParent]);
 
   return (
     <div className={`flex justify-center mt-4 ${className}`}>

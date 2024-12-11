@@ -4,6 +4,7 @@ export const AuctionStatus = {
     CLOSED: 'Closed',
     CANCELED: 'Canceled',
     COMPLETED: 'Completed',
+    READY: 'Ready',
     // EXTENDED: 'Extended'
 }
 
@@ -21,3 +22,10 @@ export const OrderStatus = {
     COMPLETED: 'Completed',
     CANCELED: 'Canceled'
 }
+
+// enum này chỉ có ở FE
+export const AccountStatus = {
+  VERIFIED: 'Verified',
+  UNVERIFIED: 'Unverified',
+  BANNED: 'Banned',
+};

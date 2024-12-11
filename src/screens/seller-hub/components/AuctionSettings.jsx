@@ -10,12 +10,11 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
         value = parseFloat(value) || 0; // Chuyển đổi thành số (nếu không hợp lệ sẽ thành 0)
         break;
       case 'datetime':
-        value = new Date(value); // Chuyển đổi thành Date
+        value = new Date(`${value}:00Z`); // Chuyển đổi thành Date
         break;
       default:
         break; // giữ nguyên giá trị chuỗi
     }
-
     setAuctionSettings((prevSettings) => ({
       ...prevSettings,
       [field]: value,
@@ -61,7 +60,7 @@ export const AuctionSettings = ({ auctionSettings, setAuctionSettings }) => {
                 value={auctionSettings.endTime ? auctionSettings.endTime.toISOString().slice(0, 16) : ''}
                 onChange={handleChange("endTime", 'datetime')}
                 className="border rounded w-full px-2 py-1"
-              />
+              />  
             </td>
           </tr>
           <tr>

@@ -31,6 +31,8 @@ export const useSignin = () => {
         if (errorCode === 1011) {  // USER_IS_NOT_VERIFIED
           setNeedVerification(true);
           showToastNotification("Email is not verified. Redirecting to OTP verification.", "info");
+        } else if (errorCode === 1012) {  // USER_IS_BANNED
+          showToastNotification('Your account has been banned. Please contact support for more information.', 'error');
         } else {
           showToastNotification(error.response.data?.message || 'An error occurred', 'error');
         }
