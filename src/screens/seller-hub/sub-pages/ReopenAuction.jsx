@@ -8,10 +8,12 @@ import AuctionUpdateRequest from "../../../dto/Request/AuctionUpdateRequest";
 import ProductService from "../../../services/productService";
 import AuctionService from "../../../services/auctionService";
 import { useNavigate, useParams } from "react-router-dom";
+import { useNotification } from "../../../notifications/NotificationContext";
 
-export const EditAuction = () => {
+export const ReopenAuction = () => {
   const { auctionId } = useParams();
   const navigate = useNavigate();
+  const { showToastNotification } = useNotification();
   const [currentTitle, setCurrentTitle] = useState("");
   const [productDetails, setProductDetails] = useState({
     title: '',
@@ -66,11 +68,12 @@ export const EditAuction = () => {
       console.log('auctionUpdateRequest:', JSON.stringify(auctionUpdateRequest));
       auctionUpdateRequest.validate();
 
-      await AuctionService.updateAuction(auctionId, auctionUpdateRequest);
-      window.alert('Product updated successfully');
+    //   await AuctionService.updateAuction(auctionId, auctionUpdateRequest);
+      await AuctionService.reOpenAuction(auctionId, auctionUpdateRequest);
+      showToastNotification('Reopened auction successfully', 'success');
     } catch (error) {
       console.error('Error updating product:', error);
-      window.alert('Error updating product. Please try again later');
+      showToastNotification('Failed to reopen auction', 'error');
     } finally {
       setLoading(false);
       navigate('/seller-hub/listings');
@@ -106,12 +109,12 @@ export const EditAuction = () => {
       }
     }
     fetchAuction();
-  }, []);
+  }, [auctionId]);
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow">
       <h1 className="text-3xl font-semibold mb-6 text-center">
-        You are editing auction: <span className="text-green">{currentTitle}</span>
+        You are reopening the auction: <span className="text-green">{currentTitle}</span>
       </h1>
 
       <PhotoUpload
@@ -152,7 +155,7 @@ export const EditAuction = () => {
           onClick={handleSubmit}
           disabled={loading}
         >
-          {loading ? 'Updating...' : 'Update auction'}
+          {loading ? 'Loading...' : 'Reopen Auction'}
         </button>
         <button
           className="w-52 py-2 bg-gray-100 border border-gray-300 rounded-full"

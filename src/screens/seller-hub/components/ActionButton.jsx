@@ -23,12 +23,7 @@ export const ActionButton = ({ type, item }) => {
                 <p className="text-gray-700">ID: <span className="font-medium">{item.hidden_id}</span></p>
               </div>,
               async () => {
-                try {
-                  await AuctionService.reOpenAuction(item.hidden_id);
-                  window.alert('Auction reopened successfully');
-                } catch (error) {
-                  console.error('Error reopening auction:', error);
-                }
+                navigate(`/seller-hub/reopen-auction/${item.hidden_id}`); //???
               });
            }}
           >

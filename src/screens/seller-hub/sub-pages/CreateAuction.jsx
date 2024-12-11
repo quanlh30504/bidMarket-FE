@@ -7,13 +7,16 @@ import { CreationAgreement } from "../components/CreationAgreement";
 import ProductService from "../../../services/productService";
 import ProductCreateRequest from "../../../dto/Request/ProductCreateRequest";
 import AuctionCreateRequest from "../../../dto/Request/AuctionCreateRequest";
-import { useUser } from "../../../router";
+import { useUser, useWarning } from "../../../router";
+import { useNotification } from "../../../notifications/NotificationContext";
 import AuctionService from "../../../services/auctionService";
 import { useNavigate, useParams } from "react-router-dom";
 import { SelectProductPopup } from "../components/SelectProductPopup";
 
 export const CreateAuction = () => {
   const navigate = useNavigate();
+  const { showWarning } = useWarning();
+  const { showToastNotification } = useNotification();
   const { productId } = useParams();
   const [isEditingProductDetails, setIsEditingProductDetails] = useState(true);
   const [productDetails, setProductDetails] = useState({
@@ -40,48 +43,56 @@ export const CreateAuction = () => {
   const UUID = useUser().user.UUID;
 
   const handleSubmit = async () => {
-    try {
-      setLoading(true);
-
-      let imageUrls = [];
-      if (productDetails.photos) {
-        imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
+    showWarning(
+      <div className="text-lg font-semibold mb-2 text-center">
+          You are about to create a new auction. <br />
+          Make sure all the details are correct before proceeding.
+      </div>,
+      async () => {
+        try {
+          setLoading(true);
+    
+          let imageUrls = [];
+          if (productDetails.photos) {
+            imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
+          }
+    
+          const productCreateRequest = new ProductCreateRequest({
+            productId: productDetails.id,
+            name: productDetails.title,
+            description: JSON.stringify(productDetails.specifics),
+            sellerId: UUID,
+            stockQuantity: productDetails.stockQuantity,
+            categories: new Set(productDetails.itemCategory),
+            imageUrls: imageUrls,
+          });
+    
+          productCreateRequest.validate();
+    
+          const auctionCreateRequest = new AuctionCreateRequest({
+            title: auctionSettings.title,
+            productCreateRequest: productCreateRequest,
+            startTime: auctionSettings.startTime,
+            endTime: auctionSettings.endTime,
+            currentPrice: auctionSettings.startPrice,
+            startingPrice: auctionSettings.startPrice,
+            minimumBidIncrement: auctionSettings.minimumBidIncrement,
+            extensionCount: 0,
+          });
+    
+          auctionCreateRequest.validate();
+    
+          await AuctionService.createAuction(auctionCreateRequest);
+          showToastNotification('Auction created successfully.', 'success');
+        } catch (error) {
+          console.error('Error creating product:', error);
+          showToastNotification('Error creating product', 'error');
+        } finally {
+          setLoading(false);
+          navigate('/seller-hub/listings');
+        }
       }
-
-      const productCreateRequest = new ProductCreateRequest({
-        productId: productDetails.id,
-        name: productDetails.title,
-        description: JSON.stringify(productDetails.specifics),
-        sellerId: UUID,
-        stockQuantity: productDetails.stockQuantity,
-        categories: new Set(productDetails.itemCategory),
-        imageUrls: imageUrls,
-      });
-
-      productCreateRequest.validate();
-
-      const auctionCreateRequest = new AuctionCreateRequest({
-        title: auctionSettings.title,
-        productCreateRequest: productCreateRequest,
-        startTime: auctionSettings.startTime,
-        endTime: auctionSettings.endTime,
-        currentPrice: auctionSettings.startPrice,
-        startingPrice: auctionSettings.startPrice,
-        minimumBidIncrement: auctionSettings.minimumBidIncrement,
-        extensionCount: 0,
-      });
-
-      auctionCreateRequest.validate();
-
-      await AuctionService.createAuction(auctionCreateRequest);
-      window.alert('Auction created successfully');
-    } catch (error) {
-      console.error('Error creating product:', error);
-      window.alert('Error creating product');
-    } finally {
-      setLoading(false);
-      navigate('/seller-hub/listings');
-    }
+    );
   };
 
   const handleProductSelect = (product) => {

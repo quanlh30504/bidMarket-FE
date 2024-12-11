@@ -7,10 +7,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import AuctionService from "../../../services/auctionService";
 import ProductService from "../../../services/productService";
 import { useWarning } from "../../../router";
+import { useNotification } from "../../../notifications/NotificationContext";
 
 export const AdminReviewAuction = () => {
   const { showWarning } = useWarning();
   const navigate = useNavigate();
+  const { showToastNotification } = useNotification();
   const { auctionId } = useParams();
   const [loading, setLoading] = useState(false);
   const [productDetails, setProductDetails] = useState({
@@ -32,28 +34,46 @@ export const AdminReviewAuction = () => {
 
   const handleApprove = async () => {
     setLoading(true);
-    try {
-      await AuctionService.openAuction(auctionId);
-      alert("Auction approved successfully");
-    } catch (error) {
-      console.error("Error approving auction:", error);
-      alert("Failed to approve auction");
-    } finally {
-      setLoading(false);
-    }
+    showWarning(
+      <div>
+        <h2 className="text-lg font-semibold mb-2 text-center">Are you sure you want to approve this auction?</h2>
+        <p className="text-center">This action cannot be undone.</p>
+      </div>,
+      async () => {
+        try {
+          await AuctionService.openAuction(auctionId);
+          showToastNotification("Auction approved successfully", "success");
+        } catch (error) {
+          console.error("Error approving auction:", error);
+          showToastNotification("Failed to approve auction", "error");
+        } finally {
+          setLoading(false);
+          navigate("/admin/auction-management"); 
+        }
+      }
+    );
   };
 
   const handleReject = async () => {
     setLoading(true);
-    try {
-      await AuctionService.closeAuction(auctionId);
-      alert("Auction rejected successfully");
-    } catch (error) {
-      console.error("Error rejecting auction:", error);
-      alert("Failed to reject auction");
-    } finally {
-      setLoading(false);
-    }
+    showWarning(
+      <div>
+        <h2 className="text-lg font-semibold mb-2 text-center">Are you sure you want to reject this auction?</h2>
+        <p className="text-center">This action cannot be undone.</p>
+      </div>,
+      async () => {
+        try {
+          await AuctionService.closeAuction(auctionId);
+          showToastNotification("Auction rejected successfully", "success");
+        } catch (error) {
+          console.error("Error rejecting auction:", error);
+          showToastNotification("Failed to reject auction", "error");
+        } finally {
+          setLoading(false);
+          navigate("/admin/auction-management");
+        }
+      }
+    );
   };
 
   useEffect(() => {

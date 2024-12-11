@@ -14,6 +14,7 @@ import { CreateProduct } from "./sub-pages/CreateProduct";
 import { CreateAuction } from "./sub-pages/CreateAuction";
 import { EditProduct } from "./sub-pages/EditProduct.jsx";
 import { EditAuction } from "./sub-pages/EditAuction.jsx";
+import { ReopenAuction } from "./sub-pages/ReopenAuction.jsx";
 
 export const SellerHubRoute = () => {
   return (
@@ -35,6 +36,7 @@ export const SellerHubRoute = () => {
         <Route path="create-auction/:productId" element={<CreateAuction />} />
         <Route path="edit-product/:productId" element={<EditProduct />} />
         <Route path="edit-auction/:auctionId" element={<EditAuction />} />
+        <Route path="reopen-auction/:auctionId" element={<ReopenAuction />} />
       </Route>
     </Routes>
   );

@@ -5,11 +5,14 @@ import { ItemSpecifics } from '../components/ItemSpecifics';
 import { CreationAgreement } from '../components/CreationAgreement';
 import ProductService from '../../../services/productService';
 import ProductCreateRequest from '../../../dto/Request/ProductCreateRequest';
-import { useUser } from '../../../router';
+import { useUser, useWarning } from '../../../router';
+import { useNotification } from '../../../notifications/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 
 export const CreateProduct = () => {
   const navigate = useNavigate();
+  const { showWarning } = useWarning();
+  const { showToastNotification } = useNotification();
   const [productDetails, setProductDetails] = useState({
     title: '',
     itemCategory: [],
@@ -22,40 +25,45 @@ export const CreateProduct = () => {
   const UUID = useUser().user.UUID;
 
   const handleSubmit = async () => {
-    console.log('Create Auction Data:', {
-      productDetails,
-    });
-    // API call
-    try {
-      setLoading(true);
-      console.log('Creating product...');
-      console.log('productDetails:', productDetails);
-
-      let imageUrls = [];
-      if (productDetails.photos) {
-        imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
+    //confirm
+    showWarning(
+      <div className="text-lg font-semibold mb-2 text-center">
+          You are about to create a new product. <br />
+          Make sure all the details are correct before proceeding.
+      </div>,
+      async () => {
+        try {
+          setLoading(true);
+          console.log('Creating product...');
+          console.log('productDetails:', productDetails);
+    
+          let imageUrls = [];
+          if (productDetails.photos) {
+            imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
+          }
+          // const categoryKeys = Object.keys(productDetails.itemCategory);  // Get category keys only
+    
+          const productCreateRequest = new ProductCreateRequest({
+            name: productDetails.title,
+            description: JSON.stringify(productDetails.specifics), // Convert to JSON string
+            sellerId: UUID,
+            stockQuantity: productDetails.stockQuantity,
+            categories: new Set(productDetails.itemCategory),
+            imageUrls: imageUrls,
+          });
+          console.log('productCreateRequest:', JSON.stringify(productCreateRequest));
+          productCreateRequest.validate();
+          await ProductService.createProduct(productCreateRequest);
+          showToastNotification('Product created successfully.', 'success');
+        } catch (error) {
+          console.error('Error creating product:', error);
+          showToastNotification('Error creating product', 'error');
+        } finally {
+          setLoading(false);
+          navigate('/seller-hub/listings');
+        }
       }
-      // const categoryKeys = Object.keys(productDetails.itemCategory);  // Get category keys only
-
-      const productCreateRequest = new ProductCreateRequest({
-        name: productDetails.title,
-        description: JSON.stringify(productDetails.specifics), // Convert to JSON string
-        sellerId: UUID,
-        stockQuantity: productDetails.stockQuantity,
-        categories: new Set(productDetails.itemCategory),
-        imageUrls: imageUrls,
-      });
-      console.log('productCreateRequest:', JSON.stringify(productCreateRequest));
-      productCreateRequest.validate();
-      await ProductService.createProduct(productCreateRequest);
-      window.alert('Product created successfully');
-    } catch (error) {
-      console.error('Error creating product:', error);
-      window.alert('Error creating product');
-    } finally {
-      setLoading(false);
-      navigate('/seller-hub/listings');
-    }
+    );
   };
 
   return (
