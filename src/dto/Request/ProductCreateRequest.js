@@ -1,4 +1,5 @@
 import { CategoryType } from '../../router/index';
+import ProductImageDto from '../ProductImageDto';
 
 class ProductCreateRequest {
   constructor({
@@ -8,7 +9,7 @@ class ProductCreateRequest {
     sellerId,
     stockQuantity,
     categories = new Set(),
-    imageUrls = []
+    productImages = []
   }) {
     this.productId = productId;
     this.name = name;
@@ -16,7 +17,9 @@ class ProductCreateRequest {
     this.sellerId = sellerId;
     this.stockQuantity = stockQuantity;
     this.categories = categories;
-    this.imageUrls = imageUrls;
+    this.productImages = productImages;
+    console.log('productImages:', productImages);
+    console.log('this.productImages:', this.productImages);
   }
 
   validate() {
@@ -29,11 +32,14 @@ class ProductCreateRequest {
     if (typeof this.stockQuantity !== 'number' || this.stockQuantity < 0) {
       throw new Error("Stock quantity must be a non-negative number");
     }
-    if (!Array.isArray(this.imageUrls)) {
-      throw new Error("Image URLs must be an array");
-    }
     if (!(this.categories instanceof Set) || ![...this.categories].every((cat) => CategoryType[cat])) {
       throw new Error('Categories must be an array of valid CategoryType values');
+    }
+    if (
+      !Array.isArray(this.productImages) ||
+      !this.productImages.every((img) => img instanceof ProductImageDto)
+    ) {
+      throw new Error('Product images must be an array of ProductImageDto instances');
     }
   }
 
@@ -45,7 +51,7 @@ class ProductCreateRequest {
       sellerId: this.sellerId,
       stockQuantity: this.stockQuantity,
       categories: Array.from(this.categories),
-      imageUrls: this.imageUrls
+      productImages: this.productImages.map((productImageDto) => productImageDto.toJSON()),
     };
   }
 }

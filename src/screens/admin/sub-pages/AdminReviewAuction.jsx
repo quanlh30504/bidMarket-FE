@@ -8,6 +8,7 @@ import AuctionService from "../../../services/auctionService";
 import ProductService from "../../../services/productService";
 import { useWarning } from "../../../router";
 import { useNotification } from "../../../notifications/NotificationContext";
+import ProductImageDto from "../../../dto/ProductImageDto";
 
 export const AdminReviewAuction = () => {
   const { showWarning } = useWarning();
@@ -22,6 +23,7 @@ export const AdminReviewAuction = () => {
     stockQuantity: 1,
     photos: [],
     videos: [],
+    photoPrimaryIndex: 0,
   });
 
   const [auctionSettings, setAuctionSettings] = useState({
@@ -77,19 +79,67 @@ export const AdminReviewAuction = () => {
   };
 
   useEffect(() => {
-    const fetchAuction = async () => {
+    const loadFilesFromUrls = async (urls) => {
+      const files = await Promise.all(
+        urls.map(async (url) => {
+          const response = await fetch(url);
+          const blob = await response.blob();
+          const fileName = url.split('/').pop(); // Lấy tên file từ URL
+          return new File([blob], fileName, { type: blob.type });
+        })
+      );
+      return files;
+    };
+
+    const fetchAuctionAndLoadAssets = async () => {
       setLoading(true);
       try {
+        // Lấy dữ liệu sản phẩm từ API
         const auction = (await AuctionService.getAuctionById(auctionId)).data;
         const product = (await ProductService.getProduct(auction.productDto.id)).data; // api get auction không trả về product
         console.log('Auction:', auction);
         console.log('Product:', product);
-        setProductDetails({
+  
+        // Cập nhật thông tin cơ bản của sản phẩm
+        let initialDetails = {
           title: product.name,
           itemCategory: product.categories,
-          specifics: JSON.parse(product.description),  // Convert JSON string to object
+          specifics: JSON.parse(product.description), // Convert JSON string to object
           stockQuantity: product.stockQuantity,
-        });
+          photos: [],
+          videos: [],
+          photoPrimaryIndex: 0,
+        };
+  
+        // Phân loại photos và videos từ `productImages`
+        if (product.productImages) {
+          product.productImages.forEach((productImageDto, index) => {
+            const { imageUrl, isPrimary } = productImageDto;
+            console.log('imageUrl:', imageUrl);
+            const prefix = imageUrl.includes('/photos/') ? 'photos' : 
+                           imageUrl.includes('/videos/') ? 'videos' : null;
+  
+            if (prefix) {
+              initialDetails[prefix].push(imageUrl);
+  
+              if (isPrimary && prefix === 'photos') {
+                initialDetails.photoPrimaryIndex = index;
+              }
+            }
+          });
+        }
+  
+        // Tải và chuyển đổi URLs thành File
+        const [photoFiles, videoFiles] = await Promise.all([
+          loadFilesFromUrls(initialDetails.photos),
+          loadFilesFromUrls(initialDetails.videos),
+        ]);
+        
+        initialDetails.photos = photoFiles;
+        initialDetails.videos = videoFiles;
+  
+        // Cập nhật `productDetails` với Files
+        setProductDetails(initialDetails);
         setAuctionSettings({
           title: auction.title,
           startTime: new Date(auction.startTime),
@@ -112,8 +162,9 @@ export const AdminReviewAuction = () => {
       } finally {
         setLoading(false);
       }
-    }
-    fetchAuction();
+    };
+  
+    fetchAuctionAndLoadAssets();
   }, [auctionId]);
 
   return (

@@ -6,6 +6,7 @@ export const PhotoUpload = memo(({ productDetails, setProductDetails, disabled =
 
   const photos = useMemo(() => productDetails.photos || [], [productDetails.photos]);
   const videos = useMemo(() => productDetails.videos || [], [productDetails.videos]);
+  const primaryIndex = useMemo(() => productDetails.photoPrimaryIndex || 0, [productDetails.photoPrimaryIndex]);
 
   // Photo Upload Handlers
   const handlePhotoUpload = useCallback(
@@ -33,14 +34,31 @@ export const PhotoUpload = memo(({ productDetails, setProductDetails, disabled =
     [videos, setProductDetails, disabled]
   );
 
-  // Delete Handlers
+  // Select Primary Photo
+  const handleSelectPrimary = useCallback(
+    (index) => {
+      if (disabled) return;
+      setProductDetails((prevDetails) => ({
+        ...prevDetails,
+        photoPrimaryIndex: index,
+      }));
+    },
+    [setProductDetails, disabled]
+  );
+
+  // Delete Photo
   const handlePhotoDelete = useCallback(
     (index) => {
       if (disabled) return; // Vô hiệu hóa thao tác
       const updatedPhotos = photos.filter((_, photoIndex) => photoIndex !== index);
-      setProductDetails({ ...productDetails, photos: updatedPhotos });
+      const newPrimaryIndex = index < primaryIndex ? primaryIndex - 1 : primaryIndex;
+      setProductDetails((prevDetails) => ({
+        ...prevDetails,
+        photos: updatedPhotos,
+        photoPrimaryIndex: updatedPhotos.length > 0 ? Math.min(newPrimaryIndex, updatedPhotos.length - 1) : 0,
+      }));
     },
-    [photos, setProductDetails, productDetails, disabled]
+    [photos, primaryIndex, setProductDetails, disabled]
   );
 
   const handleVideoDelete = useCallback(
@@ -64,8 +82,8 @@ export const PhotoUpload = memo(({ productDetails, setProductDetails, disabled =
     const uploadedPhotos = Array.from(event.dataTransfer.files).filter((file) =>
       file.type.startsWith('image/')
     );
-    setProductDetails((prevDetails) => ({
-      ...prevDetails,
+      setProductDetails((prevDetails) => ({
+        ...prevDetails,
       photos: [...photos, ...uploadedPhotos],
     }));
   };
@@ -115,7 +133,12 @@ export const PhotoUpload = memo(({ productDetails, setProductDetails, disabled =
           ) : (
             <>
               {photos.map((photo, index) => (
-                <div key={index} className="relative w-20 h-20 border rounded overflow-hidden">
+                <div
+                  key={index}
+                  className={`relative w-20 h-20 border rounded overflow-hidden ${
+                    index === primaryIndex ? 'border-green-500 border-2' : ''
+                  }`}
+                >
                   <img
                     src={URL.createObjectURL(photo)}
                     alt={`${index + 1}`}
@@ -123,12 +146,23 @@ export const PhotoUpload = memo(({ productDetails, setProductDetails, disabled =
                     className="w-full h-full object-cover cursor-pointer"
                   />
                   {!disabled && (
-                    <button
-                      onClick={() => handlePhotoDelete(index)}
-                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
-                    >
-                      &times;
-                    </button>
+                    <>
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => handlePhotoDelete(index)}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                      >
+                        &times;
+                      </button>
+                      {/* Select Primary Button */}
+                      <button
+                        onClick={() => handleSelectPrimary(index)}
+                        // className="absolute bottom-0 left-0 bg-blue-500 text-white text-xs px-1 rounded"
+                        className={primaryIndex === index ? 'absolute bottom-0 left-0 bg-green text-white text-xs px-1 rounded' : 'absolute bottom-0 left-0 bg-blue-500 text-white text-xs px-1 rounded'}
+                      >
+                        {index === primaryIndex ? 'Primary' : 'Set Primary'}
+                      </button>
+                    </>
                   )}
                 </div>
               ))}

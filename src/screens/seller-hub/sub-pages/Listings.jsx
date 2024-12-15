@@ -61,6 +61,7 @@ export const Listings = () => {
     return response.content.map(product => {
       return {
         hidden_id: product.id, // Không hiển thị id
+        hidden_thumbnailUrl: product.productImages?.find(image => image.isPrimary)?.imageUrl || null,
         product: product.name,
         categories: product.categories && product.categories.length > 0 
         ? product.categories.map(category => CategoryType[category] || category) // Ánh xạ từng danh mục
@@ -74,6 +75,7 @@ export const Listings = () => {
     return response.content.map(auction => {
       return {
         hidden_id: auction.id, // Không hiển thị id
+        hidden_thumbnailUrl: auction.productDto.productImages?.find(image => image.isPrimary)?.imageUrl || null,
         auction: auction.title,
         start: auction.startTime,
         end: auction.endTime,

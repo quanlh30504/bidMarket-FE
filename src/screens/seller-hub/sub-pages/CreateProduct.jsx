@@ -8,6 +8,7 @@ import ProductCreateRequest from '../../../dto/Request/ProductCreateRequest';
 import { useUser, useWarning } from '../../../router';
 import { useNotification } from '../../../notifications/NotificationContext';
 import { useNavigate } from 'react-router-dom';
+import ProductImageDto from '../../../dto/ProductImageDto';
 
 export const CreateProduct = () => {
   const navigate = useNavigate();
@@ -20,9 +21,36 @@ export const CreateProduct = () => {
     stockQuantity: 1,
     photos: [],
     videos: [],
+    photoPrimaryIndex: 0,
   });
   const [loading, setLoading] = useState(false);
   const UUID = useUser().user.UUID;
+
+  const getProductImageDtos = async () => {
+    setLoading(true);
+    let productImageDtos = [];
+    const photoPromises = productDetails.photos.map((photo, index) =>
+      ProductService.getUploadedImageUrl(photo, 'products/photos').then((url) => {
+        return new ProductImageDto({
+          imageUrl: url,
+          isPrimary: index === productDetails.photoPrimaryIndex,
+        });
+      })
+    );
+
+    const videoPromises = productDetails.videos.map((video) =>
+      ProductService.getUploadedImageUrl(video, 'products/videos').then((url) => {
+        return new ProductImageDto({
+          imageUrl: url,
+          isPrimary: false,
+        });
+      })
+    );
+
+    productImageDtos = await Promise.all([...photoPromises, ...videoPromises]);
+    setLoading(false);
+    return productImageDtos;
+  };
 
   const handleSubmit = async () => {
     //confirm
@@ -37,19 +65,15 @@ export const CreateProduct = () => {
           console.log('Creating product...');
           console.log('productDetails:', productDetails);
     
-          let imageUrls = [];
-          if (productDetails.photos) {
-            imageUrls = await ProductService.getUploadedImageUrls(productDetails.photos);
-          }
-          // const categoryKeys = Object.keys(productDetails.itemCategory);  // Get category keys only
-    
+          const productImageDtos = await getProductImageDtos();
+          console.log('productImageDtos:', JSON.stringify(productImageDtos));
           const productCreateRequest = new ProductCreateRequest({
             name: productDetails.title,
             description: JSON.stringify(productDetails.specifics), // Convert to JSON string
             sellerId: UUID,
             stockQuantity: productDetails.stockQuantity,
             categories: new Set(productDetails.itemCategory),
-            imageUrls: imageUrls,
+            productImages: productImageDtos,
           });
           console.log('productCreateRequest:', JSON.stringify(productCreateRequest));
           productCreateRequest.validate();

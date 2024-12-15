@@ -40,6 +40,7 @@ class ProductService {
 
   // Tạo sản phẩm mới
   static createProduct(productCreateRequest) {
+    console.log('productCreateRequest:', productCreateRequest);
     return axiosClient.post('/api/products', productCreateRequest);
   }
 
@@ -63,11 +64,22 @@ class ProductService {
   }
 
   // Tải lên nhiều hình ảnh và trả về một mảng URL
-  static async getUploadedImageUrls(files) {
+  static async getUploadedImageUrls(files, folder='products') {
     try {
-      const uploadPromises = files.map((file) => fileUtils.uploadImage(file, 'products'));
+      const uploadPromises = files.map((file) => fileUtils.uploadImage(file, folder));
       const urls = await Promise.all(uploadPromises);
       return urls;
+    } catch (error) {
+      console.error('Error in uploadProductImages:', error);
+      throw new Error('Failed to upload images');
+    }
+  }
+
+  // 1 time 1 file
+  static async getUploadedImageUrl(file, folder='products') {
+    try {
+      const url = await fileUtils.uploadImage(file, folder);
+      return url;
     } catch (error) {
       console.error('Error in uploadProductImages:', error);
       throw new Error('Failed to upload images');

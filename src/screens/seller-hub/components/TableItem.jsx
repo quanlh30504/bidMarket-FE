@@ -110,25 +110,36 @@ const StatusBadgeAdmin = ({ item }) => {
   );
 }
 
-export const TableItem = ({ item, isAdmin=false }) => {
+export const TableItem = ({ item, isAdmin = false }) => {
   const { ...fields } = item;
+  const { hidden_thumbnailUrl } = item;
 
   return (
     <tr className="mt-2 border-t border-b">
       {Object.entries(fields)
-      .filter(([key]) => !key.startsWith('hidden_'))
-      .map(([key, value], index) => (
-        <td key={index} className="p-2">
-          {key === 'status' ? (
-            // <StatusBadge item={item} />
-            isAdmin ? <StatusBadgeAdmin item={item} /> : <StatusBadge item={item} />
-          ) : key === 'categories' ? (
-            <CategoriesBadge categories={value} />
-          ) : (
-            value
-          )}
-        </td>
-      ))}
+        .filter(([key]) => !key.startsWith('hidden_'))
+        .map(([key, value], index) => (
+          <td key={index} className="p-2">
+            {key === 'status' ? (
+              isAdmin ? <StatusBadgeAdmin item={item} /> : <StatusBadge item={item} />
+            ) : key === 'categories' ? (
+              <CategoriesBadge categories={value} />
+            ) : key === 'auction' || key === 'product' ? (
+              <div className="flex items-center">
+                <div className="mr-4 w-20 h-20">
+                  <img
+                    src={hidden_thumbnailUrl || 'https://placehold.co/80x80/png?text=No+Image'}
+                    alt={`${key} thumbnail`}
+                    className="w-full h-full object-cover rounded"
+                  />
+                </div>
+                <span>{value}</span>
+              </div>
+            ) : (
+              value
+            )}
+          </td>
+        ))}
     </tr>
   );
 };

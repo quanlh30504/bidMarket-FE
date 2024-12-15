@@ -93,7 +93,7 @@ const fileUtils = {
 
     uploadImage: async (file, folder) => {
         return fileUtils.uploadFile(file, folder, {
-            validTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+            validTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4'],
             maxSize: 5 * 1024 * 1024
         });
     },

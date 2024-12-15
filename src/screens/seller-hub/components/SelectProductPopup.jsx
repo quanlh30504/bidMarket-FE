@@ -18,6 +18,7 @@ export const SelectProductPopup = ({ onSelect, onClose }) => {
         hidden_status: ProductStatus[product.productStatus] || product.productStatus,
         hidden_specifics: JSON.parse(product.description),
         hidden_stockQuantity: product.stockQuantity,
+        hidden_productImages: product.productImages,
       };
     });
   }
