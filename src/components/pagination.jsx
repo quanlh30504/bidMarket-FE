@@ -81,6 +81,7 @@ export const Pagination = ({
 
   useEffect(() => {
     if (currentPageByParent !== null) {
+      console.log("currentPageByParent", currentPageByParent);
       setCurrentPage(currentPageByParent);
     }
   }, [currentPageByParent]);
