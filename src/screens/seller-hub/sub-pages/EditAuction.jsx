@@ -10,8 +10,10 @@ import AuctionService from "../../../services/auctionService";
 import { useNavigate, useParams } from "react-router-dom";
 import ProductImageDto from '../../../dto/ProductImageDto';
 import { useWarning } from "../../../router";
+import { useNotification } from "../../../notifications/NotificationContext";
 
 export const EditAuction = () => {
+  const { showToastNotification } = useNotification();
   const { auctionId } = useParams();
   const navigate = useNavigate();
   const { showWarning } = useWarning();
@@ -100,10 +102,12 @@ export const EditAuction = () => {
           auctionUpdateRequest.validate();
     
           await AuctionService.updateAuction(auctionId, auctionUpdateRequest);
-          window.alert('Product updated successfully');
+          // window.alert('Product updated successfully');
+          showToastNotification('Product updated successfully', 'success');
         } catch (error) {
           console.error('Error updating product:', error);
-          window.alert('Error updating product. Please try again later');
+          // window.alert('Error updating product. Please try again later');
+          showToastNotification('Error updating product. Please try again later', 'error');
         } finally {
           setLoading(false);
           navigate('/seller-hub/listings');

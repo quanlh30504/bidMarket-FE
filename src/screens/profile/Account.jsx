@@ -9,9 +9,11 @@ import fileUtils from "../../utils/fileUtils";
 import { useUser } from "../../router";
 import { FaHome, FaBriefcase, FaEllipsisH } from "react-icons/fa";
 import { FaMapMarkerAlt, FaCity, FaGlobe, FaTag } from "react-icons/fa";
+import { useNotification } from "../../notifications/NotificationContext";
 
 
 export const Account = () => {
+  const { showToastNotification } = useNotification();
   const { avatarUrl, setAvatarUrl } = useUser();
   const fileInputRef = useRef(null);
   const [accountInfo, setAccountInfo] = useState(null);
@@ -98,7 +100,9 @@ export const Account = () => {
   const handleSaveAddress = async () => {
     // Kiểm tra xem streetAddress có được điền hay không
     if (!profileData.streetAddress.trim()) {
-      alert("Street Address không được để trống!");
+      // alert("Street Address không được để trống!");
+      showToastNotification("Street Address không được để trống!", "info");
+      
       return;
     }
 

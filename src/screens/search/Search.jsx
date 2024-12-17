@@ -7,8 +7,10 @@ import { ProductCard } from "../../components/cards/ProductCard";
 import { IoIosSearch } from "react-icons/io";
 import { commonClassNameOfInput } from "../../components/common/Design";
 import { categoryMapping, statusMapping, sortByMapping } from "./filterMapping";
+import { useNotification } from "../../notifications/NotificationContext";
 
 export const SearchList = () => {
+  const { showToastNotification } = useNotification();
   const [searchParams] = useSearchParams();
   const title = searchParams.get("title") || ""; // Lấy title từ URL
   const statusParam = searchParams.get("status") || null;
@@ -77,14 +79,16 @@ export const SearchList = () => {
       
       if (key === "minPrice" && updatedFilters.maxPrice !== null && value !== "") {
         if (Number(value) > Number(updatedFilters.maxPrice)) {
-          alert("Min price không được lớn hơn Max price.");
+          // alert("Min price không được lớn hơn Max price.");
+          showToastNotification("Min price không được lớn hơn Max price.", "info");
           return prev; 
         }
         setMinPrice(value);
       }
       if (key === "maxPrice" && updatedFilters.minPrice !== null && value !== "") {
         if (Number(value) < Number(updatedFilters.minPrice)) {
-          alert("Max price không được nhỏ hơn Min price.");
+          // alert("Max price không được nhỏ hơn Min price.");
+          showToastNotification("Max price không được nhỏ hơn Min price.", "info");
           return prev; 
         }
         setMaxPrice(value);

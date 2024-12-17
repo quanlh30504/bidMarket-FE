@@ -322,12 +322,12 @@ export const CreateAuction = () => {
         >
           Create auction
         </button>
-        <button
+        {/* <button
           className="w-52 py-2 bg-gray-100 border border-gray-300 rounded-full"
           disabled={loading}
         >
           Save for later
-        </button>
+        </button> */}
         <button
           className="w-52 py-2 bg-gray-100 border border-gray-300 rounded-full"
           onClick={() => navigate('/seller-hub/listings')}

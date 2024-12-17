@@ -239,7 +239,8 @@ export const ProductsDetailsPage = () => {
       setWatchlistId(response.data.id);
     } catch (error) {
       console.error("Lỗi khi thêm vào Watchlist:", error);
-      alert("Không thể thêm vào Watchlist. Vui lòng thử lại sau.");
+      // alert("Không thể thêm vào Watchlist. Vui lòng thử lại sau.");
+      showToastNotification("Failed to add to Watchlist. Please try again.", "error");
     }
   };
 
@@ -249,7 +250,8 @@ export const ProductsDetailsPage = () => {
       setIsInWatchlist(false);
     } catch (error) {
       console.error("Lỗi khi xóa khỏi Watchlist:", error);
-      alert("Không thể xóa khỏi Watchlist. Vui lòng thử lại sau.");
+      // alert("Không thể xóa khỏi Watchlist. Vui lòng thử lại sau.");
+      showToastNotification("Failed to remove from Watchlist. Please try again.", "error");
     }
   };
 
@@ -290,9 +292,13 @@ export const ProductsDetailsPage = () => {
     }
 
     if (bidAmount - auction?.currentPrice < auction?.minimumBidIncrement) {
-      alert(
-        "Your bid must be higher than the current bid at least $" +
-        auction?.minimumBidIncrement
+      // alert(
+      //   "Your bid must be higher than the current bid at least $" +
+      //   auction?.minimumBidIncrement
+      // );
+      showToastNotification(
+        `Your bid must be higher than the current bid at least $${auction?.minimumBidIncrement}`,
+        "error"
       );
       return;
     }
@@ -309,7 +315,8 @@ export const ProductsDetailsPage = () => {
 
     } catch (error) {
       console.error("Error placing bid:", error);
-      alert("Failed to place the bid. Please try again.");
+      // alert("Failed to place the bid. Please try again.");
+      showToastNotification("Failed to place the bid. Please try again.", "error");
     } finally {
       setIsSubmittingBid(false);
     }
@@ -617,85 +624,52 @@ export const ProductsDetailsPage = () => {
                 <div className="description-tab shadow-s3 p-8 rounded-md">
                   <Title level={4}>Description</Title>
                   <br />
-                  <Caption className="leading-7">
-                    If you’ve been following the crypto space, you’ve likely
-                    heard of Non-Fungible Tokens (Biddings), more popularly
-                    referred to as ‘Crypto Collectibles.’ The world of Biddings
-                    is growing rapidly. It seems there is no slowing down of
-                    these assets as they continue to go up in price. This growth
-                    comes with the opportunity for people to start new
-                    businesses to create and capture value. The market is open
-                    for players in every kind of field. Are you a collector.
-                  </Caption>
-                  <Caption className="leading-7">
-                    If you’ve been following the crypto space, you’ve likely
-                    heard of Non-Fungible Tokens (Biddings), more popularly
-                    referred to as ‘Crypto Collectibles.’ The world of Biddings
-                    is growing rapidly. It seems there is no slowing down of
-                    these assets as they continue to go up in price. This growth
-                    comes with the opportunity for people to start new
-                    businesses to create and capture value. The market is open
-                    for players in every kind of field. Are you a collector.
-                  </Caption>
-                  <br />
-                  <Title level={4}>Product Overview</Title>
-                  <div className="flex justify-between gap-5">
-                    <div className="mt-4 capitalize w-1/2">
-                      <div className="flex justify-between border-b py-3">
-                        <Title>category</Title>
-                        <Caption>Category</Caption>
-                      </div>
-                      <div className="flex justify-between border-b py-3">
-                        <Title>height</Title>
-                        <Caption> 200 (cm)</Caption>
-                      </div>
-                      <div className="flex justify-between border-b py-3">
-                        <Title>length</Title>
-                        <Caption> 300 (cm)</Caption>
-                      </div>
-                      <div className="flex justify-between border-b py-3">
-                        <Title>width</Title>
-                        <Caption> 400 (cm)</Caption>
-                      </div>
-                      <div className="flex justify-between border-b py-3">
-                        <Title>weigth</Title>
-                        <Caption> 50 (kg)</Caption>
-                      </div>
-                      <div className="flex justify-between py-3 border-b">
-                        <Title>medium used</Title>
-                        <Caption> Gold </Caption>
-                      </div>
-                      <div className="flex justify-between py-3 border-b">
-                        <Title>Price</Title>
-                        <Caption> $50000 </Caption>
-                      </div>
-                      <div className="flex justify-between py-3 border-b">
-                        <Title>Sold out</Title>
-                        Yes
-                      </div>
-                      <div className="flex justify-between py-3 border-b">
-                        <Title>verify</Title>
-                        No
-                      </div>
-                      <div className="flex justify-between py-3 border-b">
-                        <Title>Create At</Title>
-                        <Caption>December 31, 2024 12:00 am</Caption>
-                      </div>
-                      <div className="flex justify-between py-3">
-                        <Title>Update At</Title>
-                        <Caption>December 31, 2024 12:00 am</Caption>
-                      </div>
-                    </div>
-                    <div className="w-1/2">
-                      <div className="h-[60vh] p-2 bg-green rounded-xl">
-                        <img
-                          src={selectedImage}
-                          alt=""
-                          className="w-full h-full object-cover rounded-xl"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  {(() => {
+                    let parsedData;
+                    try {
+                      parsedData = JSON.parse(auction.productDto.description); // Parse JSON
+                    } catch (error) {
+                      console.error("Invalid JSON format", error);
+                      return <Caption className="leading-7">Invalid description data.</Caption>;
+                    }
+
+                    // Check for description field
+                    const description = parsedData?.description;
+                    const specifics = Object.entries(parsedData).filter(([key]) => key !== "Description");
+
+                    return (
+                      <>
+                        <Caption className="leading-7">
+                          {description || "This product has no description available."}
+                        </Caption>
+                        <br />
+                        <Title level={4}>Product Overview</Title>
+                        <div className="flex justify-between gap-5">
+                          <div className="mt-4 capitalize w-1/2">
+                            {specifics.length > 0 ? (
+                              specifics.map(([key, value]) => (
+                                <div key={key} className="flex justify-between border-b py-3">
+                                  <Title>{key}</Title>
+                                  <Caption>{value}</Caption>
+                                </div>
+                              ))
+                            ) : (
+                              <Caption>No additional specifics available for this product.</Caption>
+                            )}
+                          </div>
+                          <div className="w-1/2">
+                            <div className="h-[60vh] p-2 bg-green rounded-xl">
+                              <img
+                                src={selectedImage}
+                                alt="Product"
+                                className="w-full h-full object-cover rounded-xl"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
               {activeTab === "auctionHistory" && (
