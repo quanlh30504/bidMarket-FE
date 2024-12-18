@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FilterBar } from '../components/FilterBar';
 import { Table } from '../components/Table';
 import { Sidebar } from '../components/Sidebar';
@@ -29,8 +29,8 @@ export const Listings = () => {
     endTime: null,
     page: 0,
     size: 10,
-    sortField: 'currentPrice',
-    sortDirection: 'ASC',
+    sortField: 'createdAt',
+    sortDirection: 'DESC',
   });
   const [productFilters, setProductFilters] = useState({
     sellerId: user.UUID,
@@ -40,22 +40,39 @@ export const Listings = () => {
     page: 0,
     size: 10,
     sortField: 'createdAt',
-    sortDirection: 'ASC',
+    sortDirection: 'DESC',
   });
   const [auctionTotalItems, setAuctionTotalItems] = useState(0);
   const [productTotalItems, setProductTotalItems] = useState(0);
+
+  const [selectedSortOption, setSelectedSortOption] = useState('newest');
 
   const menuItems = [
     'Auction',
     'Product'
   ];
 
-  const sortOptions = [
+  const sortOptionsAuction = useMemo(() => [
     { value: 'newest', label: 'Newest first' },
     { value: 'oldest', label: 'Oldest first' },
-    { value: 'highest', label: 'Highest price' },
-    { value: 'lowest', label: 'Lowest price' }
-  ];
+    { value: 'highest', label: 'Highest current price' },
+    { value: 'lowest', label: 'Lowest current price' },
+    { value: 'ending', label: 'Ending soonest' },
+    { value: 'ending-latest', label: 'Ending latest' }
+  ], []);
+
+  const sortOptionsProduct = useMemo(() => [
+    { value: 'newest', label: 'Newest first' },
+    { value: 'oldest', label: 'Oldest first' }
+  ], []);
+
+  const searchByOptionsAuction = useMemo(() => [
+    'Auction title',
+  ], []);
+
+  const searchByOptionsProduct = useMemo(() => [
+    'Product name',
+  ], []);
 
   const formatProductData = (response) => {
     return response.content.map(product => {
@@ -142,10 +159,30 @@ export const Listings = () => {
     }
   }
 
-  const sortListings = (sortBy) => {  // có thể là 2 sort function riêng cho Auction và Products
-    window.alert(`Sorting by ${sortBy}`);
-    // some sorting logic return ordered items (use setItems) (later)
+  const sortListings = (sortBy) => {
+    setSelectedSortOption(sortBy);
   };
+
+  const searchFunction = useCallback((searchByOption, value) => {
+    console.log ('activeMenuItem:', activeMenuItem);
+    console.log ('searchByOption:', searchByOption);
+    if (activeMenuItem === 'Auction') {
+      if (searchByOption === 'Auction title') {
+        setAuctionFilters((prevFilters) => ({
+          ...prevFilters,
+          title: value,
+        }));
+      }
+    } else if (activeMenuItem === 'Product') {
+      if (searchByOption === 'Product name') {
+        setProductFilters((prevFilters) => ({
+          ...prevFilters,
+          name: value,
+        }));
+      }
+    }
+    return;
+  }, [activeMenuItem]);
 
   const header = (activeMenuItems) => {
     switch (activeMenuItems) {
@@ -182,6 +219,80 @@ export const Listings = () => {
     fetchProducts().finally(() => setLoading(false));
   }, [fetchProducts]);
 
+  useEffect(() => {
+    if (activeMenuItem === 'Auction') {
+      switch (selectedSortOption) {
+        case 'newest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'createdAt',
+            sortDirection: 'DESC',
+          }));
+          break;
+        case 'oldest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'createdAt',
+            sortDirection: 'ASC',
+          }));
+          break;
+        case 'highest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'currentPrice',
+            sortDirection: 'DESC',
+          }));
+          break;
+        case 'lowest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'currentPrice',
+            sortDirection: 'ASC',
+          }));
+          break;
+        case 'ending':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'endTime',
+            sortDirection: 'ASC',
+          }));
+          break;
+        case 'ending-latest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'endTime',
+            sortDirection: 'DESC',
+          }));
+          break;
+        default:
+          break;
+      }
+    } else if (activeMenuItem === 'Product') {
+      switch (selectedSortOption) {
+        case 'newest':
+          setProductFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'createdAt',
+            sortDirection: 'DESC',
+          }));
+          break;
+        case 'oldest':
+          setProductFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'createdAt',
+            sortDirection: 'ASC',
+          }));
+          break;
+        default:
+          break;
+      }
+    }
+  }, [selectedSortOption]);
+
+  useEffect(() => {
+    setSelectedSortOption('newest');
+  }, [activeMenuItem]);
+
   return (
     <div className="flex">
       <Sidebar menuItems={menuItems} activeMenuItem={activeMenuItem} setActiveMenuItem={setActiveMenuItem} />
@@ -199,8 +310,9 @@ export const Listings = () => {
           <p>Loading...</p>
         ) : (
           <>
-            <FilterBar />
-            <Table items={items} sortOptions={sortOptions} sortFunction={sortListings} />
+            <FilterBar searchByOptions={activeMenuItem === 'Auction' ? searchByOptionsAuction : searchByOptionsProduct} searchFunction={searchFunction} />
+            <Table items={items} sortOptions={activeMenuItem === 'Auction' ? sortOptionsAuction : sortOptionsProduct}
+            sortFunction={sortListings} selectedSortOption={selectedSortOption} />
             <Pagination 
               totalItems={activeMenuItem === 'Auction' ? auctionTotalItems : productTotalItems}
               itemsPerPage={activeMenuItem === 'Auction' ? auctionFilters.size : productFilters.size}

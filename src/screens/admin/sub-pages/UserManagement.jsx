@@ -25,8 +25,8 @@ export const UserManagement = () => {
     isVerified: null,
     page: 0,
     size: 10,
-    sortBy: null,
-    sortDirection: null,
+    sortBy: 'createdAt',
+    sortDirection: 'DESC',
   });
   const [userFilters_sellers, setUserFilters_sellers] = useState({
     ...userFilters_all,
@@ -59,10 +59,22 @@ export const UserManagement = () => {
   ];
 
   const sortOptions = [
-    { value: 'username', label: 'Username' },
-    { value: 'email', label: 'Email' },
-    { value: 'status', label: 'Status' },
+    { value: 'newest', label: 'Newest first' },
   ];
+
+  const searchByOptions = [
+    'Email',
+  ];
+  
+  const searchFunction = (searchByOption, value) => {
+    let setter = null;
+    activeMenuItem === 'All users' ? setter = setUserFilters_all 
+    : activeMenuItem === 'Sellers' ? setter = setUserFilters_sellers 
+    : activeMenuItem === 'Bidders' ? setter = setUserFilters_bidders 
+    : activeMenuItem === 'Inactive' ? setter = setUserFilters_inactive 
+    : setter = setUserFilters_banned;
+    setter((prevFilters) => ({ ...prevFilters, email: value }));
+  }
 
   const header = (activeMenuItems) => {
     switch (activeMenuItems) {
@@ -79,10 +91,10 @@ export const UserManagement = () => {
         }
   }
 
-  function sortOrders(sortBy) {
-    window.alert(`Sorting by ${sortBy}`);
-    // some sorting logic return ordered items (use setItems) (later)
-  }
+  // function sortOrders(sortBy) {
+  //   window.alert(`Sorting by ${sortBy}`);
+  //   // some sorting logic return ordered items (use setItems) (later)
+  // }
 
   const formatUserData = (response) => {
     return response.content.map(user => {
@@ -243,8 +255,8 @@ export const UserManagement = () => {
           <p>Loading...</p>
         ) : (
           <>
-            <FilterBar />
-            <Table items={items} sortOptions={sortOptions} sortFunction={sortOrders} />
+            <FilterBar searchByOptions={searchByOptions} searchFunction={searchFunction} />
+            <Table items={items} sortOptions={sortOptions} sortFunction={() => {}} />
             <Pagination
               totalItems={activeMenuItem === 'All users' ? userTotalItems_all : activeMenuItem === 'Sellers' ? userTotalItems_sellers : activeMenuItem === 'Bidders' ? userTotalItems_bidders : activeMenuItem === 'Inactive' ? userTotalItems_inactive : userTotalItems_banned}
               itemsPerPage={userFilters_all.size}

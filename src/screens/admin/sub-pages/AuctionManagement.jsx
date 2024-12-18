@@ -43,6 +43,8 @@ export const AuctionManagement = () => {
   const [auctionTotalItems_open, setAuctionTotalItems_open] = useState(0);
   const [auctionTotalItems_pending, setAuctionTotalItems_pending] = useState(0);
 
+  const [selectedSortOption, setSelectedSortOption] = useState('newest');
+
   const menuItems = [
     'All auctions',
     'Pending',
@@ -50,16 +52,31 @@ export const AuctionManagement = () => {
   ];
 
   const sortOptions = [
-    { value: 'start', label: 'Start Date' },
-    { value: 'end', label: 'End Date' },
-    { value: 'highest', label: 'Highest price' },
-    { value: 'lowest', label: 'Lowest price' }
+    { value: 'newest', label: 'Newest first' },
+    { value: 'oldest', label: 'Oldest first' },
+    { value: 'highest', label: 'Highest current price' },
+    { value: 'lowest', label: 'Lowest current price' },
+    { value: 'ending', label: 'Ending soonest' },
+    { value: 'ending-latest', label: 'Ending latest' }
   ];
+
+  const searchByOptions = [
+    'Auction title',
+  ]
+
+  const searchFunction = (searchByOption, value) => {
+    let setter = null;
+    activeMenuItem === 'All auctions' ? setter = setAuctionFilters_all 
+    : activeMenuItem === 'Open' ? setter = setAuctionFilters_open 
+    : setter = setAuctionFilters_pending;
+    setter((prevFilters) => ({ ...prevFilters, title: value }));
+  }; 
 
   const formatAuctionData = (response) => {
     return response.content.map(auction => {
       return {
         hidden_id: auction.id,
+        hidden_thumbnailUrl: auction.productDto.productImages?.find(image => image.isPrimary)?.imageUrl || null,
         auction: auction.title,
         "Starting price": auction.startingPrice,
         "Current price": auction.currentPrice,
@@ -129,8 +146,7 @@ export const AuctionManagement = () => {
   };
 
   const sortOrders = (sortBy) => {
-    window.alert(`Sorting by ${sortBy}`);
-    // some sorting logic return ordered items (use setItems) (later)
+    setSelectedSortOption(sortBy);
   };
 
   const header = (activeMenuItems) => {
@@ -175,6 +191,73 @@ export const AuctionManagement = () => {
     handleChangeActiveMenuItem(activeMenuItem);
   }, [activeMenuItem, data]);
 
+  useEffect(() => {
+    let setter = null;
+    switch (activeMenuItem) {
+      case 'All auctions':
+        setter = setAuctionFilters_all;
+        break;
+      case 'Open':
+        setter = setAuctionFilters_open;
+        break;
+      case 'Pending':
+        setter = setAuctionFilters_pending;
+        break;
+      default:
+        return;
+    }
+    switch (selectedSortOption) {
+      case 'newest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'createdAt',
+          sortDirection: 'DESC',
+        }));
+        break;
+      case 'oldest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'createdAt',
+          sortDirection: 'ASC',
+        }));
+        break;
+      case 'highest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'currentPrice',
+          sortDirection: 'DESC',
+        }));
+        break;
+      case 'lowest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'currentPrice',
+          sortDirection: 'ASC',
+        }));
+        break;
+      case 'ending':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'endTime',
+          sortDirection: 'ASC',
+        }));
+        break;
+      case 'ending-latest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'endTime',
+          sortDirection: 'DESC',
+        }));
+        break;
+      default:
+        break;
+    }
+  }, [selectedSortOption]);
+  
+  useEffect(() => {
+    setSelectedSortOption('newest');
+  }, [activeMenuItem]);
+
   return (
     <div className="flex">
       <Sidebar menuItems={menuItems} activeMenuItem={activeMenuItem} setActiveMenuItem={setActiveMenuItem} />
@@ -187,7 +270,7 @@ export const AuctionManagement = () => {
           <p>Loading...</p>
         ) : (
           <>
-            <FilterBar />
+            <FilterBar searchByOptions={searchByOptions} searchFunction={searchFunction} />
             <Table items={items} sortOptions={sortOptions} sortFunction={sortOrders} />
             <Pagination
               totalItems={activeMenuItem === 'All auctions' ? auctionTotalItems_all : activeMenuItem === 'Open' ? auctionTotalItems_open : auctionTotalItems_pending}

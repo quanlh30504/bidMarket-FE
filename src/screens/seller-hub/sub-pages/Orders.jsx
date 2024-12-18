@@ -6,6 +6,7 @@ import OrderService from '../../../services/orderService';
 import { useUser, OrderStatus, Pagination } from '../../../router';
 
 export const Orders = () => {
+  const [selectedSortOption, setSelectedSortOption] = useState('newest');
   const { user } = useUser();
   const menuItems = [
     'All orders',
@@ -63,10 +64,41 @@ export const Orders = () => {
     { value: 'lowest', label: 'Lowest price' }
   ];
 
+  const searchByOptions = [
+    'Auction title',
+  ]
+
   const sortOrders = (sortBy) => {
-    window.alert(`Sorting by ${sortBy}`);
-    // some sorting logic return ordered items (use setItems) (later)
+    setSelectedSortOption(sortBy);
   }
+
+  const searchFunction = (searchByOption, value) => {
+    let setter = null;
+    switch (activeMenuItem) {
+      case 'All orders':
+        setter = setOrderFilterAll;
+        break;
+      case 'Awaiting payment':
+        setter = setOrderFilterAwaitingPayment;
+        break;
+      case 'Awaiting shipment':
+        setter = setOrderFilterAwaitingShipment;
+        break;
+      case 'Paid and shipped':
+        setter = setOrderFilterPaidAndShipped;
+        break;
+      case 'Cancellations':
+        setter = setOrderFilterCancellations;
+        break;
+      default:
+        return;
+    }
+    setter((prevFilters) => ({
+      ...prevFilters,
+      auctionTitle: searchByOption === 'Auction title' ? value : null,
+    }));
+  }
+
 
   const header = (activeMenuItems) => {
     switch (activeMenuItems) {
@@ -234,6 +266,65 @@ export const Orders = () => {
     handleChangeActiveMenuItem();
   }, [activeMenuItem, data]);
 
+  useEffect(() => {
+    let setter = null;
+    switch (activeMenuItem) {
+      case 'All orders':
+        setter = setOrderFilterAll;
+        break;
+      case 'Awaiting payment':
+        setter = setOrderFilterAwaitingPayment;
+        break;
+      case 'Awaiting shipment':
+        setter = setOrderFilterAwaitingShipment;
+        break;
+      case 'Paid and shipped':
+        setter = setOrderFilterPaidAndShipped;
+        break;
+      case 'Cancellations':
+        setter = setOrderFilterCancellations;
+        break;
+      default:
+        return;
+    }
+    switch (selectedSortOption) {
+      case 'newest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'createdAt',
+          sortDirection: 'DESC',
+        }));
+        break;
+      case 'oldest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'createdAt',
+          sortDirection: 'ASC',
+        }));
+        break;
+      case 'highest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'totalAmount',
+          sortDirection: 'DESC',
+        }));
+        break;
+      case 'lowest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'totalAmount',
+          sortDirection: 'ASC',
+        }));
+        break;
+      default:
+        break;
+    }
+  }, [selectedSortOption]);
+
+  useEffect(() => {
+    setSelectedSortOption('newest');
+  }, [activeMenuItem]);
+
   return (
     <div className="flex">
       <Sidebar menuItems={menuItems} activeMenuItem={activeMenuItem} setActiveMenuItem={setActiveMenuItem} />
@@ -246,8 +337,8 @@ export const Orders = () => {
           <p>Loading...</p>
         ) : (
           <>
-            <FilterBar />
-            <Table items={items} sortOptions={sortOptions} sortFunction={sortOrders} />
+            <FilterBar searchByOptions={searchByOptions} searchFunction={searchFunction} />
+            <Table items={items} sortOptions={sortOptions} sortFunction={sortOrders} selectedSortOption={selectedSortOption} />
             <Pagination 
               totalItems={activeMenuItem === 'All orders' ? orderTotalItemsAll : activeMenuItem === 'Awaiting payment' ? orderTotalItemsAwaitingPayment : activeMenuItem === 'Awaiting shipment' ? orderTotalItemsAwaitingShipment : activeMenuItem === 'Paid and shipped' ? orderTotalItemsPaidAndShipped : orderTotalItemsCancellations}
               itemsPerPage={orderFilterAll.size}
