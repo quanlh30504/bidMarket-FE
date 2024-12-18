@@ -65,7 +65,7 @@ export const AdminReviewAuction = () => {
       </div>,
       async () => {
         try {
-          await AuctionService.closeAuction(auctionId);
+          await AuctionService.cancelAuction(auctionId);
           showToastNotification("Auction rejected successfully", "success");
         } catch (error) {
           console.error("Error rejecting auction:", error);

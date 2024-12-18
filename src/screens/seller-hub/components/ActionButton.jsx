@@ -165,6 +165,31 @@ export const ActionButtonAdmin = ({ type, item }) => {
           <svg width={24} height={24} fill="#000000" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path> </g></svg>
         </button>
       )}
+      
+      {/* CLOSE AUCTION */}
+      {type === ActionButtonTypesAdmin.CLOSE_AUCTION && (
+        <button className="px-1"
+        title='Force close this auction'
+        onClick={() => {
+          showWarning(
+            <div className="text-center text-xl mb-4">
+              <p className="text-gray-700">Are you sure you want to close this auction now without waiting for the end time??</p>
+              <p className="text-green text-center">{item.auction}</p>
+              <p className="text-gray-700">ID: <span className="font-medium">{item.hidden_id}</span></p>
+            </div>,
+            async () => {
+              try {
+                await AuctionService.closeAuction(item.hidden_id);
+                window.alert('Close auction successfully');
+              } catch (error) {
+                console.error('Error closing auction:', error);
+              }
+            });
+        }}
+        >
+          <svg width={24} height={24} fill="#000000" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>auction</title> <path d="M11.623 7.603l6.062 3.5c0.479 0.276 1.090 0.112 1.365-0.366 0.277-0.478 0.113-1.090-0.365-1.365l-6.062-3.5c-0.479-0.276-1.090-0.112-1.366 0.365s-0.112 1.089 0.366 1.366zM17.186 11.969l-6.062-3.5-3.5 6.062 6.062 3.5 3.5-6.062zM6.123 17.129l6.062 3.5c0.478 0.276 1.090 0.112 1.365-0.366s0.112-1.090-0.365-1.365l-6.062-3.5c-0.479-0.276-1.090-0.112-1.366 0.365-0.277 0.478-0.112 1.090 0.366 1.366zM27.012 19.951l-11.076-5.817-1 1.732 10.576 6.683c0.717 0.414 1.635 0.169 2.049-0.549s0.168-1.635-0.549-2.049zM16.033 25c0-0.553-0.448-1-1-1h-9c-0.553 0-1 0.447-1 1 0 0.552 0 1 0 1l-1.033-0.021 0.033 1.021h13l0.047-0.958-0.984-0.042c0 0-0.063-0.448-0.063-1z"></path> </g></svg>
+        </button>
+      )}
 
       {/* REVIEW AUCTION */}
       {type === ActionButtonTypesAdmin.REVIEW_AUCTION && (
@@ -239,4 +264,5 @@ export const ActionButtonTypesAdmin = {
   REVIEW_AUCTION: 'ReviewAuction',
   BAN_USER: 'BanUser',
   UNBAN_USER: 'UnbanUser',
+  CLOSE_AUCTION: 'CloseAuction',
 };

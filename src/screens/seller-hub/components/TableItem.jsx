@@ -93,6 +93,7 @@ const StatusBadgeAdmin = ({ item }) => {
         {(status === AuctionStatus.OPEN || status === AuctionStatus.READY) && (
           <div className="flex mt-1 justify-center">
             <ActionButtonAdmin type={ActionButtonTypesAdmin.CANCEL_AUCTION} item={item} />
+            <ActionButtonAdmin type={ActionButtonTypesAdmin.CLOSE_AUCTION} item={item} />
           </div>
         )}
         {(status === AccountStatus.UNVERIFIED || status === AccountStatus.VERIFIED) && (
