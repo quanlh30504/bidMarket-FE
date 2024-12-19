@@ -1,38 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FilterBar } from '../components/FilterBar';
 import { Table } from '../components/Table';
 import { Sidebar } from '../components/Sidebar';
 import AuctionService from '../../../services/auctionService';
 import ProductService from '../../../services/productService';
-import { useUser, ProductStatus, CategoryType, AuctionStatus } from '../../../router';
+import { useUser, ProductStatus, CategoryType, AuctionStatus, Pagination } from '../../../router';
 import { useNavigate } from 'react-router-dom';
 
-
 export const Listings = () => {
+  const { user } = useUser();
+  const navigate = useNavigate();
+
+  const [activeMenuItem, setActiveMenuItem] = useState('Auction');
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState({
     auctions: [],
     products: [],
   });
-  const { user } = useUser();
-  const navigate = useNavigate();
+  const [auctionFilters, setAuctionFilters] = useState({
+    sellerId: user.UUID,
+    title: null,
+    categoryType: [],
+    status: null,
+    minPrice: null,
+    maxPrice: null,
+    startTime: null,
+    endTime: null,
+    page: 0,
+    size: 10,
+    sortField: 'createdAt',
+    sortDirection: 'DESC',
+  });
+  const [productFilters, setProductFilters] = useState({
+    sellerId: user.UUID,
+    name: null,
+    categoryType: null,
+    status: null,
+    page: 0,
+    size: 10,
+    sortField: 'createdAt',
+    sortDirection: 'DESC',
+  });
+  const [auctionTotalItems, setAuctionTotalItems] = useState(0);
+  const [productTotalItems, setProductTotalItems] = useState(0);
+
+  const [selectedSortOption, setSelectedSortOption] = useState('newest');
+
   const menuItems = [
     'Auction',
     'Product'
   ];
-  const [activeMenuItem, setActiveMenuItem] = useState('Auction');
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const sortOptions = [
+
+  const sortOptionsAuction = useMemo(() => [
     { value: 'newest', label: 'Newest first' },
     { value: 'oldest', label: 'Oldest first' },
-    { value: 'highest', label: 'Highest price' },
-    { value: 'lowest', label: 'Lowest price' }
-  ];
+    { value: 'highest', label: 'Highest current price' },
+    { value: 'lowest', label: 'Lowest current price' },
+    { value: 'ending', label: 'Ending soonest' },
+    { value: 'ending-latest', label: 'Ending latest' }
+  ], []);
+
+  const sortOptionsProduct = useMemo(() => [
+    { value: 'newest', label: 'Newest first' },
+    { value: 'oldest', label: 'Oldest first' }
+  ], []);
+
+  const searchByOptionsAuction = useMemo(() => [
+    'Auction title',
+  ], []);
+
+  const searchByOptionsProduct = useMemo(() => [
+    'Product name',
+  ], []);
 
   const formatProductData = (response) => {
     return response.content.map(product => {
       return {
         hidden_id: product.id, // Không hiển thị id
+        hidden_thumbnailUrl: product.productImages?.find(image => image.isPrimary)?.imageUrl || null,
         product: product.name,
         categories: product.categories && product.categories.length > 0 
         ? product.categories.map(category => CategoryType[category] || category) // Ánh xạ từng danh mục
@@ -40,12 +86,13 @@ export const Listings = () => {
         status: ProductStatus[product.productStatus] || product.productStatus,
       };
     });
-  }
+  };
 
   const formatAuctionData = (response) => {
     return response.content.map(auction => {
       return {
         hidden_id: auction.id, // Không hiển thị id
+        hidden_thumbnailUrl: auction.productDto.productImages?.find(image => image.isPrimary)?.imageUrl || null,
         auction: auction.title,
         start: auction.startTime,
         end: auction.endTime,
@@ -54,28 +101,57 @@ export const Listings = () => {
         status: AuctionStatus[auction.status] || auction.status,
       };
     });
-  }
-
-  const handleChangeMenuItems = async (activeMenuItem) => {
+  };
+  
+  const handlePageChange = async (newPage) => {
     if (activeMenuItem === 'Auction') {
-      setItems(data.auctions);
+      setAuctionFilters((prevFilters) => ({
+        ...prevFilters,
+        page: newPage - 1,
+      }));
     } else if (activeMenuItem === 'Product') {
-      setItems(data.products);
+      setProductFilters((prevFilters) => ({
+        ...prevFilters,
+        page: newPage - 1,
+      }));
     }
-  }
+  };
+
+  const fetchAuctions = useCallback(async () => {
+    try {
+      const response = await AuctionService.searchAuctions(auctionFilters);
+      setData((prevData) => ({
+        ...prevData,
+        auctions: formatAuctionData(response.data),
+      })); 
+      setAuctionTotalItems(response.data.totalElements);
+    } catch (error) {
+        console.error('Error fetching auctions:', error);
+    }
+  }, [auctionFilters]);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await ProductService.searchProducts(productFilters);
+      setData((prevData) => ({
+        ...prevData,
+        products: formatProductData(response.data),
+      }));
+      setProductTotalItems(response.data.totalElements);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  }, [productFilters]);
 
   const refreshData = async () => {
+    console.log('refreshing data');
     setLoading(true);
     try {
-      const auctionResponse = await AuctionService.searchAuctions({ sellerId: user.UUID });
-      const productResponse = await ProductService.searchProducts({ sellerId: user.UUID });
-      console.log('Auction response:', formatAuctionData(auctionResponse.data));
-      console.log('Product response:', formatProductData(productResponse.data));
-      setData({
-        auctions: formatAuctionData(auctionResponse.data),
-        products: formatProductData(productResponse.data),
-      });
-      console.log('Data fetched:', data);
+      if (activeMenuItem === 'Auction') {
+        await fetchAuctions();
+      } else if (activeMenuItem === 'Product') {
+        await fetchProducts();
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -83,10 +159,30 @@ export const Listings = () => {
     }
   }
 
-  const sortListings = (sortBy) => {  // có thể là 2 sort function riêng cho Auction và Products
-    window.alert(`Sorting by ${sortBy}`);
-    // some sorting logic return ordered items (use setItems) (later)
-  }
+  const sortListings = (sortBy) => {
+    setSelectedSortOption(sortBy);
+  };
+
+  const searchFunction = useCallback((searchByOption, value) => {
+    console.log ('activeMenuItem:', activeMenuItem);
+    console.log ('searchByOption:', searchByOption);
+    if (activeMenuItem === 'Auction') {
+      if (searchByOption === 'Auction title') {
+        setAuctionFilters((prevFilters) => ({
+          ...prevFilters,
+          title: value,
+        }));
+      }
+    } else if (activeMenuItem === 'Product') {
+      if (searchByOption === 'Product name') {
+        setProductFilters((prevFilters) => ({
+          ...prevFilters,
+          name: value,
+        }));
+      }
+    }
+    return;
+  }, [activeMenuItem]);
 
   const header = (activeMenuItems) => {
     switch (activeMenuItems) {
@@ -97,16 +193,105 @@ export const Listings = () => {
       default:
         return 'Manage auctions';
     }
-  
-  }
-  useEffect(() => {
-    refreshData();
-  }, []);
+  };
   
   useEffect(() => {
-    handleChangeMenuItems(activeMenuItem);
+    const handleChangeMenuItems = async () => {
+      console.log('set items for:', activeMenuItem);
+      if (activeMenuItem === 'Auction') {
+        setItems(data.auctions);
+      } else if (activeMenuItem === 'Product') {
+        setItems(data.products);
+      }
+    };
+    handleChangeMenuItems();
   }, [activeMenuItem, data]);
 
+  useEffect(() => {
+    console.log('fetch auction')
+    setLoading(true);
+    fetchAuctions().finally(() => setLoading(false));
+  }, [fetchAuctions]);
+
+  useEffect(() => {
+    console.log('fetch product')
+    setLoading(true);
+    fetchProducts().finally(() => setLoading(false));
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    if (activeMenuItem === 'Auction') {
+      switch (selectedSortOption) {
+        case 'newest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'createdAt',
+            sortDirection: 'DESC',
+          }));
+          break;
+        case 'oldest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'createdAt',
+            sortDirection: 'ASC',
+          }));
+          break;
+        case 'highest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'currentPrice',
+            sortDirection: 'DESC',
+          }));
+          break;
+        case 'lowest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'currentPrice',
+            sortDirection: 'ASC',
+          }));
+          break;
+        case 'ending':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'endTime',
+            sortDirection: 'ASC',
+          }));
+          break;
+        case 'ending-latest':
+          setAuctionFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'endTime',
+            sortDirection: 'DESC',
+          }));
+          break;
+        default:
+          break;
+      }
+    } else if (activeMenuItem === 'Product') {
+      switch (selectedSortOption) {
+        case 'newest':
+          setProductFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'createdAt',
+            sortDirection: 'DESC',
+          }));
+          break;
+        case 'oldest':
+          setProductFilters((prevFilters) => ({
+            ...prevFilters,
+            sortField: 'createdAt',
+            sortDirection: 'ASC',
+          }));
+          break;
+        default:
+          break;
+      }
+    }
+  }, [selectedSortOption]);
+
+  useEffect(() => {
+    setSelectedSortOption('newest');
+  }, [activeMenuItem]);
 
   return (
     <div className="flex">
@@ -125,8 +310,16 @@ export const Listings = () => {
           <p>Loading...</p>
         ) : (
           <>
-            <FilterBar />
-            <Table items={items} sortOptions={sortOptions} sortFunction={sortListings} />
+            <FilterBar searchByOptions={activeMenuItem === 'Auction' ? searchByOptionsAuction : searchByOptionsProduct} searchFunction={searchFunction} />
+            <Table items={items} sortOptions={activeMenuItem === 'Auction' ? sortOptionsAuction : sortOptionsProduct}
+            sortFunction={sortListings} selectedSortOption={selectedSortOption} />
+            <Pagination 
+              totalItems={activeMenuItem === 'Auction' ? auctionTotalItems : productTotalItems}
+              itemsPerPage={activeMenuItem === 'Auction' ? auctionFilters.size : productFilters.size}
+              pagesPerGroup={3}
+              onPageChange={handlePageChange}
+              currentPageByParent={activeMenuItem === 'Auction' ? auctionFilters.page + 1 : productFilters.page + 1}
+            />
           </>
         )}
       </div>

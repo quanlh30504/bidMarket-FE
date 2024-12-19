@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { FilterBar } from '../components/FilterBar';
-import { Table } from '../components/Table';
-import { Sidebar } from '../components/Sidebar';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FilterBar } from '../../seller-hub/components/FilterBar';
+import { Table } from '../../seller-hub/components/Table';
+import { Sidebar } from '../../seller-hub/components/Sidebar';
 import AdminService from '../../../services/adminService';
-import { Role } from '../../../router/index';
+import { Role, Pagination, AccountStatus } from '../../../router/index';
 
 export const UserManagement = () => {
   const [items, setItems] = useState([]);
@@ -17,6 +17,39 @@ export const UserManagement = () => {
     banned: [],
   });
 
+  // Filters state below
+  const [userFilters_all, setUserFilters_all] = useState({
+    email: null,
+    role: null,
+    isBanned: null,
+    isVerified: null,
+    page: 0,
+    size: 10,
+    sortBy: 'createdAt',
+    sortDirection: 'DESC',
+  });
+  const [userFilters_sellers, setUserFilters_sellers] = useState({
+    ...userFilters_all,
+    role: 'SELLER',
+  });
+  const [userFilters_bidders, setUserFilters_bidders] = useState({
+    ...userFilters_all,
+    role: 'BIDDER',
+  });
+  const [userFilters_inactive, setUserFilters_inactive] = useState({
+    ...userFilters_all,
+    isVerified: false,
+  });
+  const [userFilters_banned, setUserFilters_banned] = useState({
+    ...userFilters_all,
+    isBanned: true,
+  });
+  const [userTotalItems_all, setUserTotalItems_all] = useState(0);
+  const [userTotalItems_sellers, setUserTotalItems_sellers] = useState(0);
+  const [userTotalItems_bidders, setUserTotalItems_bidders] = useState(0);
+  const [userTotalItems_inactive, setUserTotalItems_inactive] = useState(0);
+  const [userTotalItems_banned, setUserTotalItems_banned] = useState(0);
+
   const menuItems = [
     'All users',
     'Sellers',
@@ -26,10 +59,22 @@ export const UserManagement = () => {
   ];
 
   const sortOptions = [
-    { value: 'username', label: 'Username' },
-    { value: 'email', label: 'Email' },
-    { value: 'status', label: 'Status' },
+    { value: 'newest', label: 'Newest first' },
   ];
+
+  const searchByOptions = [
+    'Email',
+  ];
+  
+  const searchFunction = (searchByOption, value) => {
+    let setter = null;
+    activeMenuItem === 'All users' ? setter = setUserFilters_all 
+    : activeMenuItem === 'Sellers' ? setter = setUserFilters_sellers 
+    : activeMenuItem === 'Bidders' ? setter = setUserFilters_bidders 
+    : activeMenuItem === 'Inactive' ? setter = setUserFilters_inactive 
+    : setter = setUserFilters_banned;
+    setter((prevFilters) => ({ ...prevFilters, email: value }));
+  }
 
   const header = (activeMenuItems) => {
     switch (activeMenuItems) {
@@ -46,74 +91,157 @@ export const UserManagement = () => {
         }
   }
 
-  function sortOrders(sortBy) {
-    window.alert(`Sorting by ${sortBy}`);
-    // some sorting logic return ordered items (use setItems) (later)
-  }
+  // function sortOrders(sortBy) {
+  //   window.alert(`Sorting by ${sortBy}`);
+  //   // some sorting logic return ordered items (use setItems) (later)
+  // }
 
   const formatUserData = (response) => {
-    return response.map(user => {
+    return response.content.map(user => {
       return {
+        hidden_id: user.id,
         username: user.profile && user.profile.fullName ? user.profile.fullName : 'Unknown',
         email: user.email,
         role: Role[user.role],
-        "Is verified": user.verified ? 'Yes' : 'No',
-        "Is banned": user.banned ? 'Yes' : 'No',
+        status: user.banned ? AccountStatus.BANNED : user.verified ? AccountStatus.VERIFIED : AccountStatus.UNVERIFIED,
       };
     });
   }
 
+  const handlePageChange = async (newPage) => {
+    if (activeMenuItem === 'All users') {
+      setUserFilters_all((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    }
+    if (activeMenuItem === 'Sellers') {
+      setUserFilters_sellers((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    }
+    if (activeMenuItem === 'Bidders') {
+      setUserFilters_bidders((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    }
+    if (activeMenuItem === 'Inactive') {
+      setUserFilters_inactive((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    }
+    if (activeMenuItem === 'Banned') {
+      setUserFilters_banned((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    }
+  };
+
+  const fetchUsersAll = useCallback(async () => {
+    try {
+      const response = await AdminService.searchUsers(userFilters_all);
+      setData((prevData) => ({ ...prevData, all: formatUserData(response.data) }));
+      setUserTotalItems_all(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [userFilters_all]);
+
+  const fetchUsersSellers = useCallback(async () => {
+    try {
+      const response = await AdminService.searchUsers(userFilters_sellers);
+      setData((prevData) => ({ ...prevData, sellers: formatUserData(response.data) }));
+      setUserTotalItems_sellers(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [userFilters_sellers]);
+
+  const fetchUsersBidders = useCallback(async () => {
+    try {
+      const response = await AdminService.searchUsers(userFilters_bidders);
+      setData((prevData) => ({ ...prevData, bidders: formatUserData(response.data) }));
+      setUserTotalItems_bidders(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [userFilters_bidders]);
+
+  const fetchUsersInactive = useCallback(async () => {
+    try {
+      const response = await AdminService.searchUsers(userFilters_inactive);
+      setData((prevData) => ({ ...prevData, inactive: formatUserData(response.data) }));
+      setUserTotalItems_inactive(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [userFilters_inactive]);
+
+  const fetchUsersBanned = useCallback(async () => {
+    try {
+      const response = await AdminService.searchUsers(userFilters_banned);
+      setData((prevData) => ({ ...prevData, banned: formatUserData(response.data) }));
+      setUserTotalItems_banned(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [userFilters_banned]);
+
   const refreshData = async () => {
     setLoading(true);
-    try {
-      const all = (await AdminService.searchUsers({ role: '', isVerified: '', isBanned: '' })).data.content;
-      const sellers = all.filter(user => user.role === 'SELLER');
-      const bidders = all.filter(user => user.role === 'BIDDER');
-      const inactive = all.filter(user => !user.verified);
-      const banned = all.filter(user => user.banned);
-
-      setData({
-        all: formatUserData(all),
-        sellers: formatUserData(sellers),
-        bidders: formatUserData(bidders),
-        inactive: formatUserData(inactive),
-        banned: formatUserData(banned),
-      });
-      console.log('Data fetched:', data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const handleChangeActiveMenuItem = async (activeMenuItem) => {
     switch (activeMenuItem) {
+      case 'All users':
+        fetchUsersAll();
+        break;
       case 'Sellers':
-        setItems(data.sellers);
-        return;
+        fetchUsersSellers();
+        break;
       case 'Bidders':
-        setItems(data.bidders);
-        return;
+        fetchUsersBidders();
+        break;
       case 'Inactive':
-        setItems(data.inactive);
-        return;
+        fetchUsersInactive();
+        break;
       case 'Banned':
-        setItems(data.banned);
-        return;
+        fetchUsersBanned();
+        break;
       default:
-        setItems(data.all);
-        return;
+        break;
     }
+    setLoading(false);
   }
 
   useEffect(() => {
-    handleChangeActiveMenuItem(activeMenuItem);
-  }, [activeMenuItem, data]);
+    fetchUsersAll();
+  }, [fetchUsersAll]);
 
   useEffect(() => {
-    refreshData();
-  }, []);
+    fetchUsersSellers();
+  }, [fetchUsersSellers]);
+
+  useEffect(() => {
+    fetchUsersBidders();
+  }, [fetchUsersBidders]);
+
+  useEffect(() => {
+    fetchUsersInactive();
+  }, [fetchUsersInactive]);
+
+  useEffect(() => {
+    fetchUsersBanned();
+  }, [fetchUsersBanned]);
+
+  useEffect(() => {
+    const handleChangeActiveMenuItem = async () => {
+      switch (activeMenuItem) {
+        case 'Sellers':
+          setItems(data.sellers);
+          return;
+        case 'Bidders':
+          setItems(data.bidders);
+          return;
+        case 'Inactive':
+          setItems(data.inactive);
+          return;
+        case 'Banned':
+          setItems(data.banned);
+          return;
+        default:
+          setItems(data.all);
+          return;
+      }
+    };
+    handleChangeActiveMenuItem();
+  }, [activeMenuItem, data]);
 
   return (
     <div className="flex">
@@ -127,8 +255,15 @@ export const UserManagement = () => {
           <p>Loading...</p>
         ) : (
           <>
-            <FilterBar />
-            <Table items={items} sortOptions={sortOptions} sortFunction={sortOrders} />
+            <FilterBar searchByOptions={searchByOptions} searchFunction={searchFunction} />
+            <Table items={items} sortOptions={sortOptions} sortFunction={() => {}} />
+            <Pagination
+              totalItems={activeMenuItem === 'All users' ? userTotalItems_all : activeMenuItem === 'Sellers' ? userTotalItems_sellers : activeMenuItem === 'Bidders' ? userTotalItems_bidders : activeMenuItem === 'Inactive' ? userTotalItems_inactive : userTotalItems_banned}
+              itemsPerPage={userFilters_all.size}
+              pagesPerGroup={3}
+              onPageChange={handlePageChange}
+              currentPageByParent={activeMenuItem === 'All users' ? userFilters_all.page + 1 : activeMenuItem === 'Sellers' ? userFilters_sellers.page + 1 : activeMenuItem === 'Bidders' ? userFilters_bidders.page + 1 : activeMenuItem === 'Inactive' ? userFilters_inactive.page + 1 : userFilters_banned.page + 1}
+            />
           </>
         )}
       </div>

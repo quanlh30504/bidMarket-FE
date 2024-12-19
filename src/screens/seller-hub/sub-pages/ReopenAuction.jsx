@@ -3,25 +3,22 @@ import { PhotoUpload } from "../components/PhotoUpload";
 import { ProductDetails } from "../components/ProductDetails";
 import { ItemSpecifics } from "../components/ItemSpecifics";
 import { AuctionSettings } from "../components/AuctionSettings";
-import { CreationAgreement } from "../components/CreationAgreement";
+import ProductUpdateRequest from "../../../dto/Request/ProductUpdateRequest";
+import AuctionUpdateRequest from "../../../dto/Request/AuctionUpdateRequest";
 import ProductService from "../../../services/productService";
-import ProductCreateRequest from "../../../dto/Request/ProductCreateRequest";
-import AuctionCreateRequest from "../../../dto/Request/AuctionCreateRequest";
-import { useUser, useWarning } from "../../../router";
-import { useNotification } from "../../../notifications/NotificationContext";
 import AuctionService from "../../../services/auctionService";
 import { useNavigate, useParams } from "react-router-dom";
-import { SelectProductPopup } from "../components/SelectProductPopup";
+import { useNotification } from "../../../notifications/NotificationContext";
 import ProductImageDto from '../../../dto/ProductImageDto';
+import { useWarning } from "../../../router";
 
-export const CreateAuction = () => {
+export const ReopenAuction = () => {
+  const { auctionId } = useParams();
   const navigate = useNavigate();
   const { showWarning } = useWarning();
   const { showToastNotification } = useNotification();
-  const { productId } = useParams();
-  const [isEditingProductDetails, setIsEditingProductDetails] = useState(true);
+  const [currentTitle, setCurrentTitle] = useState("");
   const [productDetails, setProductDetails] = useState({
-    id: null,
     title: '',
     itemCategory: [],
     specifics: {},
@@ -40,9 +37,6 @@ export const CreateAuction = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [isProductSelected, setIsProductSelected] = useState(false); // Kiểm tra sản phẩm đã được chọn chưa
-  const UUID = useUser().user.UUID;
 
   const getProductImageDtos = async () => {
     setLoading(true);
@@ -73,31 +67,31 @@ export const CreateAuction = () => {
   const handleSubmit = async () => {
     showWarning(
       <div className="text-lg font-semibold mb-2 text-center">
-          You are about to create a new auction. <br />
+          You are about to reopen this auction. <br />
           Make sure all the details are correct before proceeding.
       </div>,
       async () => {
         try {
           setLoading(true);
+          console.log('Updating product:', productDetails);
     
           const productImageDtos = await getProductImageDtos();
-          console.log('productImageDtos:', productImageDtos);
     
-          const productCreateRequest = new ProductCreateRequest({
-            productId: productDetails.id,
+    
+          const productUpdateRequest = new ProductUpdateRequest({
             name: productDetails.title,
-            description: JSON.stringify(productDetails.specifics),
-            sellerId: UUID,
+            description: JSON.stringify(productDetails.specifics),  // Convert object to JSON string
             stockQuantity: productDetails.stockQuantity,
-            categories: new Set(productDetails.itemCategory),
+            categories: Array.from(new Set(productDetails.itemCategory)),
             productImages: productImageDtos,
+            newImages: [],
           });
+          console.log('productUpdateRequest:', JSON.stringify(productUpdateRequest));
+          productUpdateRequest.validate();
     
-          productCreateRequest.validate();
-    
-          const auctionCreateRequest = new AuctionCreateRequest({
+          const auctionUpdateRequest = new AuctionUpdateRequest({
             title: auctionSettings.title,
-            productCreateRequest: productCreateRequest,
+            productUpdateRequest: productUpdateRequest,
             startTime: auctionSettings.startTime,
             endTime: auctionSettings.endTime,
             currentPrice: auctionSettings.startPrice,
@@ -105,14 +99,15 @@ export const CreateAuction = () => {
             minimumBidIncrement: auctionSettings.minimumBidIncrement,
             extensionCount: 0,
           });
+          console.log('auctionUpdateRequest:', JSON.stringify(auctionUpdateRequest));
+          auctionUpdateRequest.validate();
     
-          auctionCreateRequest.validate();
-    
-          await AuctionService.createAuction(auctionCreateRequest);
-          showToastNotification('Auction created successfully.', 'success');
+        //   await AuctionService.updateAuction(auctionId, auctionUpdateRequest);
+          await AuctionService.reOpenAuction(auctionId, auctionUpdateRequest);
+          showToastNotification('Reopened auction successfully', 'success');
         } catch (error) {
-          console.error('Error creating product:', error);
-          showToastNotification('Error creating product', 'error');
+          console.error('Error updating product:', error);
+          showToastNotification('Failed to reopen auction', 'error');
         } finally {
           setLoading(false);
           navigate('/seller-hub/listings');
@@ -121,84 +116,28 @@ export const CreateAuction = () => {
     );
   };
 
-  const loadFilesFromUrls = async (urls) => {
-    const files = await Promise.all(
-      urls.map(async (url) => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const fileName = url.split('/').pop(); // Lấy tên file từ URL
-        return new File([blob], fileName, { type: blob.type });
-      })
-    );
-    return files;
-  };
-
-  const handleProductSelect = async (product) => {
-    let initialDetails = {
-      id: product.hidden_id,
-      title: product.product,
-      itemCategory: product.categories,
-      specifics: product.hidden_specifics,
-      stockQuantity: product.hidden_stockQuantity,
-      photos: [],
-      videos: [],
-      photoPrimaryIndex: 0,
+  useEffect(() => {
+    const loadFilesFromUrls = async (urls) => {
+      const files = await Promise.all(
+        urls.map(async (url) => {
+          const response = await fetch(url);
+          const blob = await response.blob();
+          const fileName = url.split('/').pop(); // Lấy tên file từ URL
+          return new File([blob], fileName, { type: blob.type });
+        })
+      );
+      return files;
     };
 
-    // Phân loại photos và videos từ `productImages`
-    if (product.hidden_productImages) {
-      product.hidden_productImages.forEach((productImageDto, index) => {
-        const { imageUrl, isPrimary } = productImageDto;
-        console.log('imageUrl:', imageUrl);
-        const prefix = imageUrl.includes('/photos/') ? 'photos' : 
-                       imageUrl.includes('/videos/') ? 'videos' : null;
-
-        if (prefix) {
-          initialDetails[prefix].push(imageUrl);
-
-          if (isPrimary && prefix === 'photos') {
-            initialDetails.photoPrimaryIndex = index;
-          }
-        }
-      });
-    }
-
-    // Tải và chuyển đổi URLs thành File
-    const [photoFiles, videoFiles] = await Promise.all([
-      loadFilesFromUrls(initialDetails.photos),
-      loadFilesFromUrls(initialDetails.videos),
-    ]);
-
-    initialDetails.photos = photoFiles;
-    initialDetails.videos = videoFiles;
-
-    // Cập nhật `productDetails` với Files
-    setProductDetails(initialDetails);
-    setIsEditingProductDetails(false);
-    setIsProductSelected(true);
-  };
-
-  const handleCancelProductSelection = () => {
-    setProductDetails({
-      id: null,
-      title: '',
-      itemCategory: [],
-      specifics: {},
-      stockQuantity: 1,
-      photos: [],
-      videos: [],
-    });
-    setIsEditingProductDetails(true);
-    setIsProductSelected(false);
-  };
-
-  useEffect(() => {
-    const fetchAuctionAndLoadAssets = async () => {
+    const fetchProductAndLoadAssets = async () => {
       setLoading(true);
       try {
         // Lấy dữ liệu sản phẩm từ API
-        const product = (await ProductService.getProduct(productId)).data;
+        const auction = (await AuctionService.getAuctionById(auctionId)).data;
+        const product = (await ProductService.getProduct(auction.productDto.id)).data; // api get auction không trả về product
+        console.log('Auction:', auction);
         console.log('Product:', product);
+        setCurrentTitle(auction.title);
   
         // Cập nhật thông tin cơ bản của sản phẩm
         let initialDetails = {
@@ -234,13 +173,19 @@ export const CreateAuction = () => {
           loadFilesFromUrls(initialDetails.photos),
           loadFilesFromUrls(initialDetails.videos),
         ]);
-
+        
         initialDetails.photos = photoFiles;
         initialDetails.videos = videoFiles;
   
         // Cập nhật `productDetails` với Files
         setProductDetails(initialDetails);
-        setIsEditingProductDetails(false);
+        setAuctionSettings({
+          title: auction.title,
+          startTime: new Date(auction.startTime),
+          endTime: new Date(auction.endTime),
+          startPrice: auction.startingPrice,
+          minimumBidIncrement: auction.minimumBidIncrement,
+        });
       } catch (error) {
         console.error('Error fetching product or loading assets:', error);
       } finally {
@@ -248,56 +193,29 @@ export const CreateAuction = () => {
       }
     };
   
-    fetchAuctionAndLoadAssets();
-  }, [productId]);  
+    fetchProductAndLoadAssets();
+  }, [auctionId]);
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow">
-      <h1 className="text-3xl font-semibold mb-6 text-center">Create your Auction</h1>
-
-      <div className="flex justify-end gap-4">
-        {!productId && isEditingProductDetails && (
-          <button
-            className="border py-1 px-4 rounded-full bg-green"
-            onClick={() => setShowPopup(true)}
-            disabled={loading}
-          >
-            Select available product
-          </button>
-        )}
-
-        {!productId && isProductSelected && (
-          <button
-            className="border py-1 px-4 rounded-full bg-red-500 text-white"
-            onClick={handleCancelProductSelection}
-            disabled={loading}
-          >
-            Cancel Selection
-          </button>
-        )}
-      </div>
-
-      {showPopup && (
-        <SelectProductPopup
-          onSelect={handleProductSelect}
-          onClose={() => setShowPopup(false)}
-        />
-      )}
+      <h1 className="text-3xl font-semibold mb-6 text-center">
+        You are reopening the auction: <span className="text-green">{currentTitle}</span>
+      </h1>
 
       <PhotoUpload
         productDetails={productDetails}
         setProductDetails={setProductDetails}
-        disabled={!isEditingProductDetails}
+        disabled={true}
       />
       <ProductDetails
         productDetails={productDetails}
         setProductDetails={setProductDetails}
-        disabled={!isEditingProductDetails}
+        disabled={true}
       />
       <ItemSpecifics
         productDetails={productDetails}
         setProductDetails={setProductDetails}
-        disabled={!isEditingProductDetails}
+        disabled={true}
       />
       <div className="mb-10 border-t pt-4">
         <h2 className="text-lg font-semibold mb-2">STOCK QUANTITY</h2>
@@ -308,11 +226,13 @@ export const CreateAuction = () => {
           onChange={(e) => setProductDetails({ ...productDetails, stockQuantity: Number(e.target.value) })}
           min="0"
           placeholder="Enter stock quantity"
-          disabled={!isEditingProductDetails}
+          disabled={true}
         />
       </div>
-      <AuctionSettings auctionSettings={auctionSettings} setAuctionSettings={setAuctionSettings} />
-      <CreationAgreement createButtonName="Create auction" />
+      <AuctionSettings
+        auctionSettings={auctionSettings}
+        setAuctionSettings={setAuctionSettings}
+      />
 
       <div className="mt-8 flex flex-col space-y-2 items-center">
         <button
@@ -320,14 +240,8 @@ export const CreateAuction = () => {
           onClick={handleSubmit}
           disabled={loading}
         >
-          Create auction
+          {loading ? 'Loading...' : 'Reopen Auction'}
         </button>
-        {/* <button
-          className="w-52 py-2 bg-gray-100 border border-gray-300 rounded-full"
-          disabled={loading}
-        >
-          Save for later
-        </button> */}
         <button
           className="w-52 py-2 bg-gray-100 border border-gray-300 rounded-full"
           onClick={() => navigate('/seller-hub/listings')}

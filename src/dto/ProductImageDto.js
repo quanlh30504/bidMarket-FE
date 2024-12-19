@@ -14,6 +14,13 @@ class ProductImageDto {
         throw new Error('isPrimary must be a boolean');
       }
     }
+
+    toJSON() {
+      return {
+        imageUrl: this.imageUrl,
+        isPrimary: this.isPrimary,
+      };
+    }
   }
   
   export default ProductImageDto;

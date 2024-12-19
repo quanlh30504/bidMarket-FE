@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { TableItem } from "./TableItem";
+import { useUser } from "../../../router";
 
-export const Table = ({ items, sortOptions, sortFuntion }) => {
-  if (items.length === 0) return null;
+export const Table = ({ items, sortOptions, sortFunction, selectedSortOption=null }) => {
+  const { user } = useUser();
+
+  if (items.length === 0) return <div>No items found</div>;
 
   // get all fields from the first item
   const fields = Object.keys(items[0])
@@ -17,9 +20,10 @@ export const Table = ({ items, sortOptions, sortFuntion }) => {
           <label>Sorted by:</label>
           <select
             className="ml-2 p-1 font-bold border rounded-lg"
+            value={selectedSortOption}
             onChange={(event) => {
               const selectedValue = event.target.value;
-              sortFuntion(selectedValue);
+              sortFunction(selectedValue);
             }}
           >
             {sortOptions.map((option, index) => (
@@ -40,7 +44,7 @@ export const Table = ({ items, sortOptions, sortFuntion }) => {
         </thead>
         <tbody>
           {items.map((item, index) => (
-            <TableItem key={index} item={item}/>
+            <TableItem key={index} item={item} isAdmin={user.role === 'ADMIN'} />
           ))}
         </tbody>
       </table>

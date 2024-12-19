@@ -239,7 +239,8 @@ export const ProductsDetailsPage = () => {
       setWatchlistId(response.data.id);
     } catch (error) {
       console.error("Lỗi khi thêm vào Watchlist:", error);
-      alert("Không thể thêm vào Watchlist. Vui lòng thử lại sau.");
+      // alert("Không thể thêm vào Watchlist. Vui lòng thử lại sau.");
+      showToastNotification("Failed to add to Watchlist. Please try again.", "error");
     }
   };
 
@@ -249,7 +250,8 @@ export const ProductsDetailsPage = () => {
       setIsInWatchlist(false);
     } catch (error) {
       console.error("Lỗi khi xóa khỏi Watchlist:", error);
-      alert("Không thể xóa khỏi Watchlist. Vui lòng thử lại sau.");
+      // alert("Không thể xóa khỏi Watchlist. Vui lòng thử lại sau.");
+      showToastNotification("Failed to remove from Watchlist. Please try again.", "error");
     }
   };
 
@@ -290,9 +292,13 @@ export const ProductsDetailsPage = () => {
     }
 
     if (bidAmount - auction?.currentPrice < auction?.minimumBidIncrement) {
-      alert(
-        "Your bid must be higher than the current bid at least $" +
-        auction?.minimumBidIncrement
+      // alert(
+      //   "Your bid must be higher than the current bid at least $" +
+      //   auction?.minimumBidIncrement
+      // );
+      showToastNotification(
+        `Your bid must be higher than the current bid at least $${auction?.minimumBidIncrement}`,
+        "error"
       );
       return;
     }
@@ -309,7 +315,8 @@ export const ProductsDetailsPage = () => {
 
     } catch (error) {
       console.error("Error placing bid:", error);
-      alert("Failed to place the bid. Please try again.");
+      // alert("Failed to place the bid. Please try again.");
+      showToastNotification("Failed to place the bid. Please try again.", "error");
     } finally {
       setIsSubmittingBid(false);
     }

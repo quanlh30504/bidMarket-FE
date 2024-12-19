@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { FilterBar } from '../components/FilterBar';
-import { Table } from '../components/Table';
-import { Sidebar } from '../components/Sidebar';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FilterBar } from '../../seller-hub/components/FilterBar';
+import { Table } from '../../seller-hub/components/Table';
+import { Sidebar } from '../../seller-hub/components/Sidebar';
 import AdminService from '../../../services/adminService';
-import { AuctionStatus } from '../../../router';
+import { AuctionStatus, Pagination } from '../../../router';
 
 export const AuctionManagement = () => {
   const [activeMenuItem, setActiveMenuItem] = useState('All auctions');
@@ -14,6 +14,36 @@ export const AuctionManagement = () => {
     open: [],
     pending: [],
   });
+  const [auctionFilters_all, setAuctionFilters_all] = useState({
+    sellerId: null,
+    title: null,
+    categoryType: [],
+    status: null,
+    minPrice: null,
+    maxPrice: null,
+    startTime: null,
+    endTime: null,
+    page: 0,
+    size: 10,
+    sortField: 'currentPrice',
+    sortDirection: 'ASC',
+  });
+
+  const [auctionFilters_open, setAuctionFilters_open] = useState({
+    ...auctionFilters_all,
+    status: 'OPEN',  
+  });
+
+  const [auctionFilters_pending, setAuctionFilters_pending] = useState({
+    ...auctionFilters_all,
+    status: 'PENDING',  
+  });
+
+  const [auctionTotalItems_all, setAuctionTotalItems_all] = useState(0);
+  const [auctionTotalItems_open, setAuctionTotalItems_open] = useState(0);
+  const [auctionTotalItems_pending, setAuctionTotalItems_pending] = useState(0);
+
+  const [selectedSortOption, setSelectedSortOption] = useState('newest');
 
   const menuItems = [
     'All auctions',
@@ -22,16 +52,31 @@ export const AuctionManagement = () => {
   ];
 
   const sortOptions = [
-    { value: 'start', label: 'Start Date' },
-    { value: 'end', label: 'End Date' },
-    { value: 'highest', label: 'Highest price' },
-    { value: 'lowest', label: 'Lowest price' }
+    { value: 'newest', label: 'Newest first' },
+    { value: 'oldest', label: 'Oldest first' },
+    { value: 'highest', label: 'Highest current price' },
+    { value: 'lowest', label: 'Lowest current price' },
+    { value: 'ending', label: 'Ending soonest' },
+    { value: 'ending-latest', label: 'Ending latest' }
   ];
+
+  const searchByOptions = [
+    'Auction title',
+  ]
+
+  const searchFunction = (searchByOption, value) => {
+    let setter = null;
+    activeMenuItem === 'All auctions' ? setter = setAuctionFilters_all 
+    : activeMenuItem === 'Open' ? setter = setAuctionFilters_open 
+    : setter = setAuctionFilters_pending;
+    setter((prevFilters) => ({ ...prevFilters, title: value }));
+  }; 
 
   const formatAuctionData = (response) => {
     return response.content.map(auction => {
       return {
         hidden_id: auction.id,
+        hidden_thumbnailUrl: auction.productDto.productImages?.find(image => image.isPrimary)?.imageUrl || null,
         auction: auction.title,
         "Starting price": auction.startingPrice,
         "Current price": auction.currentPrice,
@@ -42,43 +87,67 @@ export const AuctionManagement = () => {
     });
   };
 
+  const handlePageChange = async (newPage) => {
+    if (activeMenuItem === 'All auctions') {
+      setAuctionFilters_all((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    } else if (activeMenuItem === 'Open') {
+      setAuctionFilters_open((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    } else if (activeMenuItem === 'Pending') {
+      setAuctionFilters_pending((prevFilters) => ({ ...prevFilters, page: newPage - 1 }));
+    }
+  };
+
+  const fetchAuctionsAll = useCallback(async () => {
+    try {
+      const response = await AdminService.searchAuctions(auctionFilters_all);
+      setData((prevData) => ({ ...prevData, all: formatAuctionData(response.data) }));
+      setAuctionTotalItems_all(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [auctionFilters_all]);
+
+  const fetchAuctionsOpen = useCallback(async () => {
+    try {
+      const response = await AdminService.searchAuctions(auctionFilters_open);
+      setData((prevData) => ({ ...prevData, open: formatAuctionData(response.data) }));
+      setAuctionTotalItems_open(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [auctionFilters_open]);
+
+  const fetchAuctionsPending = useCallback(async () => {
+    try {
+      const response = await AdminService.searchAuctions(auctionFilters_pending);
+      setData((prevData) => ({ ...prevData, pending: formatAuctionData(response.data) }));
+      setAuctionTotalItems_pending(response.data.totalElements);
+    } catch (error) {
+      console.error('Failed to fetch auctions:', error);
+    }
+  }, [auctionFilters_pending]);
+
   const refreshData = async () => {
     setLoading(true);
-    try {
-      const all = (await AdminService.searchAuctions({})).data;
-      const open = (await AdminService.searchAuctions({ status: 'OPEN' })).data;
-      const pending = (await AdminService.searchAuctions({ status: 'PENDING' })).data;
-      setData({
-        all: formatAuctionData(all),
-        open: formatAuctionData(open),
-        pending: formatAuctionData(pending),
-      });
-      console.log('Data fetched:', data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const handleChangeActiveMenuItem = async (activeMenuItem) => {
     switch (activeMenuItem) {
+      case 'All auctions':
+        fetchAuctionsAll();
+        break;
       case 'Open':
-        setItems(data.open);
-        return;
+        fetchAuctionsOpen();
+        break;
       case 'Pending':
-        setItems(data.pending);
-        return;
+        fetchAuctionsPending();
+        break;
       default:
-        setItems(data.all);
-        return;
+        break;
     }
-  }
+    setLoading(false);
+  };
 
   const sortOrders = (sortBy) => {
-    window.alert(`Sorting by ${sortBy}`);
-    // some sorting logic return ordered items (use setItems) (later)
-  }
+    setSelectedSortOption(sortBy);
+  };
 
   const header = (activeMenuItems) => {
     switch (activeMenuItems) {
@@ -91,15 +160,103 @@ export const AuctionManagement = () => {
         default:
             return 'All auctions';
     }
-  }
+  };
 
   useEffect(() => {
+    fetchAuctionsAll();
+  }, [fetchAuctionsAll]);
+
+  useEffect(() => {
+    fetchAuctionsOpen();
+  }, [fetchAuctionsOpen]);
+
+  useEffect(() => {
+    fetchAuctionsPending();
+  }, [fetchAuctionsPending]);
+
+  useEffect(() => {
+    const handleChangeActiveMenuItem = async (activeMenuItem) => {
+      switch (activeMenuItem) {
+        case 'Open':
+          setItems(data.open);
+          return;
+        case 'Pending':
+          setItems(data.pending);
+          return;
+        default:
+          setItems(data.all);
+          return;
+      }
+    };
     handleChangeActiveMenuItem(activeMenuItem);
   }, [activeMenuItem, data]);
 
   useEffect(() => {
-    refreshData();
-  }, []);
+    let setter = null;
+    switch (activeMenuItem) {
+      case 'All auctions':
+        setter = setAuctionFilters_all;
+        break;
+      case 'Open':
+        setter = setAuctionFilters_open;
+        break;
+      case 'Pending':
+        setter = setAuctionFilters_pending;
+        break;
+      default:
+        return;
+    }
+    switch (selectedSortOption) {
+      case 'newest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'createdAt',
+          sortDirection: 'DESC',
+        }));
+        break;
+      case 'oldest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'createdAt',
+          sortDirection: 'ASC',
+        }));
+        break;
+      case 'highest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'currentPrice',
+          sortDirection: 'DESC',
+        }));
+        break;
+      case 'lowest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'currentPrice',
+          sortDirection: 'ASC',
+        }));
+        break;
+      case 'ending':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'endTime',
+          sortDirection: 'ASC',
+        }));
+        break;
+      case 'ending-latest':
+        setter((prevFilters) => ({
+          ...prevFilters,
+          sortField: 'endTime',
+          sortDirection: 'DESC',
+        }));
+        break;
+      default:
+        break;
+    }
+  }, [selectedSortOption]);
+  
+  useEffect(() => {
+    setSelectedSortOption('newest');
+  }, [activeMenuItem]);
 
   return (
     <div className="flex">
@@ -113,8 +270,15 @@ export const AuctionManagement = () => {
           <p>Loading...</p>
         ) : (
           <>
-            <FilterBar />
+            <FilterBar searchByOptions={searchByOptions} searchFunction={searchFunction} />
             <Table items={items} sortOptions={sortOptions} sortFunction={sortOrders} />
+            <Pagination
+              totalItems={activeMenuItem === 'All auctions' ? auctionTotalItems_all : activeMenuItem === 'Open' ? auctionTotalItems_open : auctionTotalItems_pending}
+              itemsPerPage={activeMenuItem === 'All auctions' ? auctionFilters_all.size : activeMenuItem === 'Open' ? auctionFilters_open.size : auctionFilters_pending.size}
+              pagesPerGroup={3}
+              onPageChange={handlePageChange}
+              currentPageByParent={activeMenuItem === 'All auctions' ? auctionFilters_all.page + 1 : activeMenuItem === 'Open' ? auctionFilters_open.page + 1 : auctionFilters_pending.page + 1}
+            />
           </>
         )}
       </div>

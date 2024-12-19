@@ -31,14 +31,14 @@ export const SellerHub = () => {
         <CustomNavLinkList href="/seller-hub/listings" isActive={location.pathname === '/seller-hub/listings'}>
           Listings
         </CustomNavLinkList>
-        <CustomNavLinkList href="/seller-hub/marketing" isActive={location.pathname === '/seller-hub/marketing'}>
+        {/* <CustomNavLinkList href="/seller-hub/shipping" isActive={location.pathname === '/seller-hub/shipping'}>
+          Shipping
+        </CustomNavLinkList> */}
+        {/* <CustomNavLinkList href="/seller-hub/marketing" isActive={location.pathname === '/seller-hub/marketing'}>
           Marketing
         </CustomNavLinkList>
         <CustomNavLinkList href="/seller-hub/store" isActive={location.pathname === '/seller-hub/store'}>
           Store
-        </CustomNavLinkList>
-        <CustomNavLinkList href="/seller-hub/shipping" isActive={location.pathname === '/seller-hub/shipping'}>
-          Shipping
         </CustomNavLinkList>
         <CustomNavLinkList href="/seller-hub/performance" isActive={location.pathname === '/seller-hub/performance'}>
           Performance
@@ -51,7 +51,7 @@ export const SellerHub = () => {
         </CustomNavLinkList>
         <CustomNavLinkList href="/seller-hub/reports" isActive={location.pathname === '/seller-hub/reports'}>
           Reports
-        </CustomNavLinkList>
+        </CustomNavLinkList> */}
         {/* <CustomNavLinkList href="/seller-hub/create-product" isActive={location.pathname === '/seller-hub/create-product'}>
           Create Product
         </CustomNavLinkList>

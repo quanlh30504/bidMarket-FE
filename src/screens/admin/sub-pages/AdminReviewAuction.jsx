@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { PhotoUpload } from "../components/PhotoUpload";
-import { ProductDetails } from "../components/ProductDetails";
-import { ItemSpecifics } from "../components/ItemSpecifics";
-import { AuctionSettings } from "../components/AuctionSettings";
+import { PhotoUpload } from "../../seller-hub/components/PhotoUpload";
+import { ProductDetails } from "../../seller-hub/components/ProductDetails";
+import { ItemSpecifics } from "../../seller-hub/components/ItemSpecifics";
+import { AuctionSettings } from "../../seller-hub/components/AuctionSettings";
 import { useNavigate, useParams } from "react-router-dom";
 import AuctionService from "../../../services/auctionService";
 import ProductService from "../../../services/productService";
 import { useWarning } from "../../../router";
+import { useNotification } from "../../../notifications/NotificationContext";
+import ProductImageDto from "../../../dto/ProductImageDto";
 
 export const AdminReviewAuction = () => {
   const { showWarning } = useWarning();
   const navigate = useNavigate();
+  const { showToastNotification } = useNotification();
   const { auctionId } = useParams();
   const [loading, setLoading] = useState(false);
   const [productDetails, setProductDetails] = useState({
@@ -20,6 +23,7 @@ export const AdminReviewAuction = () => {
     stockQuantity: 1,
     photos: [],
     videos: [],
+    photoPrimaryIndex: 0,
   });
 
   const [auctionSettings, setAuctionSettings] = useState({
@@ -32,44 +36,110 @@ export const AdminReviewAuction = () => {
 
   const handleApprove = async () => {
     setLoading(true);
-    try {
-      await AuctionService.openAuction(auctionId);
-      alert("Auction approved successfully");
-    } catch (error) {
-      console.error("Error approving auction:", error);
-      alert("Failed to approve auction");
-    } finally {
-      setLoading(false);
-    }
+    showWarning(
+      <div>
+        <h2 className="text-lg font-semibold mb-2 text-center">Are you sure you want to approve this auction?</h2>
+        <p className="text-center">This action cannot be undone.</p>
+      </div>,
+      async () => {
+        try {
+          await AuctionService.openAuction(auctionId);
+          showToastNotification("Auction approved successfully", "success");
+        } catch (error) {
+          console.error("Error approving auction:", error);
+          showToastNotification("Failed to approve auction", "error");
+        } finally {
+          setLoading(false);
+          navigate("/admin/auction-management"); 
+        }
+      }
+    );
   };
 
   const handleReject = async () => {
     setLoading(true);
-    try {
-      await AuctionService.closeAuction(auctionId);
-      alert("Auction rejected successfully");
-    } catch (error) {
-      console.error("Error rejecting auction:", error);
-      alert("Failed to reject auction");
-    } finally {
-      setLoading(false);
-    }
+    showWarning(
+      <div>
+        <h2 className="text-lg font-semibold mb-2 text-center">Are you sure you want to reject this auction?</h2>
+        <p className="text-center">This action cannot be undone.</p>
+      </div>,
+      async () => {
+        try {
+          await AuctionService.cancelAuction(auctionId);
+          showToastNotification("Auction rejected successfully", "success");
+        } catch (error) {
+          console.error("Error rejecting auction:", error);
+          showToastNotification("Failed to reject auction", "error");
+        } finally {
+          setLoading(false);
+          navigate("/admin/auction-management");
+        }
+      }
+    );
   };
 
   useEffect(() => {
-    const fetchAuction = async () => {
+    const loadFilesFromUrls = async (urls) => {
+      const files = await Promise.all(
+        urls.map(async (url) => {
+          const response = await fetch(url);
+          const blob = await response.blob();
+          const fileName = url.split('/').pop(); // Lấy tên file từ URL
+          return new File([blob], fileName, { type: blob.type });
+        })
+      );
+      return files;
+    };
+
+    const fetchAuctionAndLoadAssets = async () => {
       setLoading(true);
       try {
+        // Lấy dữ liệu sản phẩm từ API
         const auction = (await AuctionService.getAuctionById(auctionId)).data;
         const product = (await ProductService.getProduct(auction.productDto.id)).data; // api get auction không trả về product
         console.log('Auction:', auction);
         console.log('Product:', product);
-        setProductDetails({
+  
+        // Cập nhật thông tin cơ bản của sản phẩm
+        let initialDetails = {
           title: product.name,
           itemCategory: product.categories,
-          specifics: JSON.parse(product.description),  // Convert JSON string to object
+          specifics: JSON.parse(product.description), // Convert JSON string to object
           stockQuantity: product.stockQuantity,
-        });
+          photos: [],
+          videos: [],
+          photoPrimaryIndex: 0,
+        };
+  
+        // Phân loại photos và videos từ `productImages`
+        if (product.productImages) {
+          product.productImages.forEach((productImageDto, index) => {
+            const { imageUrl, isPrimary } = productImageDto;
+            console.log('imageUrl:', imageUrl);
+            const prefix = imageUrl.includes('/photos/') ? 'photos' : 
+                           imageUrl.includes('/videos/') ? 'videos' : null;
+  
+            if (prefix) {
+              initialDetails[prefix].push(imageUrl);
+  
+              if (isPrimary && prefix === 'photos') {
+                initialDetails.photoPrimaryIndex = index;
+              }
+            }
+          });
+        }
+  
+        // Tải và chuyển đổi URLs thành File
+        const [photoFiles, videoFiles] = await Promise.all([
+          loadFilesFromUrls(initialDetails.photos),
+          loadFilesFromUrls(initialDetails.videos),
+        ]);
+        
+        initialDetails.photos = photoFiles;
+        initialDetails.videos = videoFiles;
+  
+        // Cập nhật `productDetails` với Files
+        setProductDetails(initialDetails);
         setAuctionSettings({
           title: auction.title,
           startTime: new Date(auction.startTime),
@@ -92,8 +162,9 @@ export const AdminReviewAuction = () => {
       } finally {
         setLoading(false);
       }
-    }
-    fetchAuction();
+    };
+  
+    fetchAuctionAndLoadAssets();
   }, [auctionId]);
 
   return (

@@ -1,8 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 export const ItemSpecifics = ({ productDetails, setProductDetails, disabled = false }) => {
-  const specifics = productDetails?.specifics || {};
-  const [isEditing, setIsEditing] = useState(false);
+  const specifics = useMemo(() => productDetails?.specifics || {}, [productDetails.specifics]);
+  const [isEditing, setIsEditing] = useState(true);
+
+  React.useEffect(() => {
+    if (!specifics.Description) {
+      setProductDetails({
+        ...productDetails,
+        specifics: { ...specifics, Description: '' },
+      });
+    }
+  }, []);
 
   const handleAddSpecific = () => {
     if (disabled || Object.keys(specifics).length >= 15) return;
@@ -16,7 +25,7 @@ export const ItemSpecifics = ({ productDetails, setProductDetails, disabled = fa
   };
 
   const handleRemoveSpecific = (key) => {
-    if (disabled) return;
+    if (disabled || key === 'Description') return; // Không thể xóa Description
     const updatedSpecifics = { ...specifics };
     delete updatedSpecifics[key];
     setProductDetails({ ...productDetails, specifics: updatedSpecifics });
@@ -34,9 +43,16 @@ export const ItemSpecifics = ({ productDetails, setProductDetails, disabled = fa
     <div className="mb-10 border-t pt-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">ITEM SPECIFICS</h2>
-        {!disabled && ( // Chỉ hiển thị nút chỉnh sửa nếu không bị khóa
+        {!disabled && (
           <button className="flex items-center gap-1" onClick={() => setIsEditing(!isEditing)}>
-            <svg className="relative bottom-[2px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
+            <svg
+              className="relative bottom-[2px]"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+            >
               <path
                 fillRule="evenodd"
                 clipRule="evenodd"
@@ -53,28 +69,30 @@ export const ItemSpecifics = ({ productDetails, setProductDetails, disabled = fa
         <div className="mt-4">
           <table className="table-fixed w-full">
             <tbody>
-              {Object.keys(specifics).length > 0 ? (
-                Object.keys(specifics).map((key, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-2 w-2/5 align-top">
-                      <input
-                        type="text"
-                        className="border px-2 py-1 w-full"
-                        placeholder="Enter attribute name"
-                        value={key}
-                        onChange={(e) => handleChangeSpecific(key, e.target.value, specifics[key])}
-                      />
-                    </td>
-                    <td className="px-4 py-2 w-2/5 align-top">
-                      <input
-                        type="text"
-                        className="border px-2 py-1 w-full"
-                        placeholder="Enter attribute value"
-                        value={specifics[key]}
-                        onChange={(e) => handleChangeSpecific(key, key, e.target.value)}
-                      />
-                    </td>
-                    <td className="px-4 py-2 align-top">
+              {Object.keys(specifics).map((key, index) => (
+                <tr key={index}>
+                  <td className="px-4 py-2 w-2/5 align-top">
+                    <input
+                      type="text"
+                      className="border px-2 py-1 w-full"
+                      placeholder="Enter attribute name"
+                      value={key}
+                      disabled={key === 'Description'} // Không thể sửa tên Description
+                      onChange={(e) => handleChangeSpecific(key, e.target.value, specifics[key])}
+                    />
+                  </td>
+                  <td className="px-4 py-2 w-2/5 align-top">
+                    <input
+                      type="text"
+                      className="border px-2 py-1 w-full"
+                      placeholder="Enter attribute value"
+                      value={specifics[key]}
+                      required={key === 'Description'} // Bắt buộc nhập Description
+                      onChange={(e) => handleChangeSpecific(key, key, e.target.value)}
+                    />
+                  </td>
+                  <td className="px-4 py-2 align-top">
+                    {key !== 'Description' && (
                       <button
                         type="button"
                         className="bg-red-500 text-white px-2 py-1 rounded"
@@ -82,16 +100,10 @@ export const ItemSpecifics = ({ productDetails, setProductDetails, disabled = fa
                       >
                         Remove
                       </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td className="px-4 py-2" colSpan="3">
-                    No specifics available
+                    )}
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
           {Object.keys(specifics).length < 15 && (
@@ -110,20 +122,12 @@ export const ItemSpecifics = ({ productDetails, setProductDetails, disabled = fa
         <div className="mt-4">
           <table className="table-fixed w-full">
             <tbody>
-              {Object.keys(specifics).length > 0 ? (
-                Object.keys(specifics).map((key) => (
-                  <tr key={key}>
-                    <td className="px-4 py-2 font-semibold w-2/5 align-top">{key}</td>
-                    <td className="px-4 py-2">{specifics[key]}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td className="px-4 py-2" colSpan="2">
-                    No specifics available
-                  </td>
+              {Object.keys(specifics).map((key) => (
+                <tr key={key}>
+                  <td className="px-4 py-2 font-semibold w-2/5 align-top">{key}</td>
+                  <td className="px-4 py-2">{specifics[key]}</td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
