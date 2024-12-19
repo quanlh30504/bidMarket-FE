@@ -628,7 +628,7 @@ export const ProductsDetailsPage = () => {
 
                     // Check for description field
                     const description = parsedData?.description;
-                    const specifics = Object.entries(parsedData).filter(([key]) => key !== "description");
+                    const specifics = Object.entries(parsedData).filter(([key]) => key !== "Description");
 
                     return (
                       <>
