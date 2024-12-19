@@ -134,7 +134,7 @@ export const CreateAuction = () => {
       itemCategory: product.categories,
       specifics: product.hidden_specifics,
       stockQuantity: product.hidden_stockQuantity,
-      photos: product.hidden_productImages.map((productImageDto) => productImageDto.imageUrl),
+      photos: product.hidden_productImages?.map((productImageDto) => productImageDto.imageUrl),
       videos: [],
       photoPrimaryIndex: 0,
     });

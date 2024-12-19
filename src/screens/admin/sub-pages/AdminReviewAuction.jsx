@@ -93,7 +93,7 @@ export const AdminReviewAuction = () => {
           itemCategory: product.categories,
           specifics: JSON.parse(product.description), // Convert JSON string to object
           stockQuantity: product.stockQuantity,
-          photos: product.productImages.map((productImageDto) => productImageDto.imageUrl),
+          photos: product.productImages?.map((productImageDto) => productImageDto.imageUrl),
           videos: [],
           photoPrimaryIndex: 0,
         });
