@@ -106,7 +106,7 @@ export const ProductDetails = ({ productDetails, setProductDetails, disabled = f
         {/* Chosen categories */}
         {!showCategories && (
           <div id="categories" className="mt-4 min-h-[20px]">
-            {productDetails.itemCategory.map((category, index) => (
+            {productDetails?.itemCategory?.map((category, index) => (
               <span
                 key={index}
                 className="inline-block bg-green text-white px-2 py-1 rounded-full mr-2 mt-2"

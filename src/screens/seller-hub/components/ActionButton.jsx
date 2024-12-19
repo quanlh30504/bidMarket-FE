@@ -180,7 +180,8 @@ export const ActionButtonAdmin = ({ type, item }) => {
             async () => {
               try {
                 await AuctionService.closeAuction(item.hidden_id);
-                window.alert('Close auction successfully');
+                // window.alert('Close auction successfully');
+                showToastNotification('Close auction successfully', 'success');
               } catch (error) {
                 console.error('Error closing auction:', error);
               }
@@ -188,6 +189,39 @@ export const ActionButtonAdmin = ({ type, item }) => {
         }}
         >
           <svg width={24} height={24} fill="#000000" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>auction</title> <path d="M11.623 7.603l6.062 3.5c0.479 0.276 1.090 0.112 1.365-0.366 0.277-0.478 0.113-1.090-0.365-1.365l-6.062-3.5c-0.479-0.276-1.090-0.112-1.366 0.365s-0.112 1.089 0.366 1.366zM17.186 11.969l-6.062-3.5-3.5 6.062 6.062 3.5 3.5-6.062zM6.123 17.129l6.062 3.5c0.478 0.276 1.090 0.112 1.365-0.366s0.112-1.090-0.365-1.365l-6.062-3.5c-0.479-0.276-1.090-0.112-1.366 0.365-0.277 0.478-0.112 1.090 0.366 1.366zM27.012 19.951l-11.076-5.817-1 1.732 10.576 6.683c0.717 0.414 1.635 0.169 2.049-0.549s0.168-1.635-0.549-2.049zM16.033 25c0-0.553-0.448-1-1-1h-9c-0.553 0-1 0.447-1 1 0 0.552 0 1 0 1l-1.033-0.021 0.033 1.021h13l0.047-0.958-0.984-0.042c0 0-0.063-0.448-0.063-1z"></path> </g></svg>
+        </button>
+      )}
+
+      {/* OPEN AUCTION */}
+      {type === ActionButtonTypesAdmin.OPEN_AUCTION && (
+        <button className="px-1"
+        title='Open this auction'
+        onClick={() => {
+          showWarning(
+            <div className="text-center text-xl mb-4">
+              <p className="text-gray-700">Are you sure you want to open this auction without review?</p>
+              <p className="text-green text-center">{item.auction}</p>
+              <p className="text-gray-700">ID: <span className="font-medium">{item.hidden_id}</span></p>
+            </div>,
+            async () => {
+              try {
+                await AuctionService.openAuction(item.hidden_id);
+                showToastNotification('Auction opened successfully', 'success');
+              } catch (error) {
+                console.error('Error closing auction:', error);
+              }
+            });
+        }}
+        >
+          <svg width={24} height={24} fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+            <g id="SVGRepo_iconCarrier"> 
+              <defs> 
+                <style> .cls-1 
+                  <g fillRule="evenodd"/>
+                </style> 
+              </defs> <path id="accept" class="cls-1" d="M1008,120a12,12,0,1,1,12-12A12,12,0,0,1,1008,120Zm0-22a10,10,0,1,0,10,10A10,10,0,0,0,1008,98Zm-0.08,14.333a0.819,0.819,0,0,1-.22.391,0.892,0.892,0,0,1-.72.259,0.913,0.913,0,0,1-.94-0.655l-2.82-2.818a0.9,0.9,0,0,1,1.27-1.271l2.18,2.184,4.46-7.907a1,1,0,0,1,1.38-.385,1.051,1.051,0,0,1,.36,1.417Z" transform="translate(-996 -96)"></path> </g>
+          </svg>
         </button>
       )}
 
@@ -260,6 +294,7 @@ export const ActionButtonAdmin = ({ type, item }) => {
 
 
 export const ActionButtonTypesAdmin = {
+  OPEN_AUCTION: 'OpenAuction',
   CANCEL_AUCTION: 'CancelAuction',
   REVIEW_AUCTION: 'ReviewAuction',
   BAN_USER: 'BanUser',

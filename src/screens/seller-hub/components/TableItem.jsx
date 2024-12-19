@@ -87,6 +87,7 @@ const StatusBadgeAdmin = ({ item }) => {
       <div className="flex flex-col items-center justify-center">
         {status === AuctionStatus.PENDING && (
           <div className="flex mt-1 justify-center">
+            <ActionButtonAdmin type={ActionButtonTypesAdmin.OPEN_AUCTION} item={item} />
             <ActionButtonAdmin type={ActionButtonTypesAdmin.REVIEW_AUCTION} item={item} />
           </div>
         )}
