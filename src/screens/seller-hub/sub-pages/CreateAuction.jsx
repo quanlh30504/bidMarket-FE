@@ -47,25 +47,31 @@ export const CreateAuction = () => {
   const getProductImageDtos = async () => {
     setLoading(true);
     let productImageDtos = [];
-    const photoPromises = productDetails.photos.map((photo, index) =>
-      ProductService.getUploadedImageUrl(photo, 'products/photos').then((url) => {
-        return new ProductImageDto({
-          imageUrl: url,
-          isPrimary: index === productDetails.photoPrimaryIndex,
+    const photoPromises = productDetails.photos.map( async (photo, index) => {
+      if (photo instanceof File) {
+        return ProductService.getUploadedImageUrl(photo, 'products/photos').then((url) => {
+          return new ProductImageDto({
+            imageUrl: url,
+            isPrimary: index === productDetails.photoPrimaryIndex,
+          });
         });
-      })
-    );
+      } else if (typeof photo === "string") {
+        return Promise.resolve(
+          new ProductImageDto({
+            imageUrl: photo,
+            isPrimary: index === productDetails.photoPrimaryIndex,
+          })
+        );
+      }
+      return Promise.resolve(null);
+    });
 
-    const videoPromises = productDetails.videos.map((video) =>
-      ProductService.getUploadedImageUrl(video, 'products/videos').then((url) => {
-        return new ProductImageDto({
-          imageUrl: url,
-          isPrimary: false,
-        });
-      })
-    );
-
-    productImageDtos = await Promise.all([...photoPromises, ...videoPromises]);
+    // Chờ tất cả promises hoàn thành
+    const results = await Promise.all([...photoPromises]);
+  
+    // Loại bỏ các phần tử null (nếu có)
+    productImageDtos = results.filter((item) => item !== null);
+  
     setLoading(false);
     return productImageDtos;
   };
@@ -121,59 +127,17 @@ export const CreateAuction = () => {
     );
   };
 
-  const loadFilesFromUrls = async (urls) => {
-    const files = await Promise.all(
-      urls.map(async (url) => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const fileName = url.split('/').pop(); // Lấy tên file từ URL
-        return new File([blob], fileName, { type: blob.type });
-      })
-    );
-    return files;
-  };
-
   const handleProductSelect = async (product) => {
-    let initialDetails = {
+    setProductDetails({
       id: product.hidden_id,
       title: product.product,
       itemCategory: product.categories,
       specifics: product.hidden_specifics,
       stockQuantity: product.hidden_stockQuantity,
-      photos: [],
+      photos: product.hidden_productImages.map((productImageDto) => productImageDto.imageUrl),
       videos: [],
       photoPrimaryIndex: 0,
-    };
-
-    // Phân loại photos và videos từ `productImages`
-    if (product.hidden_productImages) {
-      product.hidden_productImages.forEach((productImageDto, index) => {
-        const { imageUrl, isPrimary } = productImageDto;
-        console.log('imageUrl:', imageUrl);
-        const prefix = imageUrl.includes('/photos/') ? 'photos' : 
-                       imageUrl.includes('/videos/') ? 'videos' : null;
-
-        if (prefix) {
-          initialDetails[prefix].push(imageUrl);
-
-          if (isPrimary && prefix === 'photos') {
-            initialDetails.photoPrimaryIndex = index;
-          }
-        }
-      });
-    }
-
-    // Tải và chuyển đổi URLs thành File
-    const [photoFiles, videoFiles] = await Promise.all([
-      loadFilesFromUrls(initialDetails.photos),
-      loadFilesFromUrls(initialDetails.videos),
-    ]);
-
-    initialDetails.photos = photoFiles;
-    initialDetails.videos = videoFiles;
-
-    // Cập nhật `productDetails` với Files
-    setProductDetails(initialDetails);
+    });
     setIsEditingProductDetails(false);
     setIsProductSelected(true);
   };
@@ -193,54 +157,23 @@ export const CreateAuction = () => {
   };
 
   useEffect(() => {
-    const fetchAuctionAndLoadAssets = async () => {
+    const fetchProductAndLoadAssets = async () => {
       setLoading(true);
       try {
         // Lấy dữ liệu sản phẩm từ API
         const product = (await ProductService.getProduct(productId)).data;
         console.log('Product:', product);
-  
-        // Cập nhật thông tin cơ bản của sản phẩm
-        let initialDetails = {
+
+        // Cập nhật `productDetails` với Files
+        setProductDetails({
           title: product.name,
           itemCategory: product.categories,
           specifics: JSON.parse(product.description), // Convert JSON string to object
           stockQuantity: product.stockQuantity,
-          photos: [],
+          photos: product.productImages.map((productImageDto) => productImageDto.imageUrl),
           videos: [],
           photoPrimaryIndex: 0,
-        };
-  
-        // Phân loại photos và videos từ `productImages`
-        if (product.productImages) {
-          product.productImages.forEach((productImageDto, index) => {
-            const { imageUrl, isPrimary } = productImageDto;
-            console.log('imageUrl:', imageUrl);
-            const prefix = imageUrl.includes('/photos/') ? 'photos' : 
-                           imageUrl.includes('/videos/') ? 'videos' : null;
-  
-            if (prefix) {
-              initialDetails[prefix].push(imageUrl);
-  
-              if (isPrimary && prefix === 'photos') {
-                initialDetails.photoPrimaryIndex = index;
-              }
-            }
-          });
-        }
-  
-        // Tải và chuyển đổi URLs thành File
-        const [photoFiles, videoFiles] = await Promise.all([
-          loadFilesFromUrls(initialDetails.photos),
-          loadFilesFromUrls(initialDetails.videos),
-        ]);
-
-        initialDetails.photos = photoFiles;
-        initialDetails.videos = videoFiles;
-  
-        // Cập nhật `productDetails` với Files
-        setProductDetails(initialDetails);
-        setIsEditingProductDetails(false);
+        });
       } catch (error) {
         console.error('Error fetching product or loading assets:', error);
       } finally {
@@ -248,8 +181,8 @@ export const CreateAuction = () => {
       }
     };
   
-    fetchAuctionAndLoadAssets();
-  }, [productId]);  
+    fetchProductAndLoadAssets();
+  }, [productId]);
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow">

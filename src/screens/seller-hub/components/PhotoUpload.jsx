@@ -2,10 +2,10 @@ import React, { useState, useCallback, memo, useMemo } from 'react';
 
 export const PhotoUpload = memo(({ productDetails, setProductDetails, disabled = false }) => {
   const [previewPhoto, setPreviewPhoto] = useState(null);
-  const [previewVideo, setPreviewVideo] = useState(null);
+  // const [previewVideo, setPreviewVideo] = useState(null);
 
   const photos = useMemo(() => productDetails.photos || [], [productDetails.photos]);
-  const videos = useMemo(() => productDetails.videos || [], [productDetails.videos]);
+  // const videos = useMemo(() => productDetails.videos || [], [productDetails.videos]);
   const primaryIndex = useMemo(() => productDetails.photoPrimaryIndex || 0, [productDetails.photoPrimaryIndex]);
 
   // Photo Upload Handlers
@@ -132,7 +132,7 @@ export const PhotoUpload = memo(({ productDetails, setProductDetails, disabled =
             </label>
           ) : (
             <>
-              {photos.map((photo, index) => (
+              {photos?.map((photo, index) => (
                 <div
                   key={index}
                   className={`relative w-32 h-32 border rounded overflow-hidden ${
@@ -140,9 +140,9 @@ export const PhotoUpload = memo(({ productDetails, setProductDetails, disabled =
                   }`}
                 >
                   <img
-                    src={URL.createObjectURL(photo)}
+                    src={photo instanceof File ? URL.createObjectURL(photo) : typeof photo === "string" ? photo : null}
                     alt={`${index + 1}`}
-                    onClick={() => !disabled && setPreviewPhoto(URL.createObjectURL(photo))}
+                    onClick={() => !disabled && setPreviewPhoto(photo instanceof File ? URL.createObjectURL(photo) : photo)}
                     className="w-full h-full object-cover cursor-pointer"
                   />
                   {!disabled && (
