@@ -56,7 +56,9 @@ export const Account = () => {
     try {
       const response = await axiosClient.get(`/api/users/${userId}/accountInfo`);
       setAccountInfo(response.data);
-      setAvatarUrl(response.data.avatarImageUrl);
+      if (response?.data?.avatarImageUrl) {
+        setAvatarUrl(response.data.avatarImageUrl);
+      }
     } catch (error) {
       console.error("Error fetching account info:", error);
     }

@@ -22,6 +22,7 @@ import { formatTime } from "../../utils/DateFormatter";
 import { AuctionHistory } from "./AuctionHistory";
 import WebSocketService from "../../services/WebSocketService";
 import { useUser } from "../../router";
+import { use } from "react";
 
 
 export const ProductsDetailsPage = () => {
@@ -68,7 +69,7 @@ export const ProductsDetailsPage = () => {
       setLoading(true);
       const { data } = await axiosClient.get(`/api/auctions/${id}`);
       setAuction(data);
-      console.log(auction)
+      // console.log(auction)
       setCurrentPrice(data.currentPrice);
       setSellerId(data.productDto.sellerId);
     } catch (err) {
@@ -77,6 +78,10 @@ export const ProductsDetailsPage = () => {
       setLoading(false);
     }
   }, [id]);
+
+  useEffect(() => {
+    console.log('Auction test:', auction);
+  }, [auction]);
 
   const fetchWatchlistStatus = useCallback(async () => {
     if (!isAuth) return;
@@ -130,6 +135,7 @@ export const ProductsDetailsPage = () => {
     fetchProductDetails();
     fetchWatchlistStatus();
     fetchRelatedAuction();
+    console.log('auction', auction)
 
     webSocketService.connect(
       () => {
@@ -426,7 +432,7 @@ export const ProductsDetailsPage = () => {
           >
             {auction.bidCount > 0 ? (
               <Caption className="font-semibold text-lg">
-                Winner: <span className="text-blue-700">{auction.winnerName || "Unknown"}</span>
+                Winner: <span className="text-blue-700">{auction.winner || "Unknown"}</span>
               </Caption>
             ) : (
               <Caption className="font-semibold text-lg">
